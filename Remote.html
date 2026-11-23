@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -218,6 +218,7 @@ const APP_SCRIPT_URL = "https://script.google.com/a/gateinnwinsford.com/macros/s
 let currentPin = "";
 let validPin = ""; 
 let hostName = ""; 
+let sessionToken = null; // 🔥 THE SPEED KEY
 
 // Generate box buttons for modal
 let gridHtml = '';
@@ -247,6 +248,7 @@ document.getElementById('pin-dots').style.letterSpacing = "15px";
 if (response.success && response.payload) {
     validPin = currentPin; 
     hostName = response.name;
+    sessionToken = response.token; // ⚡ The fast-lane pass from the backend
     
     // 🔥 THE INJECTION
     document.getElementById('view-container').innerHTML = response.payload;
@@ -275,21 +277,18 @@ if (response.success && response.payload) {
 }
 }
 
-// 🛡️ THE PROXY WRITER: Safe passage to Firebase via Google Apps Script
-function proxyFirebaseWrite(path, method, payload) {
-    if (!validPin) return Promise.reject("No PIN"); 
-    let body = {
-        action: 'secureFirebaseWrite',
-        pin: validPin,
-        path: path,
-        method: method
-    };
-    if (payload !== undefined) body.payload = payload;
+// ⚡ THE INSTANT WRITER: Uses the temporary token for zero-lag commands
+function instantFirebaseWrite(path, method, payload) {
+    if (!sessionToken) {
+        showToast("Session expired. Please reload.");
+        return Promise.reject("No Token");
+    }
     
-    return fetch(APP_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(body)
-    });
+    let url = FB_BASE_URL + path + "?auth=" + sessionToken;
+    let options = { method: method };
+    if (payload !== undefined) options.body = JSON.stringify(payload);
+    
+    return fetch(url, options);
 }
 
 function switchTab(tabName, element) {
@@ -321,7 +320,7 @@ if (navigator.vibrate) navigator.vibrate(50);
 let cmdPayload = { type: category, action: action, pin: validPin, timestamp: Date.now() };
 Object.assign(cmdPayload, extraPayload);
 
-proxyFirebaseWrite("remoteCommand.json", 'PUT', cmdPayload)
+instantFirebaseWrite("remoteCommand.json", 'PUT', cmdPayload)
 .then(() => showToast(`SENT: ${action.split('|')[0].toUpperCase()}`))
 .catch(() => showToast("ERROR SENDING COMMAND"));
 }
@@ -385,7 +384,7 @@ for(let i=1; i<=15; i++) {
 let v = document.getElementById(`admin-v-${i}`).value.trim();
 if(v) prefilledCache[i] = v; else delete prefilledCache[i];
 }
-proxyFirebaseWrite("boxes/prefilled.json", 'PUT', prefilledCache)
+instantFirebaseWrite("boxes/prefilled.json", 'PUT', prefilledCache)
 .then(() => showToast("VAULT SAVED!"));
 }
 
@@ -397,6 +396,7 @@ saveAdminVault();
 }
 }
 
+// Admin Correction still runs through the proxy because it interacts directly with Google Sheets logic
 function openCorrectionTool() {
 showToast("Fetching records...");
 fireCommand('admin', 'requestWinners');
@@ -420,7 +420,17 @@ if (type !== 'VOID' && (!newAmt || newAmt <= 0)) { alert("Enter a new amount!");
 if (navigator.vibrate) navigator.vibrate([50, 50]);
 
 let actionString = `applyCorrection|${row}|${cid}|${oldCredit}|${type}|${newAmt}`;
-fireCommand('admin', actionString);
+// Fire to Google Apps Script proxy for this specific admin action
+fetch(APP_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+        action: 'secureFirebaseWrite', // Routes via the old proxy pattern
+        pin: validPin,
+        path: 'remoteCommand.json',
+        method: 'PUT',
+        payload: { type: 'admin', action: actionString, pin: validPin, timestamp: Date.now() }
+    })
+});
 document.getElementById('correction-action-modal').style.display = 'none'; showToast("CORRECTION APPLIED");
 }
 
@@ -447,15 +457,14 @@ let html = "";
 let winnersArray = Array.isArray(cloud.admin.winners) ? cloud.admin.winners : Object.values(cloud.admin.winners);
 winnersArray.forEach(w => {
 if (!w || !w.name) return;
-html += `<div class="winner-row" onclick="loadCorrectionAction('${w.row}', '${w.name.replace(/'/g,"\\'")}', '${w.desc.replace(/'/g,"\\'")}', '${w.id}', '${w.credit}')">
+html += `<div class="winner-row" onclick="loadCorrectionAction('${w.row}', '${w.name.replace(/'/g,"\'")}', '${w.desc.replace(/'/g,"\'")}', '${w.id}', '${w.credit}')">
                                        <div style="font-size:1.1em; color:#fff;">${w.name}</div>
                                        <div style="font-size:0.9em; color:var(--accent-gold);">${w.desc}</div>
                                     </div>`;
 });
 if (html === "") html = "<div style='color:#aaa;'>No prizes logged today.</div>";
 document.getElementById('correction-list').innerHTML = html;
-// Delete via Proxy
-proxyFirebaseWrite("admin/winners.json", 'DELETE');
+instantFirebaseWrite("admin/winners.json", 'DELETE');
 }
 
 // 🔥 RENDER CUSTOM SOUNDS
@@ -532,7 +541,7 @@ showToast("WINNER LOGGED!");
 }
 
 // ==========================================
-// 🔊 AUDIO STUDIO (BASE64 UPLOADER) via Proxy
+// 🔊 AUDIO STUDIO (BASE64 UPLOADER) via Instant Write
 // ==========================================
 function submitAudioUpload() {
     const nameInput = document.getElementById('upload-sound-name').value.trim();
@@ -558,7 +567,7 @@ function submitAudioUpload() {
             data: base64Str
         };
         
-        proxyFirebaseWrite("customAudio/" + uniqueId + ".json", 'PUT', payload)
+        instantFirebaseWrite("customAudio/" + uniqueId + ".json", 'PUT', payload)
         .then(() => {
             showToast("✅ UPLOAD COMPLETE!");
             fireCommand('stage', 'refreshAudio'); 
