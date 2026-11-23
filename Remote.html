@@ -287,7 +287,7 @@ function instantFirebaseWrite(path, method, payload) {
     let url = FB_BASE_URL + path + "?auth=" + sessionToken;
     let options = { 
         method: method,
-        headers: { 'Content-Type': 'application/json' } // REQUIRED BY FIREBASE
+        headers: { 'Content-Type': 'application/json' }
     };
     if (payload !== undefined) {
         options.body = JSON.stringify(payload);
@@ -325,7 +325,7 @@ if (navigator.vibrate) navigator.vibrate(50);
 let cmdPayload = { type: category, action: action, pin: validPin, timestamp: Date.now() };
 Object.assign(cmdPayload, extraPayload);
 
-// 🔥 Instant UI feedback before fetch completes for maximum snappy feel
+// Instant UI feedback before fetch completes
 showToast(`SENT: ${action.split('|')[0].toUpperCase()}`);
 
 instantFirebaseWrite("remoteCommand.json", 'PUT', cmdPayload)
@@ -461,7 +461,7 @@ let html = "";
 let winnersArray = Array.isArray(cloud.admin.winners) ? cloud.admin.winners : Object.values(cloud.admin.winners);
 winnersArray.forEach(w => {
 if (!w || !w.name) return;
-html += `<div class="winner-row" onclick="loadCorrectionAction('${w.row}', '${w.name.replace(/'/g,"\'")}', '${w.desc.replace(/'/g,"\'")}', '${w.id}', '${w.credit}')">
+html += `<div class="winner-row" onclick="loadCorrectionAction('${w.row}', '${w.name.replace(/'/g,"'")}', '${w.desc.replace(/'/g,"'")}', '${w.id}', '${w.credit}')">
                                        <div style="font-size:1.1em; color:#fff;">${w.name}</div>
                                        <div style="font-size:0.9em; color:var(--accent-gold);">${w.desc}</div>
                                     </div>`;
@@ -469,27 +469,6 @@ html += `<div class="winner-row" onclick="loadCorrectionAction('${w.row}', '${w.
 if (html === "") html = "<div style='color:#aaa;'>No prizes logged today.</div>";
 document.getElementById('correction-list').innerHTML = html;
 instantFirebaseWrite("admin/winners.json", 'DELETE');
-}
-
-// 🔥 RENDER CUSTOM SOUNDS
-let soundGrid = document.getElementById('custom-sounds-grid');
-if (soundGrid) {
-    if (cloud.customAudio) {
-        let customHtml = "";
-        Object.keys(cloud.customAudio).forEach(key => {
-            let sound = cloud.customAudio[key];
-            if (sound && sound.name) {
-                customHtml += `
-                <button class="remote-btn btn-sound" onclick="fireCommand('sound', '${key}')" style="border-color:#00f2fe; color:#00f2fe;">
-                    <div style="font-size:2.5em; margin-bottom:5px;">${sound.icon || '🎵'}</div>
-                    <span>${sound.name}</span>
-                </button>`;
-            }
-        });
-        soundGrid.innerHTML = customHtml;
-    } else {
-        soundGrid.innerHTML = "<div style='grid-column: span 2; color:#555; text-align:center; font-style:italic; padding:15px;'>No custom clips uploaded yet.</div>";
-    }
 }
 
 let currentWinner = cloud.boxes ? cloud.boxes.activeWinner : null;
@@ -575,6 +554,13 @@ function submitAudioUpload() {
     
     document.getElementById('upload-sound-name').value = "";
     document.getElementById('upload-sound-file').value = "";
+}
+
+function deleteCustomSound(key) {
+    if(confirm("Delete this custom sound?")) {
+        instantFirebaseWrite("customAudio/" + key + ".json", 'DELETE')
+        .then(() => showToast("SOUND DELETED"));
+    }
 }
 </script>
 </body>
