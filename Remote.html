@@ -218,9 +218,8 @@ const APP_SCRIPT_URL = "https://script.google.com/a/gateinnwinsford.com/macros/s
 let currentPin = "";
 let validPin = ""; 
 let hostName = ""; 
-let sessionToken = null; // 🔥 THE SPEED KEY
+let sessionToken = null; 
 
-// Generate box buttons for modal
 let gridHtml = '';
 for(let i=1; i<=15; i++) {
     gridHtml += `<button onclick="selectRemoteBox(${i})" style="background:#1a1a1a; border:2px solid #333; color:#fff; font-family:'Oswald'; font-size:1.4em; padding:15px 0; border-radius:8px; cursor:pointer;" id="r-btn-${i}">${i}</button>`;
@@ -248,16 +247,17 @@ document.getElementById('pin-dots').style.letterSpacing = "15px";
 if (response.success && response.payload) {
     validPin = currentPin; 
     hostName = response.name;
-    sessionToken = response.token; // ⚡ The fast-lane pass from the backend
+    sessionToken = response.token;
     
-    // 🔥 THE INJECTION
+    // Store token in session storage to survive fast refreshes
+    sessionStorage.setItem('sessionToken', sessionToken);
+    
     document.getElementById('view-container').innerHTML = response.payload;
 
     document.getElementById('pin-gate').style.display = 'none';
     document.getElementById('dashboard').style.display = 'flex';
     document.getElementById('host-name-badge').innerHTML = `👤 ${hostName.toUpperCase()}`;
 
-    // Inject Admin Vault Inputs dynamically since they depend on the payload loading
     let vaultGrid = document.getElementById('admin-vault-grid');
     if(vaultGrid) {
         let vHtml = '';
@@ -279,12 +279,16 @@ if (response.success && response.payload) {
 
 // ⚡ THE INSTANT WRITER: Direct to Firebase using RAM token
 function instantFirebaseWrite(path, method, payload) {
+    if (!sessionToken) sessionToken = sessionStorage.getItem('sessionToken');
+    
     if (!sessionToken) {
-        showToast("Session expired. Please reload.");
+        showToast("⚠️ VIP Token Lost - Reloading...", false);
+        setTimeout(() => location.reload(), 1500);
         return Promise.reject("No Token");
     }
     
-    let url = FB_BASE_URL + path + "?auth=" + sessionToken;
+    // Ensure .json is appended correctly
+    let url = FB_BASE_URL + path + (path.includes(".json") ? "" : ".json") + "?auth=" + sessionToken;
     let options = { 
         method: method,
         headers: { 'Content-Type': 'application/json' }
@@ -328,7 +332,7 @@ Object.assign(cmdPayload, extraPayload);
 // Instant UI feedback before fetch completes
 showToast(`SENT: ${action.split('|')[0].toUpperCase()}`);
 
-instantFirebaseWrite("remoteCommand.json", 'PUT', cmdPayload)
+instantFirebaseWrite("remoteCommand", 'PUT', cmdPayload)
 .catch(() => showToast("ERROR SENDING COMMAND"));
 }
 
@@ -390,7 +394,7 @@ for(let i=1; i<=15; i++) {
 let v = document.getElementById(`admin-v-${i}`).value.trim();
 if(v) prefilledCache[i] = v; else delete prefilledCache[i];
 }
-instantFirebaseWrite("boxes/prefilled.json", 'PUT', prefilledCache)
+instantFirebaseWrite("boxes/prefilled", 'PUT', prefilledCache)
 .then(() => showToast("VAULT SAVED!"));
 }
 
@@ -402,7 +406,6 @@ saveAdminVault();
 }
 }
 
-// Admin Correction hits the GAS backend directly because it needs to sync with Sheets/EposNow
 function openCorrectionTool() {
 showToast("Fetching records...");
 fireCommand('admin', 'requestWinners');
@@ -441,50 +444,77 @@ document.getElementById('correction-action-modal').style.display = 'none'; showT
 
 let lastSeenWinner = null;
 function startRemoteSync() {
-setInterval(() => {
-fetch(FB_BASE_URL + ".json")
-.then(res => res.json())
-.then(cloud => {
-if (!cloud) return;
+    if (!sessionToken) sessionToken = sessionStorage.getItem('sessionToken');
+    
+    setInterval(() => {
+        Promise.all([
+            fetch(FB_BASE_URL + "boxes.json").then(r => r.json()).catch(() => null),
+            fetch(FB_BASE_URL + "admin.json").then(r => r.json()).catch(() => null),
+            fetch(FB_BASE_URL + "customAudioMeta.json").then(r => r.json()).catch(() => null)
+        ]).then(([boxesData, adminData, customAudioMeta]) => {
+            let cloud = { boxes: boxesData || null, admin: adminData || null, customAudio: customAudioMeta || null };
 
-if (cloud.boxes && cloud.boxes.prefilled) {
-prefilledCache = cloud.boxes.prefilled;
-for(let i=1; i<=15; i++) {
-if (document.getElementById(`admin-v-${i}`) && document.activeElement !== document.getElementById(`admin-v-${i}`)) {
-document.getElementById(`admin-v-${i}`).value = prefilledCache[i] || "";
-}
-}
-}
+            if (cloud.boxes && cloud.boxes.prefilled) {
+                prefilledCache = cloud.boxes.prefilled;
+                for(let i=1; i<=15; i++) {
+                    if (document.getElementById(`admin-v-${i}`) && document.activeElement !== document.getElementById(`admin-v-${i}`)) {
+                        document.getElementById(`admin-v-${i}`).value = prefilledCache[i] || "";
+                    }
+                }
+            }
 
-if (cloud.admin && cloud.admin.winners && document.getElementById('correction-modal').style.display === 'flex') {
-let html = "";
-let winnersArray = Array.isArray(cloud.admin.winners) ? cloud.admin.winners : Object.values(cloud.admin.winners);
-winnersArray.forEach(w => {
-if (!w || !w.name) return;
-html += `<div class="winner-row" onclick="loadCorrectionAction('${w.row}', '${w.name.replace(/'/g,"'")}', '${w.desc.replace(/'/g,"'")}', '${w.id}', '${w.credit}')">
-                                       <div style="font-size:1.1em; color:#fff;">${w.name}</div>
-                                       <div style="font-size:0.9em; color:var(--accent-gold);">${w.desc}</div>
-                                    </div>`;
-});
-if (html === "") html = "<div style='color:#aaa;'>No prizes logged today.</div>";
-document.getElementById('correction-list').innerHTML = html;
-instantFirebaseWrite("admin/winners.json", 'DELETE');
-}
+            if (cloud.admin && cloud.admin.winners && document.getElementById('correction-modal').style.display === 'flex') {
+                let html = "";
+                let winnersArray = Array.isArray(cloud.admin.winners) ? cloud.admin.winners : Object.values(cloud.admin.winners);
+                winnersArray.forEach(w => {
+                    if (!w || !w.name) return;
+                    html += `<div class="winner-row" onclick="loadCorrectionAction('${w.row}', '${w.name.replace(/'/g,"\\'")}', '${w.desc.replace(/'/g,"\\'")}', '${w.id}', '${w.credit}')">
+                           <div style="font-size:1.1em; color:#fff;">${w.name}</div>
+                           <div style="font-size:0.9em; color:var(--accent-gold);">${w.desc}</div>
+                        </div>`;
+                });
+                if (html === "") html = "<div style='color:#aaa;'>No prizes logged today.</div>";
+                document.getElementById('correction-list').innerHTML = html;
+                instantFirebaseWrite("admin/winners", 'DELETE');
+            }
 
-let currentWinner = cloud.boxes ? cloud.boxes.activeWinner : null;
-if (currentWinner && currentWinner !== lastSeenWinner) {
-lastSeenWinner = currentWinner;
-document.getElementById('aw-name').innerText = currentWinner;
-document.getElementById('aw-cash').value = ""; document.getElementById('aw-pint').value = ""; document.getElementById('aw-custom').value = "";
-document.getElementById('adaptive-winner-overlay').style.display = 'flex';
-if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
-} 
-else if (!currentWinner && lastSeenWinner) {
-lastSeenWinner = null;
-document.getElementById('adaptive-winner-overlay').style.display = 'none';
-}
-}).catch(e => console.log("Sync active..."));
-}, 1000); 
+            let soundGrid = document.getElementById('custom-sounds-grid');
+            if (soundGrid) {
+                if (cloud.customAudio) {
+                    let customHtml = "";
+                    Object.keys(cloud.customAudio).forEach(key => {
+                        let sound = cloud.customAudio[key];
+                        if (sound && sound.name) {
+                            customHtml += `
+                            <div style="display:flex; gap:8px; margin-bottom:12px;">
+                                <button class="remote-btn btn-sound" onclick="fireCommand('sound', '${key}')" style="flex:1; border-color:#00f2fe; color:#00f2fe; padding:15px;">
+                                    <div style="font-size:2.2em; margin-bottom:5px;">${sound.icon || '🎵'}</div>
+                                    <span>${sound.name}</span>
+                                </button>
+                                <button onclick="deleteCustomSound('${key}')" style="background:var(--danger); color:#fff; border:2px solid #8a0e0e; border-radius:12px; padding:0 20px; font-size:1.5em; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">🗑️</button>
+                            </div>`;
+                        }
+                    });
+                    soundGrid.innerHTML = customHtml;
+                } else {
+                    soundGrid.innerHTML = "<div style='grid-column: span 2; color:#555; text-align:center; font-style:italic; padding:15px;'>No custom clips uploaded yet.</div>";
+                }
+            }
+
+            let currentWinner = cloud.boxes ? cloud.boxes.activeWinner : null;
+            if (currentWinner && currentWinner !== lastSeenWinner) {
+                lastSeenWinner = currentWinner;
+                document.getElementById('aw-name').innerText = currentWinner;
+                document.getElementById('aw-cash').value = ""; document.getElementById('aw-pint').value = ""; document.getElementById('aw-custom').value = "";
+                document.getElementById('adaptive-winner-overlay').style.display = 'flex';
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+            } 
+            else if (!currentWinner && lastSeenWinner) {
+                lastSeenWinner = null;
+                document.getElementById('adaptive-winner-overlay').style.display = 'none';
+            }
+        }).catch(e => console.log("Sync error...", e));
+    }, 1000); 
 }
 
 function dismissWheelWinner() { document.getElementById('adaptive-winner-overlay').style.display = 'none'; fireCommand('stage', 'resetWheel'); }
@@ -531,20 +561,21 @@ function submitAudioUpload() {
     
     if (fileInput.size > 5 * 1024 * 1024) { alert("File too large! Must be under 5MB."); return; }
     
-    showToast("UPLOADING...");
     document.getElementById('audio-upload-modal').style.display = 'none';
+    showToast("UPLOADING... Please wait.");
     
     const reader = new FileReader();
     reader.onload = function(e) {
         const base64Str = e.target.result;
         const uniqueId = "custom_" + Date.now();
-        const payload = {
-            name: nameInput,
-            icon: iconInput,
-            data: base64Str
-        };
         
-        instantFirebaseWrite("customAudio/" + uniqueId + ".json", 'PUT', payload)
+        const payloadMeta = { name: nameInput, icon: iconInput };
+        const payloadData = { data: base64Str };
+        
+        Promise.all([
+            instantFirebaseWrite("customAudioMeta/" + uniqueId, 'PUT', payloadMeta),
+            instantFirebaseWrite("customAudioData/" + uniqueId, 'PUT', payloadData)
+        ])
         .then(() => {
             showToast("✅ UPLOAD COMPLETE!");
             fireCommand('stage', 'refreshAudio'); 
@@ -558,8 +589,13 @@ function submitAudioUpload() {
 
 function deleteCustomSound(key) {
     if(confirm("Delete this custom sound?")) {
-        instantFirebaseWrite("customAudio/" + key + ".json", 'DELETE')
-        .then(() => showToast("SOUND DELETED"));
+        Promise.all([
+            instantFirebaseWrite("customAudioMeta/" + key, 'DELETE'),
+            instantFirebaseWrite("customAudioData/" + key, 'DELETE')
+        ]).then(() => {
+            showToast("SOUND DELETED");
+            fireCommand('stage', 'refreshAudio');
+        });
     }
 }
 </script>
