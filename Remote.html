@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>HostOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg-base: #2a0202; --bg-grad-top: #4a0404; --bg-grad-bot: #1a0101;
+--accent-gold: #ffd700; --accent-dark-gold: #b8860b;
+--panel-bg: #111111; --btn-bg: #1e1e1e; --btn-active: #333333;
+--text-light: #f5f5f5; --danger: #ff5252; --success: #4caf50; --nav-bg: #0a0a0a;
+}
+
+body, html { margin: 0; padding: 0; background: linear-gradient(135deg, var(--bg-grad-top), var(--bg-grad-bot)); color: var(--text-light); font-family: 'Oswald', sans-serif; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; display: flex; flex-direction: column; height: 100%; overflow: hidden; touch-action: pan-y; }
+
+/* --- 🔐 PIN LOCK SCREEN (HARDCODED & VISIBLE) --- */
+#pin-gate { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at top, var(--bg-grad-top), var(--bg-grad-bot)); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.logo-box { text-align: center; margin-bottom: 20px; }
+.logo-box h1 { font-size: 2.8em; color: var(--accent-gold); margin: 0; line-height: 1.1; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
+.pin-display { font-size: 3em; letter-spacing: 15px; margin-bottom: 30px; color: var(--accent-gold); height: 60px; text-shadow: 0 0 15px var(--accent-dark-gold); }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 85%; max-width: 350px; }
+.key-btn { background: var(--panel-bg); border: 2px solid #333; color: var(--text-light); font-size: 2em; padding: 20px 0; border-radius: 12px; font-family: 'Oswald'; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.1s; }
+.key-btn:active { background: var(--btn-active); border-color: var(--accent-gold); transform: scale(0.95); }
+
+/* --- 🎛️ HOST DASHBOARD (DYNAMICALLY INJECTED HOLLOW SHELL) --- */
+#dashboard { display: none; flex-direction: column; height: 100%; }
+.header { background: var(--panel-bg); padding: env(safe-area-inset-top, 15px) 15px 15px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-gold); color: var(--accent-gold); letter-spacing: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 10; font-weight: bold; }
+.host-badge { background: #333; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; color: var(--accent-gold); display: flex; align-items: center; gap: 5px; }
+
+.view-container { flex: 1; overflow-y: auto; padding: 20px 15px; position: relative; }
+.tab-view { display: none; animation: fadeIn 0.2s ease-in-out; }
+.tab-view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+.remote-btn { background: var(--btn-bg); border: 2px solid #333; color: var(--text-light); padding: 25px 10px; border-radius: 12px; font-family: 'Oswald', sans-serif; font-size: 1.1em; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.5); transition: transform 0.05s, border-color 0.15s; }
+.remote-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+.remote-btn svg { width: 40px; height: 40px; stroke-width: 1.5; stroke: currentColor; fill: none; transition: stroke 0.2s; }
+
+.btn-sound:active { border-color: #00f2fe; } .btn-sound:active svg { stroke: #00f2fe; }
+.btn-stage { border-color: var(--accent-dark-gold); color: var(--accent-gold); } .btn-stage:active { background: var(--accent-gold); color: #000; }
+.btn-danger { border-color: #8a0e0e; color: var(--danger); } .btn-danger:active { background: var(--danger); color: #fff; }
+
+.section-title { color: #888; font-size: 1.1em; margin: 15px 0 10px 0; border-bottom: 1px dashed #333; padding-bottom: 5px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+
+/* --- 📱 BOTTOM NAVIGATION --- */
+.bottom-nav { display: flex; background: var(--nav-bg); border-top: 1px solid #333; padding-bottom: env(safe-area-inset-bottom, 15px); z-index:50;}
+.nav-item { flex: 1; padding: 15px 0; text-align: center; color: #777; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: color 0.2s; }
+.nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; }
+.nav-item.active { color: var(--accent-gold); }
+
+/* --- OVERLAYS & MODALS --- */
+.full-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px); }
+.overlay-card { background: linear-gradient(135deg, #18002b, #090014); border: 2px solid #00f2fe; border-radius: 16px; width: 100%; max-width: 400px; padding: 25px; box-shadow: 0 15px 40px rgba(0,242,254,0.3); text-align: center; max-height: 90vh; overflow-y: auto; }
+
+.adaptive-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+.adaptive-btn { padding: 15px 0; border: none; border-radius: 8px; font-family: 'Oswald'; font-size: 1.2em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: transform 0.1s; }
+.adaptive-btn:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+
+.winner-row { background: #111; border: 1px solid #333; padding: 12px; margin-bottom: 8px; border-radius: 8px; text-align: left; cursor: pointer; transition: border-color 0.2s; }
+.winner-row:active { border-color: var(--accent-gold); background: #222; }
+
+#box-stage-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-base); z-index: 9000; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
+.box-header { background: #111; padding: 15px; text-align: center; font-size: 1.5em; border-bottom: 2px solid var(--accent-gold); color: var(--accent-gold); letter-spacing: 2px; font-weight: bold; }
+
+#toast { position: fixed; top: env(safe-area-inset-top, 20px); left: 50%; transform: translateX(-50%); background: var(--accent-gold); color: #000; padding: 12px 25px; border-radius: 30px; font-size: 1.1em; font-weight: bold; transition: opacity 0.3s, top 0.3s; z-index: 20000; white-space: nowrap; opacity: 0; pointer-events: none; box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+#toast.show { opacity: 1; top: calc(env(safe-area-inset-top, 20px) + 20px); }
+
+.game-theme-card { background: linear-gradient(135deg, #d32f2f, #b71c1c); border: 4px solid var(--accent-gold); box-shadow: 0 15px 40px rgba(0,0,0,0.9); }
+.game-theme-input { width: 100%; padding: 15px; font-size: 1.4em; font-family: 'Oswald'; background: #fff; border: 3px solid #000; color: #000; font-weight: bold; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; text-align: center; }
+.game-theme-input::placeholder { color: #888; font-weight: normal; }
+
+/* 🔥 AUDIO UPLOAD CUSTOM STYLES */
+.icon-radio { display: none; }
+.icon-label { font-size: 2em; padding: 8px; cursor: pointer; border-radius: 8px; border: 2px solid transparent; transition: all 0.2s; background: #222; }
+.icon-radio:checked + .icon-label { border-color: #00f2fe; background: rgba(0, 242, 254, 0.2); transform: scale(1.1); box-shadow: 0 0 10px rgba(0,242,254,0.5); }
+.file-upload-input { width: 100%; background: #111; color: #fff; padding: 15px; border-radius: 8px; font-family: 'Oswald'; margin-bottom: 15px; border: 2px dashed #00f2fe; outline: none; }
+</style>
+</head>
+<body>
+
+<!-- 🔐 PIN GATE -->
+<div id="pin-gate">
+<div class="logo-box"><h1>HOST OS</h1><p>Terminal Link</p></div>
+<div class="pin-display" id="pin-dots"></div>
+<div class="keypad">
+<button class="key-btn" onclick="typePin(1)">1</button><button class="key-btn" onclick="typePin(2)">2</button><button class="key-btn" onclick="typePin(3)">3</button>
+<button class="key-btn" onclick="typePin(4)">4</button><button class="key-btn" onclick="typePin(5)">5</button><button class="key-btn" onclick="typePin(6)">6</button>
+<button class="key-btn" onclick="typePin(7)">7</button><button class="key-btn" onclick="typePin(8)">8</button><button class="key-btn" onclick="typePin(9)">9</button>
+<button class="key-btn" onclick="typePin('C')" style="color:var(--danger);">C</button><button class="key-btn" onclick="typePin(0)">0</button><button class="key-btn" onclick="checkPin()" style="color:var(--success);">OK</button>
+</div>
+</div>
+
+<!-- 🔥 THE HOLLOW SHELL: Empty container for the dashboard -->
+<div id="dashboard">
+  <div id="view-container" class="view-container"></div>
+  
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('sounds', this)"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Sounds</div>
+    <div class="nav-item" onclick="switchTab('stage', this)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>Stage</div>
+    <div class="nav-item" onclick="switchTab('admin', this)"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Admin</div>
+  </div>
+</div>
+
+<!-- ALL MODALS STAY HARDCODED FOR PERFORMANCE -->
+<div id="box-stage-screen">
+<div class="box-header">OPEN THE BOX</div>
+<div style="flex:1; overflow-y:auto; padding:20px;">
+<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px;" id="box-buttons-grid">
+  <!-- JavaScript will generate the 15 buttons here -->
+</div>
+
+<div id="remote-prize-panel" style="display:none; background:var(--btn-bg); padding:15px; border-radius:12px; border:2px solid var(--accent-gold); box-shadow: 0 5px 15px rgba(0,0,0,0.8);">
+<h3 style="margin:0 0 5px 0; color:var(--accent-gold); text-align:center; font-size:1.2em;">BOX <span id="r-box-display"></span> SELECTED</h3>
+<div id="r-box-peek" style="text-align:center; color:#aaa; font-size:0.9em; margin-bottom:15px; font-style:italic;">📦 Vault: [Empty]</div>
+<button onclick="fireCommand('box', 'autoReveal')" style="width:100%; background:var(--accent-gold); color:#000; padding:12px; border:none; border-radius:8px; font-family:'Oswald'; font-size:1.1em; font-weight:bold; cursor:pointer; margin-bottom:15px;">✨ AUTO-REVEAL VAULT PRIZE</button>
+<div style="border-top:1px dashed #333; padding-top:15px;">
+<div style="color:#aaa; font-size:0.85em; margin-bottom:5px; text-transform:uppercase;">Or Enter Manually:</div>
+<input type="text" id="r-prize-input" class="game-theme-input" placeholder="e.g. £50 Cash">
+<div style="display:flex; gap:8px;">
+<button onclick="sendRemoteBoxPrize('CASH')" style="flex:1; background:var(--success); color:#000; padding:12px 0; border:none; border-radius:6px; font-family:'Oswald'; font-weight:bold;">CASH</button>
+<button onclick="sendRemoteBoxPrize('PINT')" style="flex:1; background:#e67e22; color:#000; padding:12px 0; border:none; border-radius:6px; font-family:'Oswald'; font-weight:bold;">PINT</button>
+<button onclick="sendRemoteBoxPrize('JOKE')" style="flex:1; background:var(--danger); color:#fff; padding:12px 0; border:none; border-radius:6px; font-family:'Oswald'; font-weight:bold;">JOKE</button>
+</div>
+</div>
+</div>
+</div>
+        <div style="padding: 15px; background: #000; border-top: 2px solid #333; padding-bottom: max(30px, env(safe-area-inset-bottom, 40px));">
+       <div style="display: flex; gap: 10px;">
+            <button onclick="closeBoxStage()" style="flex:2; padding:20px; font-family:'Oswald'; font-size:1.2em; background:#222; color:#fff; border:2px solid #555; border-radius:12px; cursor:pointer;">🔙 TO WHEEL STAGE</button>
+            <button onclick="clearBoxBoard()" style="flex:1; padding:20px; font-family:'Oswald'; font-size:1.2em; background:var(--danger); color:#fff; border:2px solid #8a0e0e; border-radius:12px; cursor:pointer;">🗑️ WIPE</button>
+       </div>
+</div>
+</div>
+
+<div id="adaptive-winner-overlay" class="full-overlay">
+<div class="overlay-card game-theme-card">
+<h2 style="color:var(--accent-gold); margin:0 0 5px 0; font-size:1.5em; letter-spacing:2px; text-shadow: 2px 2px 0px #000;">WHEEL WINNER</h2>
+<h1 id="aw-name" style="color:#fff; font-size:2.8em; margin:0 0 20px 0; line-height:1.1; text-shadow:3px 3px 0 #000;">JOHN DOE</h1>
+
+<input type="number" id="aw-cash" class="game-theme-input" placeholder="£ CASH" onfocus="this.value=''">
+<input type="number" id="aw-pint" class="game-theme-input" placeholder="# OF PINTS" onfocus="this.value=''">
+<input type="text" id="aw-custom" class="game-theme-input" placeholder="CUSTOM PRIZE" onfocus="this.value=''">
+
+<div class="adaptive-btn-grid">
+<button class="adaptive-btn" style="background:var(--success); color:#000;" onclick="sendWheelPrize('MEMBERS_CASH')">CASH</button>
+<button class="adaptive-btn" style="background:#e67e22; color:#000;" onclick="sendWheelPrize('PINT')">PINT</button>
+</div>
+<div class="adaptive-btn-grid" style="margin-top:10px;">
+<button class="adaptive-btn" style="background:var(--accent-gold); color:#000;" onclick="sendWheelPrize('CUSTOM')">CUSTOM</button>
+<button class="adaptive-btn" style="background:#222; color:#ccc; border:2px solid #000;" onclick="sendWheelPrize('ABSENT')">❌ ABSENT</button>
+</div>
+
+<div id="fc-quick-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; border-top:2px dashed var(--accent-gold); padding-top:15px;">
+<button id="btn-var-overlay" onclick="triggerVARFromWinner()" style="background:#fff; border:2px solid var(--danger); color:var(--danger); padding:10px; border-radius:6px; font-family:'Oswald'; font-weight:bold; cursor:pointer;">⏪ VAR REPLAY</button>
+<button onclick="transitionToBoxStage()" style="background:var(--accent-gold); border:2px solid #000; color:#000; padding:10px; border-radius:6px; font-family:'Oswald'; font-weight:bold; cursor:pointer;">🎁 TO BOXES</button>
+</div>
+<button onclick="dismissWheelWinner()" style="margin-top:20px; background:none; border:none; color:var(--accent-gold); text-decoration:underline; font-size:1em; font-family:'Oswald'; cursor:pointer; text-shadow: 1px 1px 0 #000;">Dismiss Screen</button>
+</div>
+</div>
+
+<div id="audio-upload-modal" class="full-overlay">
+    <div class="overlay-card" style="border-color:#00f2fe; padding:20px;">
+        <h2 style="color:#00f2fe; margin:0 0 15px 0;">UPLOAD SOUND CLIP</h2>
+        <input type="text" id="upload-sound-name" class="game-theme-input" placeholder="Clip Name (e.g. Winner Theme)">
+        <div style="color:#aaa; text-align:left; margin-bottom:5px; font-family:'Oswald';">SELECT AN ICON:</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; background:#111; padding:10px; border-radius:8px; border:1px solid #333; overflow-x:auto;">
+            <label class="icon-label-wrapper"><input type="radio" name="upload-icon" value="🥁" class="icon-radio" checked> <div class="icon-label">🥁</div></label>
+            <label class="icon-label-wrapper"><input type="radio" name="upload-icon" value="🎉" class="icon-radio"> <div class="icon-label">🎉</div></label>
+            <label class="icon-label-wrapper"><input type="radio" name="upload-icon" value="🚨" class="icon-radio"> <div class="icon-label">🚨</div></label>
+            <label class="icon-label-wrapper"><input type="radio" name="upload-icon" value="👽" class="icon-radio"> <div class="icon-label">👽</div></label>
+            <label class="icon-label-wrapper"><input type="radio" name="upload-icon" value="💥" class="icon-radio"> <div class="icon-label">💥</div></label>
+            <label class="icon-label-wrapper"><input type="radio" name="upload-icon" value="🕹️" class="icon-radio"> <div class="icon-label">🕹️</div></label>
+        </div>
+        <input type="file" id="upload-sound-file" class="file-upload-input" accept="audio/*">
+        <button onclick="submitAudioUpload()" style="width:100%; padding:15px; background:#00f2fe; color:#000; border:none; border-radius:6px; font-family:'Oswald'; font-weight:bold; font-size:1.2em; margin-bottom:10px; cursor:pointer;">💾 UPLOAD & SAVE</button>
+        <button onclick="document.getElementById('audio-upload-modal').style.display='none';" style="background:none; border:none; color:#888; text-decoration:underline; font-size:1em; font-family:'Oswald'; cursor:pointer;">Cancel</button>
+    </div>
+</div>
+
+<div id="correction-modal" class="full-overlay">
+<div class="overlay-card" style="border-color:#e67e22; padding:15px;">
+<h2 style="color:#e67e22; margin:0 0 15px 0;">TODAY'S WINNERS</h2>
+<div id="correction-list" style="max-height: 250px; overflow-y:auto; margin-bottom:15px;"></div>
+<button onclick="document.getElementById('correction-modal').style.display='none';" style="width:100%; padding:12px; background:#222; color:#fff; border:none; border-radius:6px; font-family:'Oswald'; cursor:pointer;">CANCEL</button>
+</div>
+</div>
+
+<div id="correction-action-modal" class="full-overlay">
+<div class="overlay-card" style="border-color:#e67e22; padding:20px;">
+<h2 style="color:#e67e22; margin:0 0 5px 0; font-size:1.2em;">EDIT REWARD</h2>
+<h1 id="ca-name" style="color:#fff; font-size:1.8em; margin:0 0 5px 0; line-height:1.1;">JOHN DOE</h1>
+<div id="ca-desc" style="color:#aaa; font-size:1em; margin-bottom:20px;">Current: £50 Credit</div>
+<input type="hidden" id="ca-row"><input type="hidden" id="ca-cid"><input type="hidden" id="ca-oldcredit">
+<div style="border-top:1px dashed #e67e22; padding-top:15px;">
+<input type="number" id="ca-newamt" class="game-theme-input" placeholder="New Amount (e.g. 5)" style="border-color:#e67e22;">
+<div style="display:flex; gap:10px; margin-bottom:15px;">
+<button onclick="submitCorrection('MEMBERS_CASH')" style="flex:1; padding:12px; background:var(--success); color:#000; border:none; border-radius:6px; font-family:'Oswald'; font-weight:bold;">TO CASH</button>
+<button onclick="submitCorrection('PINT')" style="flex:1; padding:12px; background:#e67e22; color:#000; border:none; border-radius:6px; font-family:'Oswald'; font-weight:bold;">TO PINTS</button>
+</div>
+<button onclick="submitCorrection('VOID')" style="width:100%; padding:15px; background:var(--danger); color:#fff; border:none; border-radius:6px; font-family:'Oswald'; font-weight:bold; font-size:1.2em; margin-bottom:15px;">⛔ VOID ENTIRE REWARD</button>
+</div>
+<button onclick="document.getElementById('correction-action-modal').style.display='none';" style="background:none; border:none; color:#888; text-decoration:underline; font-size:1em; font-family:'Oswald'; cursor:pointer;">Cancel</button>
+</div>
+</div>
+
+<div id="toast">COMMAND SENT</div>
+
+<script>
+const FB_BASE_URL = "https://friday-club-ticker-default-rtdb.europe-west1.firebasedatabase.app/";
+const APP_SCRIPT_URL = "https://script.google.com/a/gateinnwinsford.com/macros/s/AKfycbwX84Y6p9mRo2SUeUOrBaiFjqaI_yQ26K2kE5wO0bofcEYUlOXEnZF7q_RZTYu0Yynb/exec";
+
+let currentPin = "";
+let validPin = ""; 
+let hostName = ""; 
+
+// Generate box buttons for modal
+let gridHtml = '';
+for(let i=1; i<=15; i++) {
+    gridHtml += `<button onclick="selectRemoteBox(${i})" style="background:#1a1a1a; border:2px solid #333; color:#fff; font-family:'Oswald'; font-size:1.4em; padding:15px 0; border-radius:8px; cursor:pointer;" id="r-btn-${i}">${i}</button>`;
+}
+document.getElementById('box-buttons-grid').innerHTML = gridHtml;
+
+function typePin(val) {
+if(val === 'C') currentPin = ""; else if (currentPin.length < 4) currentPin += val;
+document.getElementById('pin-dots').innerText = '*'.repeat(currentPin.length);
+}
+
+function checkPin() {
+if (currentPin.length === 0) return;
+document.getElementById('pin-dots').innerText = "VERIFYING";
+document.getElementById('pin-dots').style.letterSpacing = "2px";
+
+let script = document.createElement('script');
+script.src = APP_SCRIPT_URL + "?action=verifyPin&pin=" + currentPin + "&callback=pinCallback";
+document.body.appendChild(script);
+}
+
+function pinCallback(response) {
+document.getElementById('pin-dots').style.letterSpacing = "15px"; 
+
+if (response.success && response.payload) {
+    validPin = currentPin; 
+    hostName = response.name;
+    
+    // 🔥 THE INJECTION
+    document.getElementById('view-container').innerHTML = response.payload;
+
+    document.getElementById('pin-gate').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'flex';
+    document.getElementById('host-name-badge').innerHTML = `👤 ${hostName.toUpperCase()}`;
+
+    // Inject Admin Vault Inputs dynamically since they depend on the payload loading
+    let vaultGrid = document.getElementById('admin-vault-grid');
+    if(vaultGrid) {
+        let vHtml = '';
+        for(let i=1; i<=15; i++) vHtml += `<input type="text" id="admin-v-${i}" placeholder="Box ${i}" style="width:100%; padding:10px; box-sizing:border-box; background:#111; color:#fff; border:1px solid #444; border-radius:4px; font-family:'Oswald';">`;
+        vaultGrid.innerHTML = vHtml;
+    }
+
+    if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(e => console.log(e));
+
+    startRemoteSync(); 
+    showToast("WELCOME, " + hostName.toUpperCase());
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]); 
+} else {
+    currentPin = ""; document.getElementById('pin-dots').innerText = ""; document.getElementById('pin-dots').style.color = "#ff5252";
+    setTimeout(() => document.getElementById('pin-dots').style.color = "#ffd700", 500);
+    if (navigator.vibrate) navigator.vibrate(200); 
+}
+}
+
+// 🛡️ THE PROXY WRITER: Safe passage to Firebase via Google Apps Script
+function proxyFirebaseWrite(path, method, payload) {
+    if (!validPin) return Promise.reject("No PIN"); 
+    let body = {
+        action: 'secureFirebaseWrite',
+        pin: validPin,
+        path: path,
+        method: method
+    };
+    if (payload !== undefined) body.payload = payload;
+    
+    return fetch(APP_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(body)
+    });
+}
+
+function switchTab(tabName, element) {
+document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
+document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+document.getElementById('tab-' + tabName).classList.add('active'); element.classList.add('active');
+if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function setGameContext(game) {
+if(navigator.vibrate) navigator.vibrate(20);
+if (game === 'fc') {
+document.getElementById('toggle-fc').style.background = 'var(--accent-gold)'; document.getElementById('toggle-fc').style.color = '#000';
+document.getElementById('toggle-md').style.background = 'transparent'; document.getElementById('toggle-md').style.color = '#888';
+document.getElementById('controls-fc').style.display = 'block'; document.getElementById('controls-md').style.display = 'none';
+document.getElementById('fc-quick-actions').style.display = 'grid';
+fireCommand('stage', 'navFriday');
+} else {
+document.getElementById('toggle-md').style.background = '#00f2fe'; document.getElementById('toggle-md').style.color = '#000';
+document.getElementById('toggle-fc').style.background = 'transparent'; document.getElementById('toggle-fc').style.color = '#888';
+document.getElementById('controls-fc').style.display = 'none'; document.getElementById('controls-md').style.display = 'block';
+document.getElementById('fc-quick-actions').style.display = 'none';
+fireCommand('stage', 'navMembers');
+}
+}
+
+function fireCommand(category, action, extraPayload = {}) {
+if (navigator.vibrate) navigator.vibrate(50);
+let cmdPayload = { type: category, action: action, pin: validPin, timestamp: Date.now() };
+Object.assign(cmdPayload, extraPayload);
+
+proxyFirebaseWrite("remoteCommand.json", 'PUT', cmdPayload)
+.then(() => showToast(`SENT: ${action.split('|')[0].toUpperCase()}`))
+.catch(() => showToast("ERROR SENDING COMMAND"));
+}
+
+function showToast(msg) {
+const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function openBoxStage() { fireCommand('stage', 'toggleBox'); document.getElementById('box-stage-screen').style.display = 'flex'; }
+function closeBoxStage() { fireCommand('stage', 'toggleBox'); document.getElementById('box-stage-screen').style.display = 'none'; }
+
+function clearBoxBoard() {
+    if(confirm("Wipe all opened boxes from the projector screen?")) {
+        fireCommand('box', 'clearBoard');
+        for(let i=1; i<=15; i++) {
+            document.getElementById('r-btn-'+i).style.background = '#1a1a1a';
+            document.getElementById('r-btn-'+i).style.borderColor = '#333';
+        }
+        document.getElementById('remote-prize-panel').style.display = 'none';
+    }
+}
+
+let activeRemoteBox = null;
+function selectRemoteBox(boxNum) {
+if (navigator.vibrate) navigator.vibrate(30);
+activeRemoteBox = boxNum;
+for(let i=1; i<=15; i++) document.getElementById('r-btn-'+i).style.borderColor = '#333';
+document.getElementById('r-btn-'+boxNum).style.borderColor = '#ffd700';
+document.getElementById('r-box-display').innerText = boxNum;
+
+let peekText = prefilledCache[boxNum] ? `📦 Vault: [ ${prefilledCache[boxNum]} ]` : "📦 Vault: [ Empty ]";
+document.getElementById('r-box-peek').innerText = peekText;
+document.getElementById('r-box-peek').style.color = prefilledCache[boxNum] ? '#ffd700' : '#888';
+
+document.getElementById('remote-prize-panel').style.display = 'block';
+document.getElementById('r-prize-input').value = "";
+fireCommand('box', 'select|' + boxNum); 
+}
+
+function sendRemoteBoxPrize(type) {
+const desc = document.getElementById('r-prize-input').value.trim();
+if (!desc) { alert("Type a prize first!"); return; }
+if (navigator.vibrate) navigator.vibrate(50);
+const payload = { desc: desc, isCash: (type === 'CASH'), isPint: (type === 'PINT') };
+fireCommand('box', 'manualAward', payload);
+
+showToast(`BOX ${activeRemoteBox} LOGGED!`);
+document.getElementById('remote-prize-panel').style.display = 'none';
+document.getElementById('r-btn-'+activeRemoteBox).style.background = '#000'; 
+}
+
+let prefilledCache = {};
+function toggleVaultSetup() {
+const p = document.getElementById('admin-vault-setup');
+if(p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveAdminVault() {
+for(let i=1; i<=15; i++) {
+let v = document.getElementById(`admin-v-${i}`).value.trim();
+if(v) prefilledCache[i] = v; else delete prefilledCache[i];
+}
+proxyFirebaseWrite("boxes/prefilled.json", 'PUT', prefilledCache)
+.then(() => showToast("VAULT SAVED!"));
+}
+
+function clearAdminVault() {
+if(confirm("Wipe the secret vault?")) {
+prefilledCache = {};
+for(let i=1; i<=15; i++) document.getElementById(`admin-v-${i}`).value = "";
+saveAdminVault();
+}
+}
+
+function openCorrectionTool() {
+showToast("Fetching records...");
+fireCommand('admin', 'requestWinners');
+document.getElementById('correction-modal').style.display = 'flex';
+document.getElementById('correction-list').innerHTML = `<div style="text-align:center; padding:20px; color:#aaa;">Loading securely from Google Sheet...</div>`;
+}
+
+function loadCorrectionAction(row, name, desc, id, credit) {
+document.getElementById('ca-row').value = row; document.getElementById('ca-cid').value = id;
+document.getElementById('ca-oldcredit').value = credit; document.getElementById('ca-name').innerText = name;
+document.getElementById('ca-desc').innerText = `Current: ${desc}`; document.getElementById('ca-newamt').value = "";
+document.getElementById('correction-modal').style.display = 'none';
+document.getElementById('correction-action-modal').style.display = 'flex';
+}
+
+function submitCorrection(type) {
+let row = document.getElementById('ca-row').value; let cid = document.getElementById('ca-cid').value;
+let oldCredit = document.getElementById('ca-oldcredit').value; let newAmt = document.getElementById('ca-newamt').value;
+
+if (type !== 'VOID' && (!newAmt || newAmt <= 0)) { alert("Enter a new amount!"); return; }
+if (navigator.vibrate) navigator.vibrate([50, 50]);
+
+let actionString = `applyCorrection|${row}|${cid}|${oldCredit}|${type}|${newAmt}`;
+fireCommand('admin', actionString);
+document.getElementById('correction-action-modal').style.display = 'none'; showToast("CORRECTION APPLIED");
+}
+
+let lastSeenWinner = null;
+function startRemoteSync() {
+setInterval(() => {
+// Public Read via FB_BASE_URL
+fetch(FB_BASE_URL + ".json")
+.then(res => res.json())
+.then(cloud => {
+if (!cloud) return;
+
+if (cloud.boxes && cloud.boxes.prefilled) {
+prefilledCache = cloud.boxes.prefilled;
+for(let i=1; i<=15; i++) {
+if (document.getElementById(`admin-v-${i}`) && document.activeElement !== document.getElementById(`admin-v-${i}`)) {
+document.getElementById(`admin-v-${i}`).value = prefilledCache[i] || "";
+}
+}
+}
+
+if (cloud.admin && cloud.admin.winners && document.getElementById('correction-modal').style.display === 'flex') {
+let html = "";
+let winnersArray = Array.isArray(cloud.admin.winners) ? cloud.admin.winners : Object.values(cloud.admin.winners);
+winnersArray.forEach(w => {
+if (!w || !w.name) return;
+html += `<div class="winner-row" onclick="loadCorrectionAction('${w.row}', '${w.name.replace(/'/g,"\\'")}', '${w.desc.replace(/'/g,"\\'")}', '${w.id}', '${w.credit}')">
+                                       <div style="font-size:1.1em; color:#fff;">${w.name}</div>
+                                       <div style="font-size:0.9em; color:var(--accent-gold);">${w.desc}</div>
+                                    </div>`;
+});
+if (html === "") html = "<div style='color:#aaa;'>No prizes logged today.</div>";
+document.getElementById('correction-list').innerHTML = html;
+// Delete via Proxy
+proxyFirebaseWrite("admin/winners.json", 'DELETE');
+}
+
+// 🔥 RENDER CUSTOM SOUNDS
+let soundGrid = document.getElementById('custom-sounds-grid');
+if (soundGrid) {
+    if (cloud.customAudio) {
+        let customHtml = "";
+        Object.keys(cloud.customAudio).forEach(key => {
+            let sound = cloud.customAudio[key];
+            if (sound && sound.name) {
+                customHtml += `
+                <button class="remote-btn btn-sound" onclick="fireCommand('sound', '${key}')" style="border-color:#00f2fe; color:#00f2fe;">
+                    <div style="font-size:2.5em; margin-bottom:5px;">${sound.icon || '🎵'}</div>
+                    <span>${sound.name}</span>
+                </button>`;
+            }
+        });
+        soundGrid.innerHTML = customHtml;
+    } else {
+        soundGrid.innerHTML = "<div style='grid-column: span 2; color:#555; text-align:center; font-style:italic; padding:15px;'>No custom clips uploaded yet.</div>";
+    }
+}
+
+let currentWinner = cloud.boxes ? cloud.boxes.activeWinner : null;
+if (currentWinner && currentWinner !== lastSeenWinner) {
+lastSeenWinner = currentWinner;
+document.getElementById('aw-name').innerText = currentWinner;
+document.getElementById('aw-cash').value = ""; document.getElementById('aw-pint').value = ""; document.getElementById('aw-custom').value = "";
+document.getElementById('adaptive-winner-overlay').style.display = 'flex';
+if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+} 
+else if (!currentWinner && lastSeenWinner) {
+lastSeenWinner = null;
+document.getElementById('adaptive-winner-overlay').style.display = 'none';
+}
+}).catch(e => console.log("Sync active..."));
+}, 1000); 
+}
+
+function dismissWheelWinner() { document.getElementById('adaptive-winner-overlay').style.display = 'none'; fireCommand('stage', 'resetWheel'); }
+
+function transitionToBoxStage() { document.getElementById('adaptive-winner-overlay').style.display = 'none'; fireCommand('stage', 'resetWheel'); setTimeout(() => { openBoxStage(); }, 500); }
+
+function triggerVARFromWinner() {
+fireCommand('stage', 'triggerVAR');
+showToast("⏪ VAR TRIGGERED!");
+
+let btn = document.getElementById('btn-var-overlay');
+btn.innerText = "VAR PLAYING..."; btn.style.color = "#888"; btn.style.borderColor = "#555"; btn.disabled = true;
+
+setTimeout(() => { 
+btn.innerText = "⏪ VAR REPLAY"; btn.style.color = "var(--danger)"; btn.style.borderColor = "var(--danger)"; btn.disabled = false; 
+}, 8500);
+}
+
+function sendWheelPrize(type) {
+let cash = document.getElementById('aw-cash').value; let pint = document.getElementById('aw-pint').value; let custom = document.getElementById('aw-custom').value;
+
+if (type === 'MEMBERS_CASH' && !cash) { alert("Enter cash amount!"); return; }
+if (type === 'PINT' && !pint) { alert("Enter pint amount!"); return; }
+if (type === 'CUSTOM' && !custom) { alert("Enter custom prize!"); return; }
+if (navigator.vibrate) navigator.vibrate(50);
+
+if (type === 'ABSENT') {
+fireCommand('wheel', 'absent');
+document.getElementById('adaptive-winner-overlay').style.display = 'none';
+showToast("ABSENT LOGGED!");
+return;
+}
+
+fireCommand('wheel', 'award', { prizeType: type, cash: cash, pint: pint, custom: custom });
+document.getElementById('adaptive-winner-overlay').style.display = 'none';
+showToast("WINNER LOGGED!");
+}
+
+// ==========================================
+// 🔊 AUDIO STUDIO (BASE64 UPLOADER) via Proxy
+// ==========================================
+function submitAudioUpload() {
+    const nameInput = document.getElementById('upload-sound-name').value.trim();
+    const iconInput = document.querySelector('input[name="upload-icon"]:checked').value;
+    const fileInput = document.getElementById('upload-sound-file').files[0];
+    
+    if (!nameInput) { alert("Please enter a name for the clip."); return; }
+    if (!fileInput) { alert("Please select an audio file."); return; }
+    
+    // 5MB Limit to prevent Database Bloat
+    if (fileInput.size > 5 * 1024 * 1024) { alert("File too large! Must be under 5MB."); return; }
+    
+    showToast("UPLOADING...");
+    document.getElementById('audio-upload-modal').style.display = 'none';
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64Str = e.target.result;
+        const uniqueId = "custom_" + Date.now();
+        const payload = {
+            name: nameInput,
+            icon: iconInput,
+            data: base64Str
+        };
+        
+        proxyFirebaseWrite("customAudio/" + uniqueId + ".json", 'PUT', payload)
+        .then(() => {
+            showToast("✅ UPLOAD COMPLETE!");
+            fireCommand('stage', 'refreshAudio'); 
+        }).catch(() => showToast("UPLOAD FAILED"));
+    };
+    reader.readAsDataURL(fileInput);
+    
+    // Reset form
+    document.getElementById('upload-sound-name').value = "";
+    document.getElementById('upload-sound-file').value = "";
+}
+</script>
+</body>
+</html>
