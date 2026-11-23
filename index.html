@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Friday Club Projector</title>
+  <title>Friday Club </title>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -175,7 +175,7 @@
   <!-- 🔥 HARDCODED URLS -->
   <div class="game-selector">
     <a href="MembersDraw.html" class="game-link">MEMBERS DRAW</a>
-    <a href="FridayClub.html" class="game-link active">FRIDAY CLUB</a>
+    <a href="https://cornerstonecoopapps.github.io/FridayClub/" class="game-link active">FRIDAY CLUB</a>
     <a href="https://script.google.com/macros/s/AKfycbzvDrkgRVBb-x6M6PfbJT6wpJG6sOoVuFyB3OKrHU0qFYh47fU1p__JVP6h2deRpR1w/exec" class="game-link">MAKE YOUR MARK!</a>
   </div>
 
@@ -294,21 +294,42 @@
     const API_URL = "https://script.google.com/a/gateinnwinsford.com/macros/s/AKfycbwX84Y6p9mRo2SUeUOrBaiFjqaI_yQ26K2kE5wO0bofcEYUlOXEnZF7q_RZTYu0Yynb/exec";
     const FB_BASE_URL = "https://friday-club-ticker-default-rtdb.europe-west1.firebasedatabase.app/";
 
-    // 🛡️ THE PROXY WRITER: Safe passage to Firebase via Google Apps Script
+    // 🔥 SESSION MEMORY FOR PIN
+    let projectorSessionPin = null;
+    let sessionToken = null; // 🔥 ADDED: VIP Speed Token
+
+    // Downloads the audio from the cloud so the projector can play it
+    function syncCustomAudio() {
+        fetch(FB_BASE_URL + "customAudio.json")
+        .then(res => res.json())
+        .then(data => {
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    // If we haven't loaded this sound yet, add it to the engine!
+                    if (!audioMap[key] && data[key].data) {
+                        audioMap[key] = new Audio(data[key].data);
+                    }
+                });
+            }
+        }).catch(e => console.log("No custom audio found."));
+    }
+
+    // 🛡️ THE WRITER: Uses Instant VIP Speed if it has a token, otherwise uses the proxy
     function proxyFirebaseWrite(path, method, payload) {
-        if (!projectorSessionPin) return; // Must have PIN to write
-        let body = {
-            action: 'secureFirebaseWrite',
-            pin: projectorSessionPin,
-            path: path,
-            method: method
-        };
-        if (payload !== undefined) body.payload = payload;
+        if (!projectorSessionPin) return; 
         
-        fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(body)
-        }).catch(err => console.log("Proxy write error:", err));
+        // ⚡ INSTANT OVERRIDE: Zero-latency writes!
+        if (sessionToken) {
+            let options = { method: method, headers: { 'Content-Type': 'application/json' } };
+            if (payload !== undefined) options.body = JSON.stringify(payload);
+            fetch(FB_BASE_URL + path + "?auth=" + sessionToken, options);
+            return;
+        }
+
+        // Fallback to slow proxy (if token is missing)
+        let body = { action: 'secureFirebaseWrite', pin: projectorSessionPin, path: path, method: method };
+        if (payload !== undefined) body.payload = payload;
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(body) });
     }
 
     const google = {
@@ -350,9 +371,6 @@
     let players = []; let winningPlayer = null; const ROW_HEIGHT = 90; const COLORS = ['card-blue', 'card-green', 'card-red', 'card-gold']; 
     let audioCtx = null; let tickerInterval = null; let isSpinning = false; let particles = []; let confettiLoop = null; 
     let knownFirebaseKeys = new Set(); let idleSpinFrame = null; let idleTop = -65; let lastWinningScroll = 0; 
-    
-    // 🔥 SESSION MEMORY FOR PIN
-    let projectorSessionPin = null;
 
     const audioMap = {
         'boxIntro': new Audio('INSERT_YOUR_JINGLE_LINK_HERE.mp3'),
@@ -390,6 +408,7 @@
             if (res.success) {
                 sessionStorage.setItem('hostPin', pin);
                 sessionStorage.setItem('hostName', res.name);
+                sessionStorage.setItem('sessionToken', res.token); // 🔥 ADDED
                 unlockProjectorGate(pin, res.name);
             } else {
                 btn.innerText = "ACCESS DENIED";
@@ -402,6 +421,7 @@
 
     function unlockProjectorGate(pin, name) {
         projectorSessionPin = pin;
+        sessionToken = sessionStorage.getItem('sessionToken'); // Ensure loaded
         let gate = document.getElementById('tv-intro-gate');
         if(gate) {
             gate.classList.add('unlocked');
@@ -438,7 +458,7 @@
                     if (cmd.type === 'sound') playSoundFX(cmd.action);
                     else if (cmd.type === 'stage') {
                         if (cmd.action === 'navMembers') window.top.location.href = "MembersDraw.html";
-                        if (cmd.action === 'navFriday') window.top.location.href = "FridayClub.html";
+                        if (cmd.action === 'navFriday') window.top.location.href = "https://cornerstonecoopapps.github.io/FridayClub/";
                         
                         if (cmd.action === 'spinWheel') triggerSpinAction();
                         if (cmd.action === 'triggerVAR') triggerVAR();
@@ -446,6 +466,7 @@
                         if (cmd.action === 'generateReport') showReport();
                         if (cmd.action === 'hydration') document.getElementById('hydration-break-overlay').classList.toggle('active');
                         if (cmd.action === 'resetWheel') closeGameReset();
+                        if (cmd.action === 'refreshAudio') syncCustomAudio(); // 🔥 ADDED
                     }
                     else if (cmd.type === 'box') {
                         if (cmd.action.startsWith('select|')) openPrizeBox(parseInt(cmd.action.split('|')[1]));
@@ -687,15 +708,20 @@
         
         startRemoteListener();
         
-        // 🔥 Check Session Storage for Instant Bypass
+        // 🔥 Check Session Storage for Instant Bypass & Audio Sync
         let savedPin = sessionStorage.getItem('hostPin');
         let savedName = sessionStorage.getItem('hostName');
+        let savedToken = sessionStorage.getItem('sessionToken'); // 🔥 ADDED
+        
         if (savedPin) {
             projectorSessionPin = savedPin;
+            sessionToken = savedToken; // 🔥 ADDED
             let gate = document.getElementById('tv-intro-gate');
             if (gate) gate.style.display = 'none'; 
             showToast("WELCOME BACK, " + (savedName || "HOST").toUpperCase(), true);
         }
+        
+        syncCustomAudio(); // 🔥 ADDED
 
         fetch(FB_BASE_URL + "players.json").then(res => res.json()).then(data => {
             if (data) {
