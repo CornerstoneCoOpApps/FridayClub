@@ -300,7 +300,7 @@
 
     // Downloads the audio from the cloud so the projector can play it
     function syncCustomAudio() {
-        fetch(FB_BASE_URL + "customAudio.json")
+        fetch(FB_BASE_URL + "customAudioData.json")
         .then(res => res.json())
         .then(data => {
             if (data) {
