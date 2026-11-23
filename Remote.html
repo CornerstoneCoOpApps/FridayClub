@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -96,7 +96,7 @@ body, html { margin: 0; padding: 0; background: linear-gradient(135deg, var(--bg
 </div>
 </div>
 
-<!-- 🔥 THE HOLLOW SHELL: Empty container for the dashboard -->
+<!-- 🔥 THE HOLLOW SHELL -->
 <div id="dashboard">
   <div id="view-container" class="view-container"></div>
   
@@ -277,7 +277,7 @@ if (response.success && response.payload) {
 }
 }
 
-// ⚡ THE INSTANT WRITER: Uses the temporary token for zero-lag commands
+// ⚡ THE INSTANT WRITER: Direct to Firebase using RAM token
 function instantFirebaseWrite(path, method, payload) {
     if (!sessionToken) {
         showToast("Session expired. Please reload.");
@@ -285,8 +285,13 @@ function instantFirebaseWrite(path, method, payload) {
     }
     
     let url = FB_BASE_URL + path + "?auth=" + sessionToken;
-    let options = { method: method };
-    if (payload !== undefined) options.body = JSON.stringify(payload);
+    let options = { 
+        method: method,
+        headers: { 'Content-Type': 'application/json' } // REQUIRED BY FIREBASE
+    };
+    if (payload !== undefined) {
+        options.body = JSON.stringify(payload);
+    }
     
     return fetch(url, options);
 }
@@ -320,8 +325,10 @@ if (navigator.vibrate) navigator.vibrate(50);
 let cmdPayload = { type: category, action: action, pin: validPin, timestamp: Date.now() };
 Object.assign(cmdPayload, extraPayload);
 
+// 🔥 Instant UI feedback before fetch completes for maximum snappy feel
+showToast(`SENT: ${action.split('|')[0].toUpperCase()}`);
+
 instantFirebaseWrite("remoteCommand.json", 'PUT', cmdPayload)
-.then(() => showToast(`SENT: ${action.split('|')[0].toUpperCase()}`))
 .catch(() => showToast("ERROR SENDING COMMAND"));
 }
 
@@ -368,7 +375,6 @@ if (navigator.vibrate) navigator.vibrate(50);
 const payload = { desc: desc, isCash: (type === 'CASH'), isPint: (type === 'PINT') };
 fireCommand('box', 'manualAward', payload);
 
-showToast(`BOX ${activeRemoteBox} LOGGED!`);
 document.getElementById('remote-prize-panel').style.display = 'none';
 document.getElementById('r-btn-'+activeRemoteBox).style.background = '#000'; 
 }
@@ -396,7 +402,7 @@ saveAdminVault();
 }
 }
 
-// Admin Correction still runs through the proxy because it interacts directly with Google Sheets logic
+// Admin Correction hits the GAS backend directly because it needs to sync with Sheets/EposNow
 function openCorrectionTool() {
 showToast("Fetching records...");
 fireCommand('admin', 'requestWinners');
@@ -420,11 +426,10 @@ if (type !== 'VOID' && (!newAmt || newAmt <= 0)) { alert("Enter a new amount!");
 if (navigator.vibrate) navigator.vibrate([50, 50]);
 
 let actionString = `applyCorrection|${row}|${cid}|${oldCredit}|${type}|${newAmt}`;
-// Fire to Google Apps Script proxy for this specific admin action
 fetch(APP_SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify({
-        action: 'secureFirebaseWrite', // Routes via the old proxy pattern
+        action: 'secureFirebaseWrite', 
         pin: validPin,
         path: 'remoteCommand.json',
         method: 'PUT',
@@ -437,7 +442,6 @@ document.getElementById('correction-action-modal').style.display = 'none'; showT
 let lastSeenWinner = null;
 function startRemoteSync() {
 setInterval(() => {
-// Public Read via FB_BASE_URL
 fetch(FB_BASE_URL + ".json")
 .then(res => res.json())
 .then(cloud => {
@@ -531,18 +535,13 @@ if (navigator.vibrate) navigator.vibrate(50);
 if (type === 'ABSENT') {
 fireCommand('wheel', 'absent');
 document.getElementById('adaptive-winner-overlay').style.display = 'none';
-showToast("ABSENT LOGGED!");
 return;
 }
 
 fireCommand('wheel', 'award', { prizeType: type, cash: cash, pint: pint, custom: custom });
 document.getElementById('adaptive-winner-overlay').style.display = 'none';
-showToast("WINNER LOGGED!");
 }
 
-// ==========================================
-// 🔊 AUDIO STUDIO (BASE64 UPLOADER) via Instant Write
-// ==========================================
 function submitAudioUpload() {
     const nameInput = document.getElementById('upload-sound-name').value.trim();
     const iconInput = document.querySelector('input[name="upload-icon"]:checked').value;
@@ -551,7 +550,6 @@ function submitAudioUpload() {
     if (!nameInput) { alert("Please enter a name for the clip."); return; }
     if (!fileInput) { alert("Please select an audio file."); return; }
     
-    // 5MB Limit to prevent Database Bloat
     if (fileInput.size > 5 * 1024 * 1024) { alert("File too large! Must be under 5MB."); return; }
     
     showToast("UPLOADING...");
@@ -575,7 +573,6 @@ function submitAudioUpload() {
     };
     reader.readAsDataURL(fileInput);
     
-    // Reset form
     document.getElementById('upload-sound-name').value = "";
     document.getElementById('upload-sound-file').value = "";
 }
