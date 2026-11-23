@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title> Friday Club </title>
+  <title>Friday Club</title>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -441,6 +441,12 @@
                 if (!cmd) return;
                 if (cmd.timestamp > lastCommandTime) {
                     lastCommandTime = cmd.timestamp;
+
+                    // 🔥 MAGIC FIX: Catch the VIP Token from the remote!
+                    if (cmd.token && sessionToken !== cmd.token) {
+                        sessionToken = cmd.token;
+                        sessionStorage.setItem('sessionToken', sessionToken);
+                    }
 
                     let gate = document.getElementById('tv-intro-gate');
                     if (gate && gate.style.display !== 'none' && !gate.classList.contains('unlocked')) {
