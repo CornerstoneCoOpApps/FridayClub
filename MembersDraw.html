@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Members Draw</title>
+    <title>Members Draw Projector</title>
     <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=New+Amsterdam&family=Jersey+15&family=Oswald:wght@700&display=swap" rel="stylesheet">
     <style>
       body { background-color: #4a0000; background-image: radial-gradient(#ff9900 15%, transparent 16%), radial-gradient(#ff9900 15%, transparent 16%); background-size: 30px 30px, 15px 15px; background-position: 0 0, 15px 15px; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
@@ -110,6 +110,26 @@
       #toast-container { visibility: hidden; min-width: 280px; margin-left: -140px; background-color: #222; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; font-size: 1.3rem; box-shadow: 0 5px 20px rgba(0,0,0,0.6); border: 2px solid #ffd700; opacity: 0; transition: opacity 0.5s, bottom 0.5s; font-family: 'Oswald', sans-serif; display: flex; align-items: center; justify-content: center; gap: 15px; }
       #toast-container.show { visibility: visible; opacity: 1; bottom: 50px; }
 
+      /* 🔥 BACKGROUND LAYER ADDED HERE */
+      .gate-wheel-container { position: relative; width: 90vw; max-width: 1100px; aspect-ratio: 1.33 / 1; margin-top: 20px; transition: border 0.3s; }
+      #box-bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://raw.githubusercontent.com/CornerstoneCoOpApps/appassets/refs/heads/main/GateWheel.png'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 0; transition: filter 0.3s; }
+      
+      .mapped-door { position: absolute; cursor: pointer; border: 2px solid transparent; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 10; }
+      .mapped-door.selected { border-color: #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); background: rgba(255, 215, 0, 0.3); animation: pulse 0.8s infinite alternate; }
+      @keyframes pulse { from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); } to { box-shadow: 0 0 35px rgba(255, 215, 0, 1); } }
+      .mapped-door.opened { background: #111; border: 2px solid #444; box-shadow: inset 0 0 20px #000; }
+      .door-prize-text { font-family: 'Oswald', sans-serif; font-size: 1.5vw; color: #ffd700; font-weight: bold; text-align: center; text-shadow: 2px 2px 0 #000; padding: 4px; line-height: 1.1; }
+      .door-prize-cash { color: #4caf50; font-size: 2vw; text-shadow: 0 0 10px #000; }
+      
+      .edit-mode-indicator { display: none; position: absolute; top: 10px; right: 10px; background: #ff0000; color: #fff; padding: 5px 15px; font-weight: bold; border-radius: 8px; animation: flash 1s infinite alternate; z-index: 20; }
+      @keyframes flash { from { opacity: 1; } to { opacity: 0.5; } }
+      .gate-wheel-container.editing .edit-mode-indicator { display: block; }
+      .gate-wheel-container.editing .mapped-door { border: 2px dashed #00ff00 !important; background: rgba(0,255,0,0.2) !important; transition: none !important; }
+
+      /* 🔥 CUSTOM BACKGROUND UPLOADER MODAL */
+      .bg-modal-content { background: #111; padding: 30px; border-radius: 15px; border: 3px solid #ffcc00; text-align: center; color: white; width: 100%; max-width: 400px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+      .bg-file-input { margin: 20px 0; font-family:'Oswald'; color: white; background: #222; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box; }
+
       @media screen and (max-height: 950px) { #scaler { transform: scale(0.85); } }
       @media screen and (max-height: 750px) { #scaler { transform: scale(0.70); } }
       @media screen and (max-height: 800px) { #winner-stage { padding: 10px; } .winner-title-small { font-size: 1.5vw; } #winner-name-big { font-size: 3.5vw; } #winner-actions { transform: scale(0.9); transform-origin: top center; margin-top: 0; } }
@@ -182,7 +202,7 @@
                   <input type="text" id="customInput" class="text-input" placeholder="e.g. Old Shoe" onfocus="this.value=''">
                   <button class="control-btn btn-custom" id="btnCustom" onclick="sendPrize('CUSTOM')">LOG PRIZE</button>
                 </div>
-                <!-- 🔥 Absent Button removed as requested -->
+                <!-- 🔥 Absent Button removed -->
                 <button class="action-btn btn-reset" onclick="startIdleMode()">Cancel / Reset</button>
               </div>
             </div>
@@ -209,6 +229,33 @@
       </div>
     </div>
     <div id="toast-container"></div>
+
+    <div id="open-box-overlay">
+      <h1 style="font-family: 'Oswald', sans-serif; font-size: 4vw; color: #ffd700; margin: 0; text-shadow: 4px 4px 0 #000; letter-spacing: 3px; z-index: 20; position: relative;">OPEN THE BOX!</h1>
+      
+      <!-- 🔥 LAYERED CONTAINER FOR INDEPENDENT BACKGROUND BLUR -->
+      <div id="gate-wheel-container" class="gate-wheel-container">
+          <div id="box-bg-layer"></div>
+      </div>
+      
+      <button style="margin-top: 20px; background: rgba(255,255,255,0.1); color: #fff; padding: 10px 30px; border: 1px solid #555; border-radius: 30px; cursor: pointer; font-family: 'Oswald'; z-index: 20; position: relative;" onclick="toggleBoxStage()">CLOSE SCREEN (B)</button>
+    </div>
+
+    <!-- 🔥 BACKGROUND UPLOADER MODAL (SHIFT + B) -->
+    <div id="bg-upload-modal" class="full-overlay" style="z-index: 100000; background: rgba(0,0,0,0.9);">
+      <div class="bg-modal-content">
+          <h2 style="font-family:'Oswald'; color:#ffcc00; margin: 0 0 15px 0;">CUSTOMIZE BACKGROUND</h2>
+          
+          <div style="text-align:left; font-family:'Oswald'; color:#aaa;">NEW IMAGE (Optional):</div>
+          <input type="file" id="bg-file-input" class="bg-file-input" accept="image/*">
+          
+          <div style="text-align:left; font-family:'Oswald'; color:#aaa; margin-top: 10px;">BLUR EFFECT (<span id="blur-val">0px</span>):</div>
+          <input type="range" id="bg-blur-slider" min="0" max="20" value="0" style="width:100%; margin: 10px 0 25px 0;" oninput="document.getElementById('blur-val').innerText=this.value+'px'">
+          
+          <button onclick="saveBackground()" style="width:100%; background:#4caf50; color:#fff; font-family:'Oswald'; padding:12px; border:none; border-radius:8px; font-size:1.2em; font-weight:bold; cursor:pointer; margin-bottom: 10px;">💾 UPLOAD & SAVE TO CLOUD</button>
+          <button onclick="document.getElementById('bg-upload-modal').style.display='none'" style="background:transparent; color:#888; font-family:'Oswald'; padding:10px; border:none; cursor:pointer; text-decoration:underline;">CANCEL</button>
+      </div>
+    </div>
 
     <script>
       if (!Array.prototype.at) { Array.prototype.at = function(n) { n = Math.trunc(n) || 0; if (n < 0) n += this.length; if (n < 0 || n >= this.length) return undefined; return this.slice(n, n + 1).pop(); }; }
@@ -393,6 +440,135 @@
       // 🔥 FIREBASE REMOTE ENGINE
       let remoteListenerActive = true; let remoteTimer = null; let lastCommandTime = Date.now();
 
+      // ==========================================
+      // 🛠️ DRAGGABLE BOX EDITOR & BACKGROUND ('E', 'S', and 'Shift+B')
+      // ==========================================
+      let editMode = false;
+      let draggedBox = null;
+      let offsetX = 0; let offsetY = 0;
+      
+      // Background Application Engine
+      function applyBackground(data) {
+          let layer = document.getElementById('box-bg-layer');
+          if (data.image) layer.style.backgroundImage = `url('${data.image}')`;
+          if (data.blur !== undefined) {
+              layer.style.filter = `blur(${data.blur}px)`;
+              document.getElementById('bg-blur-slider').value = data.blur;
+              document.getElementById('blur-val').innerText = data.blur + "px";
+          }
+      }
+
+      function saveBackground() {
+          const fileInput = document.getElementById('bg-file-input').files[0];
+          const blurVal = document.getElementById('bg-blur-slider').value;
+          
+          showToast("SAVING BACKGROUND...", true);
+          
+          if (fileInput) {
+              if (fileInput.size > 5 * 1024 * 1024) { alert("File too large! Must be under 5MB."); return; }
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                  const payload = { image: e.target.result, blur: blurVal };
+                  proxyFirebaseWrite("boxes/background.json", 'PUT', payload);
+                  applyBackground(payload);
+                  document.getElementById('bg-upload-modal').style.display = 'none';
+                  showToast("BACKGROUND SAVED!", true);
+              };
+              reader.readAsDataURL(fileInput);
+          } else {
+              const payload = { blur: blurVal };
+              proxyFirebaseWrite("boxes/background.json", 'PATCH', payload);
+              applyBackground({ blur: blurVal });
+              document.getElementById('bg-upload-modal').style.display = 'none';
+              showToast("BLUR UPDATED!", true);
+          }
+      }
+
+      document.addEventListener('keydown', function(event) { 
+          var target = event.target || event.srcElement; if (target.tagName.toUpperCase() === 'INPUT') return;
+          
+          if (event.key === 'E') { toggleEditMode(); return; }
+          if (event.key === 'S') { saveBoxPositions(); return; }
+          
+          // 🔥 SHIFT + B TRIGGERS THE BACKGROUND UPLOADER
+          if (event.key === 'B' && event.shiftKey) { 
+              document.getElementById('bg-upload-modal').style.display = 'flex'; 
+              return; 
+          }
+          
+          if (event.key === 'H') { document.getElementById('hydration-break-overlay').classList.toggle('active'); return; }
+          if (event.key === 'B' || event.key === 'b') { toggleBoxStage(); return; }
+          if (event.key === 'V') { triggerVAR(); return; }
+          
+          if (event.code === 'Space' || event.code === 'Enter') { 
+              let gate = document.getElementById('tv-intro-gate');
+              if(!gate || gate.style.display === 'none') {
+                  event.preventDefault(); 
+                  if (gameState === "IDLE") startSpin(); else if (gameState === "SPINNING") stopSpin(); 
+              }
+          }
+      });
+
+      function toggleEditMode() {
+          if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
+          editMode = !editMode;
+          const container = document.getElementById('gate-wheel-container');
+          if (editMode) {
+              container.classList.add('editing');
+              document.querySelectorAll('.mapped-door').forEach(box => {
+                  box.style.cursor = "move";
+                  box.onmousedown = startDrag;
+              });
+          } else {
+              container.classList.remove('editing');
+              document.querySelectorAll('.mapped-door').forEach(box => {
+                  box.style.cursor = "pointer";
+                  box.onmousedown = null;
+              });
+              renderBoxGrid(); 
+          }
+      }
+
+      function startDrag(e) {
+          if (!editMode) return;
+          draggedBox = this;
+          const rect = draggedBox.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+          document.onmousemove = dragBox;
+          document.onmouseup = stopDrag;
+      }
+
+      function dragBox(e) {
+          if (!draggedBox) return;
+          const container = document.getElementById('gate-wheel-container');
+          const rect = container.getBoundingClientRect();
+          let newLeft = e.clientX - rect.left - offsetX;
+          let newTop = e.clientY - rect.top - offsetY;
+          let leftPct = (newLeft / rect.width) * 100;
+          let topPct = (newTop / rect.height) * 100;
+          draggedBox.style.left = leftPct + "%";
+          draggedBox.style.top = topPct + "%";
+      }
+
+      function stopDrag() { draggedBox = null; document.onmousemove = null; document.onmouseup = null; }
+
+      function saveBoxPositions() {
+          if (!editMode) return;
+          let newDoorMap = {};
+          document.querySelectorAll('.mapped-door').forEach(box => {
+              let id = parseInt(box.id.replace('pbox-', ''));
+              newDoorMap[id] = { t: parseFloat(box.style.top), l: parseFloat(box.style.left), w: doorMap[id].w, h: doorMap[id].h };
+          });
+          doorMap = newDoorMap; 
+          saveToCloud("doorMap", doorMap);
+          
+          const container = document.getElementById('gate-wheel-container');
+          container.classList.remove('editing'); editMode = false;
+          
+          document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "pointer"; box.onmousedown = null; });
+      }
+
       window.onload = function() {
          loadPot(); 
          initBoardStructure(); 
@@ -403,7 +579,7 @@
          let savedName = sessionStorage.getItem('hostName');
          let savedToken = sessionStorage.getItem('sessionToken'); 
          
-         if (savedPin) {
+         if (savedPin && savedToken) {
              projectorSessionPin = savedPin;
              sessionToken = savedToken; 
              let gate = document.getElementById('tv-intro-gate');
@@ -422,17 +598,6 @@
          
          startRemoteListener();
       };
-
-      document.addEventListener('keydown', function(event) {
-          var target = event.target || event.srcElement; if (target.tagName.toUpperCase() === 'INPUT') return;
-          if (event.code === 'Space' || event.code === 'Enter') { 
-              let gate = document.getElementById('tv-intro-gate');
-              if(!gate || gate.style.display === 'none') {
-                  event.preventDefault(); 
-                  if (gameState === "IDLE") startSpin(); else if (gameState === "SPINNING") stopSpin(); 
-              }
-          }
-      });
 
       function startRemoteListener() {
           if (remoteTimer) clearInterval(remoteTimer);
@@ -551,52 +716,170 @@
         setTimeout(function() { fitTextToContainer('winner-name-big', 5); }, 50);
       }
 
+      let doorMap = { 1: { t: 53.5, l: 44.5, w: 11, h: 18 }, 2: { t: 43, l: 69, w: 11, h: 15 }, 3: { t: 43, l: 20, w: 11, h: 15 }, 4: { t: 26, l: 69, w: 11, h: 15 }, 5: { t: 77, l: 69, w: 11, h: 15 }, 6: { t: 41, l: 44.5, w: 11, h: 11 }, 7: { t: 41, l: 56, w: 11, h: 11 }, 8: { t: 26, l: 20, w: 11, h: 15 }, 9: { t: 73, l: 56, w: 11, h: 11 }, 10: { t: 73, l: 33, w: 11, h: 11 }, 11: { t: 60, l: 69, w: 11, h: 15 }, 12: { t: 60, l: 20, w: 11, h: 15 }, 13: { t: 73, l: 44.5, w: 11, h: 11 }, 14: { t: 41, l: 33, w: 11, h: 11 }, 15: { t: 77, l: 20, w: 11, h: 15 } };
+      let openedBoxes = {}; let prefilledBoxes = {};
+
+      function toggleBoxStage() {
+          const boxOverlay = document.getElementById('open-box-overlay');
+          const isShowing = boxOverlay.classList.toggle('active');
+          if (isShowing) {
+              playSoundFX('boxIntro'); currentOpenBox = null;
+              fetch(FB_BASE_URL + "boxes.json").then(res => res.json()).then(cloudData => {
+                  if (cloudData) { 
+                      if (cloudData.opened) openedBoxes = cloudData.opened; 
+                      if (cloudData.prefilled) prefilledBoxes = cloudData.prefilled; 
+                      if (cloudData.doorMap) doorMap = cloudData.doorMap; 
+                      if (cloudData.background) applyBackground(cloudData.background);
+                  }
+                  renderBoxGrid();
+              }).catch(e => renderBoxGrid()); 
+          } else { 
+              if(editMode) toggleEditMode(); 
+          }
+      }
+
+      function renderBoxGrid() {
+          const container = document.getElementById('gate-wheel-container');
+          
+          document.querySelectorAll('.mapped-door').forEach(e => e.remove());
+          document.querySelectorAll('.edit-mode-indicator').forEach(e => e.remove());
+          
+          let ind = document.createElement('div'); ind.className = 'edit-mode-indicator'; ind.innerText = "EDIT MODE ACTIVE (Press 'S' to Save)";
+          container.appendChild(ind);
+
+          for (let i = 1; i <= 15; i++) {
+              let box = document.createElement('div'); box.className = 'mapped-door'; box.id = 'pbox-' + i;
+              box.style.top = doorMap[i].t + '%'; box.style.left = doorMap[i].l + '%'; box.style.width = doorMap[i].w + '%'; box.style.height = doorMap[i].h + '%';
+              if (openedBoxes[i]) {
+                  box.classList.add('opened');
+                  let isCash = openedBoxes[i].toLowerCase().includes('cash') || openedBoxes[i].includes('£');
+                  box.innerHTML = `<div class="door-prize-text ${isCash ? 'door-prize-cash' : ''}">${openedBoxes[i].toUpperCase()}</div>`;
+              }
+              if(!editMode) box.onclick = () => openPrizeBox(i);
+              else { box.style.cursor = "move"; box.onmousedown = startDrag; }
+              container.appendChild(box);
+          }
+      }
+
+      function openPrizeBox(i) {
+          if(editMode) return;
+          const box = document.getElementById('pbox-' + i);
+          if (box.classList.contains('opened')) return; 
+          if (!box.classList.contains('selected')) {
+              document.querySelectorAll('.mapped-door').forEach(d => d.classList.remove('selected'));
+              box.classList.add('selected'); currentOpenBox = i; playSoundFX('drumroll');
+          }
+      }
+
+      function attemptReveal() {
+          if (!currentOpenBox) return;
+          let vaultData = prefilledBoxes[currentOpenBox];
+          if (vaultData) {
+              let desc = typeof vaultData === 'object' ? vaultData.text : vaultData;
+              let snd = typeof vaultData === 'object' ? vaultData.sound : "DEFAULT";
+              executeReveal(desc, desc.toLowerCase().includes('cash') || desc.includes('£'), desc.toLowerCase().includes('pint'), null, snd);
+          }
+      }
+
+      function executeReveal(desc, isCash, isPint, pinOverride, customSound) {
+          let activePin = pinOverride;
+          if ((isCash || isPint) && !activePin) {
+              if (!projectorSessionPin) {
+                  projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
+                  if (!projectorSessionPin) return;
+              }
+              activePin = projectorSessionPin;
+          }
+
+          if (audioMap['drumroll'] && !audioMap['drumroll'].paused) { audioMap['drumroll'].pause(); audioMap['drumroll'].currentTime = 0; }
+          const box = document.getElementById('pbox-' + currentOpenBox); box.classList.remove('selected'); box.classList.add('opened');
+          box.innerHTML = `<div class="door-prize-text ${(isCash || isPint) ? 'door-prize-cash' : ''}">${desc.toUpperCase()}</div>`;
+          
+          openedBoxes[currentOpenBox] = desc; saveToCloud("opened", openedBoxes);
+          
+          if(customSound && customSound !== "DEFAULT") { playSoundFX(customSound); } 
+          else { if (isCash || isPint) playSoundFX('celebrate'); else playSoundFX('sad'); }
+
+          let playerId = 0; 
+          let winnerName = document.getElementById('winner-name-big').innerText;
+          if (allNames && allNames.length > 0) {
+              let winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
+              if (winnerObj && winnerObj.id) playerId = winnerObj.id;
+          }
+          
+          let pType = 'CUSTOM'; let pAmt = desc;
+          if (isCash) { pType = 'PHYSICAL_CASH'; pAmt = desc.replace(/[^\d.-]/g, ''); } else if (isPint) { pType = 'PINT'; pAmt = desc.replace(/[^\d.-]/g, '') || "1"; }
+          
+          google.script.run.withSuccessHandler(res => {
+              if (res.includes("UNAUTHORIZED")) { showToast(res, false); projectorSessionPin = null; }
+          }).processFridayPrize(winnerName, playerId, pType, pAmt, activePin); 
+          
+          currentOpenBox = null;
+      }
+
       function showToast(msg, isSuccess) {
           var x = document.getElementById("toast-container"); x.innerHTML = `<span class="toast-icon">${isSuccess ? "✅" : "⚠️"}</span> <span>${msg}</span>`; x.className = "show"; x.style.borderColor = isSuccess ? "#00e676" : "#ff1744";
           if(audioCtx && audioCtx.state !== 'suspended') { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(isSuccess ? 880 : 220, audioCtx.currentTime); if(isSuccess) { osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.setValueAtTime(1108, audioCtx.currentTime + 0.1); osc.frequency.setValueAtTime(1318, audioCtx.currentTime + 0.2); } gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.6); }
           setTimeout(function(){ x.className = x.className.replace("show", ""); }, 4000);
       }
 
-      function sendPrize(amount, pinOverride) {
-          let activePin = pinOverride;
-          if (!activePin) {
-              if (!projectorSessionPin) {
-                  projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
-                  if (!projectorSessionPin) return; 
-              }
-              activePin = projectorSessionPin;
-          }
-          
-          var winnerName = document.getElementById('winner-name-big').innerText;
-          var winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
-          if (!winnerObj || !winnerObj.id) { showToast("Could not find ID for " + winnerName, false); return; }
-          
-          Array.prototype.slice.call(document.querySelectorAll('.control-btn, .action-btn')).forEach(function(b) { b.setAttribute('data-txt', b.innerText); b.disabled = true; b.innerText = "..."; });
-          
-          var finalAmount = 0;
-          if (amount === 'MEMBERS_CASH' || amount === 'CASH') {
-             finalAmount = document.getElementById('cashInput').value; if(!finalAmount || finalAmount <= 0) { showToast("Enter Cash Amount", false); resetButtons(); return; }
-             currentPot = 25; document.getElementById('rollover-amount').innerText = '£' + currentPot; 
-             google.script.run.updateRolloverPot(currentPot);
-          } else if (amount === 'PINT') { finalAmount = document.getElementById('pintInput').value; if(!finalAmount || finalAmount <= 0) { showToast("Enter Pints", false); resetButtons(); return; }
-          } else if (amount === 'CUSTOM') { finalAmount = document.getElementById('customInput').value; if(!finalAmount) { showToast("Enter Prize Name", false); resetButtons(); return; }
-          } else finalAmount = amount;
-
-          google.script.run.withSuccessHandler(function(response) {
-            if (response.includes("UNAUTHORIZED")) {
-                showToast(response, false); 
-                projectorSessionPin = null; 
-                resetButtons();
-                return;
+      // 🔥 THE FIX: Now perfectly accepts PHYSICAL_CASH and pulls the number correctly!
+      function sendPrize(type, pinOverride) { 
+        let activePin = pinOverride;
+        
+        if (!activePin) {
+            if (!projectorSessionPin) {
+                projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
+                if (!projectorSessionPin) return; 
             }
-            showToast(response, true); 
-            if(response.includes("SUCCESS") || response.includes("Logged")) setTimeout(startIdleMode, 2000); else resetButtons();
-          }).withFailureHandler(function(err) { showToast("Error: " + err, false); resetButtons(); })
-          .processFridayPrize(winnerName, winnerObj.id, (amount === 'CUSTOM' ? 'CUSTOM' : (amount === 'PINT' ? 'PINT' : (amount === 'MEMBERS_CASH' ? 'MEMBERS_CASH' : 'CASH'))), finalAmount, activePin); 
+            activePin = projectorSessionPin;
+        }
+        
+        var winnerName = document.getElementById("winner-name-big").innerText; 
+        var amount = 0; 
+        var activeBtn = document.getElementById((type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') ? 'btnCash' : (type === 'PINT' ? 'btnPint' : 'btnCustom'));
+        
+        if (type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') { 
+            amount = document.getElementById("cashInput").value; 
+            if(amount === "" || amount <= 0) { alert("Enter Cash Amount!"); return; } 
+        } 
+        else if (type === 'PINT') { 
+            amount = document.getElementById("pintInput").value; 
+            if(amount === "" || amount <= 0) { alert("Enter Number of Pints!"); return; } 
+        } 
+        else if (type === 'CUSTOM') { 
+            amount = document.getElementById("customInput").value; 
+            if(amount === "") { alert("Enter Prize Name!"); return; } 
+        } 
+        
+        document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.setAttribute('data-txt', b.innerText); b.disabled = true; b.innerText = "..."; });
+        var playerId = 0; 
+        
+        if (allNames && allNames.length > 0) {
+            let winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
+            if (winnerObj && winnerObj.id) playerId = winnerObj.id;
+        }
+        
+        let displayPrizeText = (type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') ? `£${amount} Cash` : (type === 'PINT' ? `${amount} Pint(s)` : amount);
+        
+        google.script.run.withSuccessHandler(function(res) { 
+          if (res.includes("UNAUTHORIZED")) {
+              showToast(res, false);
+              projectorSessionPin = null; 
+              document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); 
+              return;
+          }
+
+          showToast(res, true); 
+          if(res.includes("SUCCESS") || res.includes("Logged")) { 
+              setTimeout(startIdleMode, 2000); 
+          } else { 
+              document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); 
+          }
+        }).withFailureHandler(function(err) { showToast("Error: " + err, false); document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); })
+        .processFridayPrize(winnerName, playerId, type, amount, activePin); 
       }
       
-      function resetButtons() { Array.prototype.slice.call(document.querySelectorAll('.control-btn, .action-btn')).forEach(function(b) { b.disabled = false; b.innerText = b.getAttribute('data-txt') || b.innerText; }); }
-
       function showReport() { document.getElementById('global-dimmer').style.display = 'block'; document.getElementById('report-overlay').style.display = 'flex'; const btn = document.getElementById('btn-archive'); btn.innerText = "ARCHIVE TO SHEET"; btn.disabled = false; btn.style.background = "#4caf50"; google.script.run.withSuccessHandler(function(rep) { document.getElementById('rep-entries').innerText = rep.entries || 0; document.getElementById('rep-pot').innerText = "£" + (rep.revenueTonight || 0).toFixed(2); document.getElementById('rep-late').innerText = "£" + (rep.revenueLate || 0).toFixed(2); document.getElementById('rep-payouts').innerText = "£" + (rep.cashWon || 0).toFixed(2); document.getElementById('rep-carry').innerText = "£" + (rep.carryOver || 0).toFixed(2); var listHTML = ""; if(rep.winners && rep.winners.length > 0) rep.winners.forEach(function(w) { listHTML += `<div class='winner-row'><span>${w.name}</span><span>${w.prize}</span></div>`; }); document.getElementById('rep-list').innerHTML = listHTML || "NO WINNERS YET."; }).getReportData(); }
       function archiveReport() { const btn = document.getElementById('btn-archive'); btn.innerText = "SAVED (Check Sheet)"; btn.disabled = true; }
       function closeReport() { document.getElementById('report-overlay').style.display='none'; document.getElementById('global-dimmer').style.display='none'; }
