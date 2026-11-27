@@ -1,892 +1,760 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-  <title> Friday Club </title>
+  <meta charset="UTF-8">
   <title>Friday Club</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
-<style>
-:root {
---bg-base: #4a0404; --bg-dot-1: #b8860b; --bg-dot-2: #8a0e0e;
---accent-primary: #ffd700; --accent-secondary: #b8860b;
---header-grad-1: #d32f2f; --header-grad-2: #b71c1c;
---panel-bg-1: rgba(30, 5, 5, 0.88); --panel-bg-2: rgba(50, 10, 10, 0.88);
---frame-bg: #3e2723; --glow-color: rgba(255, 215, 0, 0.4);
-}
-body { background-color: var(--bg-base); background-image: radial-gradient(var(--bg-dot-1) 2px, transparent 2.2px), radial-gradient(var(--bg-dot-2) 2px, transparent 2.2px); background-size: 30px 30px, 15px 15px; background-position: 0 0, 15px 15px; color: white; font-family: 'Oswald', sans-serif; text-align: center; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; transition: background-color 0.4s ease; }
-
-/* 🔥 VIBRANT TV INTRO GATE (FRIDAY CLUB THEME) */
-#tv-intro-gate { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-base); background-image: radial-gradient(var(--bg-dot-1) 2px, transparent 2.2px), radial-gradient(var(--bg-dot-2) 2px, transparent 2.2px); background-size: 30px 30px, 15px 15px; background-position: 0 0, 15px 15px; z-index: 100000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1); }
-#tv-intro-gate::before { content: ""; position: absolute; top:0; left:0; right:0; bottom:0; background: radial-gradient(circle, rgba(0,0,0,0.4) 20%, rgba(0,0,0,0.95) 100%); z-index: 0; pointer-events: none; }
-#tv-intro-gate.unlocked { opacity: 0; transform: scale(1.15); pointer-events: none; }
-.gate-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
-.gate-logo-large { width: 180px; height: 180px; background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1088 816'%3E%3Cpath fill='%23ffd700' d='M735 114c3-1 10-3 10 3l34 196v291h-84v17h87v96H243v-96h92v-17h-90V311h291q7-1 10-7 94-96 189-190m-1 21L564 311h199zM277 334v52h147v-52zm161 0 1 52 27-1q26-25 50-51zm104 1q-9 7-16 16l29 29c7 10 20 4 30 6v-52zm58-1v52h147v-52zm-88 33-18 19h38c-6-6-13-15-20-19m-235 31v55h120l26-26q2-14 1-29zm161 0v14l14-14zm43 0-41 42c-2 4-4 15 3 13h142c0-6 2-14-3-18l-38-36zm92 0 12 12q4-16-12-12m27 0c1 11-5 26 6 33 8 7 15 17 24 22h117v-53q-1-3-5-2zm-323 68v55q27 1 52-1 29-25 55-54zm136 0-55 55h66v-55zm25 0v53q1 3 5 2h142v-55zm162 0v55h67l-51-52q-7-6-16-3m42 0q26 28 54 54 25 2 51 1v-55zm-365 67v40l40-40zm69 1q-26 23-50 49h128v-50zm92-1v48q1 3 5 2h142v-50zm162 0v50h130l-46-47q-3-3-8-3zm109 0 38 38v-38zm-353 71 1 17h316c-1-6 4-19-6-17z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: contain; filter: drop-shadow(0 0 25px rgba(255,215,0,0.8)); margin-bottom: 20px; animation: gateFloat 4s ease-in-out infinite; }
-@keyframes gateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-.gate-title { font-family: 'Oswald', sans-serif; font-size: 7vw; font-weight: 700; color: #fff; margin: 0 0 30px 0; text-transform: uppercase; letter-spacing: 12px; line-height: 1; text-shadow: 0 4px 0 #ccc, 0 8px 15px rgba(0,0,0,0.8), 0 0 40px rgba(255,215,0,0.4); text-align: center; }
-.gate-input-box { background: rgba(20, 2, 2, 0.9); padding: 40px 60px; border-radius: 25px; border: 4px solid var(--accent-primary); box-shadow: 0 0 50px rgba(255, 215, 0, 0.3), inset 0 0 30px #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px; }
-.gate-input { width: 280px; text-align: center; font-size: 4em; font-family: 'Oswald', sans-serif; padding: 10px; border-radius: 15px; border: 4px dashed var(--accent-secondary); background: #0a0a0a; color: var(--accent-primary); letter-spacing: 20px; outline: none; margin: 0 auto; text-shadow: 0 0 15px var(--accent-primary); transition: all 0.2s; font-weight: 700;}
-.gate-input::placeholder { color: #333; text-shadow: none; }
-.gate-input:focus { border-color: var(--accent-primary); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); background: #000; }
-.gate-btn { font-family: 'Oswald', sans-serif; font-size: 2.2em; padding: 15px 40px; background: linear-gradient(135deg, var(--accent-primary), #ffa000); color: #000; border: 4px solid #fff; border-radius: 50px; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; box-shadow: 0 8px #b8860b, 0 15px 20px rgba(0,0,0,0.6); width: 100%; font-weight: bold; margin-top: 10px; }
-.gate-btn:active { transform: translateY(6px); box-shadow: 0 2px #b8860b, 0 5px 10px rgba(0,0,0,0.6); }
-.gate-btn.denied { background: #ff0000; border-color: #880000; box-shadow: 0 8px #880000, 0 15px 20px rgba(0,0,0,0.6); color: #fff;}
-
-#scaler { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; transition: transform 0.3s ease; }
-#studio-blackout { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, transparent 25%, rgba(0,0,0,0.75) 100%); z-index: 5; pointer-events: none; opacity: 0; transition: opacity 0.8s ease-in-out; }
-body.is-spinning #studio-blackout { opacity: 1; }
-
-.game-selector { position: fixed; top: 15px; right: 20px; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); border-radius: 30px; padding: 5px; display: flex; gap: 5px; border: 1px solid rgba(255,255,255,0.2); z-index: 30000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-.game-link { text-decoration: none; color: #aaa; font-family: 'Oswald', sans-serif; font-size: 0.9em; letter-spacing: 1px; padding: 8px 20px; border-radius: 25px; transition: all 0.2s; text-transform: uppercase; cursor: pointer;}
-.game-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
-.game-link.active { background: var(--accent-primary); color: #000; font-weight: bold; box-shadow: 0 2px 10px var(--glow-color); }
-.stage-tools { position: fixed; top: 15px; left: 40px; display: flex; gap: 6px; z-index: 3000; align-items: center; flex-wrap: wrap; max-width: 520px; }
-.tool-pill { background: rgba(0,0,0,0.7); border: 1px solid var(--accent-secondary); color: #ddd; font-family: 'Oswald', sans-serif; font-size: 0.8em; letter-spacing: 1px; padding: 6px 12px; border-radius: 20px; cursor: pointer; text-transform: uppercase; transition: all 0.15s; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-.tool-pill:hover { color: #fff; border-color: var(--accent-primary); transform: translateY(-1px); }
-
-#live-notification { position: fixed; top: -120px; left: 40px; transform: none; background: linear-gradient(135deg, #ffd700, #ff8c00); border: 4px solid #fff; border-radius: 50px; padding: 12px 30px; color: #000; font-size: 1.8em; font-family: 'Oswald', sans-serif; box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.5); z-index: 9999; transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-transform: uppercase; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 0px rgba(255,255,255,0.6); }
-#live-notification.show { top: 58px; }
-
-.header-box { background: linear-gradient(to bottom, var(--header-grad-1), var(--header-grad-2)); box-shadow: 0 0 0 4px var(--accent-primary), 0 12px 25px rgba(0,0,0,0.7), 0 0 30px var(--glow-color); padding: 12px 50px; border-radius: 14px; position: relative; z-index: 50; transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55); margin-bottom: 10px; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 12px; }
-.logo { width: 80px; height: 80px; background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1088 816'%3E%3Cpath fill='%23ffd700' d='M735 114c3-1 10-3 10 3l34 196v291h-84v17h87v96H243v-96h92v-17h-90V311h291q7-1 10-7 94-96 189-190m-1 21L564 311h199zM277 334v52h147v-52zm161 0 1 52 27-1q26-25 50-51zm104 1q-9 7-16 16l29 29c7 10 20 4 30 6v-52zm58-1v52h147v-52zm-88 33-18 19h38c-6-6-13-15-20-19m-235 31v55h120l26-26q2-14 1-29zm161 0v14l14-14zm43 0-41 42c-2 4-4 15 3 13h142c0-6 2-14-3-18l-38-36zm92 0 12 12q4-16-12-12m27 0c1 11-5 26 6 33 8 7 15 17 24 22h117v-53q-1-3-5-2zm-323 68v55q27 1 52-1 29-25 55-54zm136 0-55 55h66v-55zm25 0v53q1 3 5 2h142v-55zm162 0v55h67l-51-52q-7-6-16-3m42 0q26 28 54 54 25 2 51 1v-55zm-365 67v40l40-40zm69 1q-26 23-50 49h128v-50zm92-1v48q1 3 5 2h142v-50zm162 0v50h130l-46-47q-3-3-8-3zm109 0 38 38v-38zm-353 71 1 17h316c-1-6 4-19-6-17z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: contain; filter: drop-shadow(4px 4px 3px rgba(0,0,0,0.5)); }
-h1 { margin: 0; font-size: 3.4em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 0 #ccc, 0 2px 0 #b9b9b9, 0 3px 0 #aaa, 0 4px 0 rgba(0,0,0,0.6), 0 8px 15px rgba(0,0,0,0.6); line-height: 1; letter-spacing: 3px; white-space: nowrap; }
-
-.dashboard-panel { position: fixed; top: 155px; bottom: 40px; width: 310px; background: linear-gradient(135deg, var(--panel-bg-1), var(--panel-bg-2)); border: 3px solid var(--accent-secondary); border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.75), 0 0 20px var(--glow-color); z-index: 40; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; transition: opacity 0.4s ease-in-out, border-color 0.4s ease; overflow-y: auto; overflow-x: hidden; }
-body.is-spinning .dashboard-panel { opacity: 0.12; pointer-events: none; }
-.panel-left { left: 40px; } .panel-right { right: 40px; }
-.panel-header { font-size: 1.4em; color: var(--accent-primary); border-bottom: 2px solid var(--accent-secondary); padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 2px 2px 0 #000; flex-shrink: 0; }
-.activity-stream { flex: 1; overflow-y: auto; overflow-x: hidden; text-align: left; font-size: 1.1em; line-height: 1.5; padding-right: 5px; }
-.activity-row { padding: 8px 10px; border-bottom: 1px solid rgba(255,215,0,0.15); border-left: 4px solid var(--accent-primary); background: rgba(0,0,0,0.3); margin-bottom: 6px; border-radius: 0 6px 6px 0; animation: row-slide 0.3s ease-out forwards; }
-@keyframes row-slide { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
-.tracker-section { margin-bottom: 6px; background: rgba(0,0,0,0.35); border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); padding: 6px; flex-shrink: 0; }
-.tracker-title { font-size: 1em; color: var(--accent-primary); text-transform: uppercase; font-weight: bold; margin-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 2px; text-align: left; }
-.tracker-item { font-size: 0.9em; padding: 4px 8px; margin-bottom: 3px; background: rgba(0,0,0,0.45); border-radius: 4px; cursor: pointer; transition: all 0.2s; border-left: 3px solid #555; text-align: left; display: flex; align-items: center; justify-content: space-between; }
-.tracker-item.active-round { background: linear-gradient(90deg, rgba(255, 215, 0, 0.28), rgba(255, 215, 0, 0.05)); border-left: 5px solid var(--accent-primary); color: #fff; font-weight: bold; transform: scale(1.02); box-shadow: 0 0 12px var(--glow-color); padding-top: 6px; padding-bottom: 6px; }
-.tracker-item.completed { background: rgba(76, 175, 80, 0.2); border-left-color: #4caf50; color: #888; text-decoration: line-through; }
-.tracker-item.box-game { border-left-color: #ff5252; font-weight: bold; color: #ffebee; }
-
-.game-elements { opacity: 1; transform: translateY(0); display: flex; flex-direction: column; align-items: center; }
-#marquee-frame { position: relative; padding: 50px; background: var(--frame-bg); border-radius: 60px; border: 5px solid var(--accent-secondary); box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 35px var(--glow-color); display: inline-block; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s ease !important; }
-body.is-spinning #marquee-frame { transform: scale(1.35) translateY(-2%) !important; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
-#ticket-counter-badge { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #111, #2a2a2a); border: 2px solid var(--accent-primary); color: var(--accent-primary); padding: 4px 22px; border-radius: 20px; font-size: 1.05em; letter-spacing: 2px; z-index: 25; box-shadow: 0 4px 12px rgba(0,0,0,0.8); text-transform: uppercase; }
-.bulb { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #444; border: 2px solid #111; transform: translate(-50%, -50%); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); z-index: 5; }
-.bulb.odd { animation: slow-blink-1 2s infinite ease-in-out; } .bulb.even { animation: slow-blink-2 2s infinite ease-in-out; }
-@keyframes slow-blink-1 { 0%, 100% { background: #fffacd; box-shadow: 0 0 10px #fffacd; border-color: #fff; } 50% { background: #b8860b; box-shadow: none; border-color: #b8860b; } }
-@keyframes slow-blink-2 { 0%, 100% { background: #b8860b; box-shadow: none; border-color: #b8860b; } 50% { background: #fffacd; box-shadow: 0 0 10px #fffacd; border-color: #fff; } }
-body.winner-mode .bulb { animation: fast-flash 0.2s infinite !important; }
-body.is-spinning .bulb { animation: fast-flash 0.1s infinite !important; }
-@keyframes fast-flash { 0%, 100% { background: #fff; box-shadow: 0 0 20px #fff; } 50% { background: #333; box-shadow: none; } }
-#cabinet { position: relative; width: 680px; height: 500px; background: #000; border-radius: 20px; overflow: hidden; box-shadow: inset 0 0 0 6px var(--accent-primary), 0 0 0 15px var(--accent-secondary); transform: translateZ(0); z-index: 10; }
-.cylinder-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 10; transition: background 1s; background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 85%, rgba(0,0,0,0.85) 100%); }
-body.winner-mode .cylinder-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.85) 70%, rgba(0,0,0,0.98) 100%); }
-.win-line { position: absolute; top: 50%; left: 6px; right: 6px; height: 90px; margin-top: -45px; z-index: 15; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.2) 100%); border-top: 3px solid var(--accent-primary); border-bottom: 3px solid var(--accent-primary); box-shadow: 0 0 20px var(--glow-color); pointer-events: none; }
-.flipper { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 25px solid var(--accent-primary); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.6)); transform-origin: top center; }
-body.is-spinning .flipper { animation: flip-bounce 0.1s infinite alternate ease-in-out; }
-@keyframes flip-bounce { 0% { transform: translateX(-50%) rotate(0deg); } 100% { transform: translateX(-50%) rotate(-15deg); } }
-#spinner-strip { position: absolute; width: 100%; top: 0; padding: 0 6px; box-sizing: border-box; }
-.name-card { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 2.8em; text-transform: uppercase; color: #fff; border-top: 2px solid rgba(255,255,255,0.4); border-bottom: 2px solid rgba(0,0,0,0.6); box-sizing: border-box; letter-spacing: 1.5px; text-shadow: 0 2px 0 rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.5); }
-.blank-card { height: 90px; background: #000; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(0,0,0,0.1); box-sizing: border-box; }
-.card-blue { background: linear-gradient(180deg, #304ffe, #1a237e); } .card-green { background: linear-gradient(180deg, #2e7d32, #1b5e20); } .card-red { background: linear-gradient(180deg, #d32f2f, #b71c1c); } .card-gold { background: linear-gradient(180deg, #fbc02d, #f57f17); color: #111; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
-.arcade-button-container { margin-top: 25px; position: relative; width: 120px; height: 120px; z-index: 10; transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s ease !important; }
-body.is-spinning .arcade-button-container { transform: translateY(250px) scale(0.5) !important; opacity: 0 !important; pointer-events: none !important; }
-.arcade-btn { position: relative; width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(145deg, #ccc, #888); box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: none; outline: none; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: transform 0.1s; }
-.arcade-btn::after { content: "SPIN"; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff5252, #b71c1c); box-shadow: inset 0 0 10px rgba(0,0,0,0.3), 0 10px 15px rgba(0,0,0,0.4); border: 2px solid #a30000; display: flex; justify-content: center; align-items: center; font-family: 'Oswald', sans-serif; font-size: 1.8em; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); letter-spacing: 2px; transition: all 0.1s; }
-.arcade-btn:disabled { filter: grayscale(0.8); cursor: not-allowed; }
-
-.winner-box { position: relative; z-index: 110; background: linear-gradient(135deg, var(--header-grad-1), var(--header-grad-2)); border: 8px solid var(--accent-primary); padding: 40px 60px; border-radius: 20px; text-align: center; width: 650px; box-shadow: 0 0 90px var(--glow-color), inset 0 0 30px rgba(0,0,0,0.5); }
-.winner-label { font-size: 2em; color: var(--accent-primary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 3px; user-select: none; text-shadow: 2px 2px 0 #000; }
-.winner-name { font-size: 4.5em; color: #fff; margin: 0; line-height: 1; margin-bottom: 25px; text-shadow: 0 1px 0 #ffd700, 0 2px 0 #e6c200, 0 3px 0 #cca300, 0 4px 0 #997a00, 0 6px 0 #000, 0 12px 25px rgba(0,0,0,0.8); }
-.control-row { display: flex; align-items: center; justify-content: flex-start; gap: 20px; background: rgba(0,0,0,0.35); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); }
-.control-label { font-size: 1.5em; font-weight: bold; color: var(--accent-primary); width: 120px; text-align: left; }
-.input-wrapper { position: relative; display: inline-block; }
-.currency-symbol { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 1.8em; color: #000; font-family: 'Oswald'; font-weight: bold; pointer-events: none; }
-.control-input, .text-input { font-size: 1.8em; width: 120px; text-align: center; border: 2px solid var(--accent-primary); border-radius: 8px; padding: 5px; font-family: 'Oswald'; background: #fff; color: #000; padding-left: 25px; }
-.text-input { width: 220px; text-align: left; padding: 10px; font-size: 1.2em; }
-.control-btn { font-family: 'Oswald'; font-size: 1.4em; padding: 8px 25px; color: white; border: 2px solid #fff; border-radius: 30px; cursor: pointer; letter-spacing: 1px; width: 180px; transition: transform 0.1s; box-shadow: 0 4px rgba(0,0,0,0.3); }
-.btn-cash { background: linear-gradient(to bottom, #2ecc71, #27ae60); box-shadow: 0 4px #1e8449; }
-.btn-pint { background: linear-gradient(to bottom, #e67e22, #d35400); box-shadow: 0 4px #a04000; }
-.btn-custom { background: linear-gradient(to bottom, #9c27b0, #7b1fa2); box-shadow: 0 4px #4a148c; }
-.btn-close { margin-top: 20px; background: transparent; border: none; color: #fff; text-decoration: underline; cursor: pointer; font-size: 1.2em; }
-
-#global-dimmer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 100; }
-#confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 110; }
-.overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 120; flex-direction: column; align-items: center; justify-content: center; }
-
-.report-box { position: relative; z-index: 110; background: linear-gradient(135deg, #b71c1c, #8a0e0e); border: 4px solid #ffd700; width: 650px; padding: 40px; border-radius: 15px; color: #fff; box-shadow: 0 0 60px #000; text-align: left; }
-.report-title { margin-top:0; color: #ffd700; text-align:center; text-transform:uppercase; letter-spacing:3px; border-bottom: 2px solid #b8860b; padding-bottom: 15px; margin-bottom: 20px; text-shadow: 2px 2px 0 #000; }
-.stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.4em; border-bottom: 1px solid rgba(0,0,0,0.3); padding: 10px 0; text-transform: uppercase; letter-spacing: 1px; }
-.stat-label { color: #ffccbc; } .stat-val { color: #fff; font-weight: bold; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); }
-.winner-list-label { margin-top: 25px; color: #ffd700; font-size: 1em; text-transform: uppercase; letter-spacing: 2px; }
-.winner-list { max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; margin-top: 5px; border: 1px solid rgba(255,215,0,0.3); }
-.winner-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2em; }
-.btn-report { position: fixed; bottom: 20px; right: 20px; background: linear-gradient(to bottom, #FFD700, #FFA000); border: 2px solid #fff; color: #3e2723; font-family: 'Oswald', sans-serif; font-size: 0.9em; padding: 10px 20px; cursor: pointer; border-radius: 30px; box-shadow: 0 4px #b71c1c, 0 5px 10px rgba(0,0,0,0.3); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; transition: all 0.1s; z-index: 50; }
-.report-actions { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
-.btn-archive { background: #4caf50; border: 2px solid #fff; color: white; padding: 10px 30px; border-radius: 30px; cursor: pointer; font-family: 'Oswald'; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; }
-
-#toast-container { visibility: hidden; min-width: 280px; margin-left: -140px; background-color: #222; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; font-size: 1.3rem; box-shadow: 0 5px 20px rgba(0,0,0,0.6); border: 2px solid var(--accent-primary); opacity: 0; transition: opacity 0.5s, bottom 0.5s; font-family: 'Oswald', sans-serif; display: flex; align-items: center; justify-content: center; gap: 15px; }
-#toast-container.show { visibility: visible; opacity: 1; bottom: 50px; }
-
-#hydration-break-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at 15% 25%, rgba(255,255,255,0.2) 0%, transparent 15%), radial-gradient(circle at 75% 65%, rgba(255,255,255,0.15) 0%, transparent 20%), linear-gradient(135deg, #00d2ff, #0371a3); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in-out; }
-#hydration-break-overlay.active { opacity: 1; pointer-events: auto; }
-.hydration-text { font-family: 'Oswald', sans-serif; font-size: 7.5vw; font-weight: 900; font-style: italic; color: #ffffff; text-transform: uppercase; line-height: 1; margin: 0; text-shadow: 6px 6px 15px rgba(0, 0, 0, 0.4); transform: skewX(-6deg) scale(0.8); transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-#hydration-break-overlay.active .hydration-text { transform: skewX(-6deg) scale(1); }
-
-#open-box-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1a0b0b 0%, #050202 100%); z-index: 99998; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in-out; }
-#open-box-overlay.active { opacity: 1; pointer-events: auto; }
-
-.gate-wheel-container { position: relative; width: 90vw; max-width: 1100px; aspect-ratio: 1.33 / 1; background-image: url('https://raw.githubusercontent.com/CornerstoneCoOpApps/appassets/refs/heads/main/GateWheel.png'); background-size: contain; background-repeat: no-repeat; background-position: center; margin-top: 20px; transition: border 0.3s; }
-.mapped-door { position: absolute; cursor: pointer; border: 2px solid transparent; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-.mapped-door.selected { border-color: #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); background: rgba(255, 215, 0, 0.3); animation: pulse 0.8s infinite alternate; }
-@keyframes pulse { from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); } to { box-shadow: 0 0 35px rgba(255, 215, 0, 1); } }
-.mapped-door.opened { background: #111; border: 2px solid #444; box-shadow: inset 0 0 20px #000; }
-.door-prize-text { font-family: 'Oswald', sans-serif; font-size: 1.5vw; color: #ffd700; font-weight: bold; text-align: center; text-shadow: 2px 2px 0 #000; padding: 4px; line-height: 1.1; }
-.door-prize-cash { color: #4caf50; font-size: 2vw; text-shadow: 0 0 10px #000; }
-
-.edit-mode-indicator { display: none; position: absolute; top: 10px; right: 10px; background: #ff0000; color: #fff; padding: 5px 15px; font-weight: bold; border-radius: 8px; animation: flash 1s infinite alternate; }
-@keyframes flash { from { opacity: 1; } to { opacity: 0.5; } }
-.gate-wheel-container.editing .edit-mode-indicator { display: block; }
-.gate-wheel-container.editing .mapped-door { border: 2px dashed #00ff00 !important; background: rgba(0,255,0,0.2) !important; transition: none !important; }
-
-@media screen and (max-height: 950px) { #scaler { transform: scale(0.85); } }
-@media screen and (max-height: 750px) { #scaler { transform: scale(0.70); } }
-@media screen and (max-height: 800px) { .winner-box { transform: scale(0.9); } }
-@media screen and (max-height: 650px) { .winner-box { transform: scale(0.75); } }
-</style>
-</head>
-<body class="intro-mode">
-
-<!-- 🔥 VIBRANT TV INTRO GATE (FRIDAY CLUB THEME) -->
-<div id="tv-intro-gate">
-<div class="gate-content">
-<div class="gate-logo-large"></div>
-<h1 class="gate-title">THE FRIDAY CLUB</h1>
-<div class="gate-input-box">
-<input type="password" id="gate-pin-input" class="gate-input" placeholder="****" maxlength="4" autocomplete="off" onkeypress="if(event.key==='Enter') verifyGatePin()">
-<button id="gate-btn" class="gate-btn" onclick="verifyGatePin()">UNLOCK STAGE</button>
-</div>
-</div>
-</div>
-
-<div id="studio-blackout"></div>
-
-<div class="stage-tools">
-<button class="tool-pill" onclick="toggleBoxStage()" title="Shortcut: Press B">🎁 OPEN THE BOX (B)</button>
-</div>
-
-<!-- 🔥 HARDCODED URLS -->
-<div class="game-selector">
-<a href="MembersDraw.html" class="game-link">MEMBERS DRAW</a>
-<a href="https://cornerstonecoopapps.github.io/FridayClub/" class="game-link active">FRIDAY CLUB</a>
-<a href="https://script.google.com/macros/s/AKfycbzvDrkgRVBb-x6M6PfbJT6wpJG6sOoVuFyB3OKrHU0qFYh47fU1p__JVP6h2deRpR1w/exec" class="game-link">MAKE YOUR MARK!</a>
-</div>
-
-<div id="live-notification">🎟️ TICKET SECURED 🎟️</div>
-<div id="global-dimmer"></div>
-<canvas id="confetti-canvas"></canvas>
-
-<div class="dashboard-panel panel-left">
-<div class="panel-header" style="text-align:center;">🎮 GAME TRACKER</div>
-<div class="tracker-section">
-<div class="tracker-title">SECTION 1</div>
-<div class="tracker-item active-round" onclick="advanceTracker(this)"><span>🎡 Spin 1</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 2</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 3</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 4</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 5</span></div>
-<div class="tracker-item box-game" onclick="advanceTracker(this)"><span>🎁 Open The Box</span></div>
-</div>
-<div class="tracker-section">
-<div class="tracker-title">SECTION 2</div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 1</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 2</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 3</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 4</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 5</span></div>
-<div class="tracker-item box-game" onclick="advanceTracker(this)"><span>🎁 Open The Box</span></div>
-</div>
-<div class="tracker-section">
-<div class="tracker-title">SECTION 3</div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 1</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 2</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 3</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 4</span></div>
-<div class="tracker-item" onclick="advanceTracker(this)"><span>🎡 Spin 5</span></div>
-<div class="tracker-item box-game" onclick="advanceTracker(this)"><span>🎁 Open The Box</span></div>
-</div>
-</div>
-
-<div class="dashboard-panel panel-right">
-<div class="panel-header" style="font-size:1.6em; border-bottom: 3px solid var(--accent-primary);">Tonight's Winners</div>
-<div class="activity-stream" id="session-winners-feed" style="font-size:1em; margin-top: 10px;">
-<div style="color:#aaa; text-align:center; padding-top:20px;">Draws will appear here!</div>
-</div>
-</div>
-
-<div id="scaler">
-<div class="header-box"><div class="logo"></div><h1>FRIDAY CLUB</h1></div>
-<div class="game-elements">
-<div id="marquee-frame">
-<div id="ticket-counter-badge">🎟️ 0 TICKETS IN PLAY</div>
-<div id="cabinet"><div class="cylinder-overlay"></div><div class="win-line"><div class="flipper"></div></div><div id="spinner-strip"></div></div>
-</div>
-<div class="arcade-button-container"><button id="spin-btn" class="arcade-btn" onclick="spinWheel()"></button></div>
-</div>
-</div>
-
-<div id="winner-overlay" class="overlay">
-<div class="winner-box">
-<div class="winner-label">CONTESTANT</div>
-<h1 class="winner-name" id="winner-name">...</h1>
-<div class="control-row">
-<span class="control-label">CASH</span>
-<div class="input-wrapper"><span class="currency-symbol">£</span><input type="number" id="cashInput" class="control-input" value="" onfocus="this.value=''"></div>
-<button class="control-btn btn-cash" id="btnCash" onclick="sendPrize('CASH')">LOG CASH</button>
-</div>
-<div class="control-row">
-<span class="control-label">PINTS</span>
-<input type="number" id="pintInput" class="control-input" value="1" onfocus="this.value=''">
-<button class="control-btn btn-pint" id="btnPint" onclick="sendPrize('PINT')">SEND PINTS</button>
-</div>
-<div class="control-row">
-<span class="control-label">CUSTOM</span>
-<input type="text" id="customInput" class="text-input" placeholder="e.g. Old Shoe" onfocus="this.value=''">
-<button class="control-btn btn-custom" id="btnCustom" onclick="sendPrize('CUSTOM')">LOG PRIZE</button>
-</div>
-<button class="btn-close" onclick="closeGameReset()">CLOSE / RESET</button>
-</div>
-</div>
-
-<button class="btn-report" onclick="showReport()">END SHOW REPORT</button>
-
-<div id="report-overlay" class="overlay">
-<div class="report-box">
-<h2 class="report-title">END OF SHOW REPORT</h2>
-<div class="stat-row"><span class="stat-label">TOTAL ENTRIES</span> <span class="stat-val" id="rep-entries">0</span></div>
-<div class="stat-row"><span class="stat-label">TONIGHT'S POT</span> <span class="stat-val" id="rep-pot">£0.00</span></div>
-<div class="stat-row row-payouts"><span class="stat-label">CASH PAYOUTS</span> <span class="stat-val" id="rep-payouts">£0.00</span></div>
-<div class="stat-row row-carry"><span class="stat-label">TOTAL CARRY OVER</span> <span class="stat-val" id="rep-carry">£0.00</span></div>
-<div class="winner-list-label">WINNERS LIST</div>
-<div class="winner-list" id="rep-list"></div>
-<div class="report-actions">
-<button id="btn-archive" class="btn-archive" onclick="archiveReport()">ARCHIVE TO SHEET</button>
-<button class="btn-archive" style="background:#b71c1c" onclick="closeReport()">CLOSE</button>
-</div>
-</div>
-</div>
-
-<div id="toast-container"></div>
-<div id="hydration-break-overlay"><h1 class="hydration-text">HYDRATION BREAK</h1></div>
-
-<div id="open-box-overlay">
-<h1 style="font-family: 'Oswald', sans-serif; font-size: 4vw; color: #ffd700; margin: 0; text-shadow: 4px 4px 0 #000; letter-spacing: 3px;">OPEN THE BOX!</h1>
-<div id="gate-wheel-container" class="gate-wheel-container">
-<div class="edit-mode-indicator">EDIT MODE ACTIVE (Press 'S' to Save)</div>
-</div>
-<button style="margin-top: 20px; background: rgba(255,255,255,0.1); color: #fff; padding: 10px 30px; border: 1px solid #555; border-radius: 30px; cursor: pointer; font-family: 'Oswald';" onclick="toggleBoxStage()">CLOSE SCREEN (B)</button>
-</div>
-
-<script>
-if (!Array.prototype.at) { Array.prototype.at = function(n) { n = Math.trunc(n) || 0; if (n < 0) n += this.length; if (n < 0 || n >= this.length) return undefined; return this.slice(n, n + 1).pop(); }; }
-
-// ==========================================
-// 🔗 API BRIDGE (NO SECRETS EXPOSED!)
-// ==========================================
-const API_URL = "https://script.google.com/a/gateinnwinsford.com/macros/s/AKfycbwX84Y6p9mRo2SUeUOrBaiFjqaI_yQ26K2kE5wO0bofcEYUlOXEnZF7q_RZTYu0Yynb/exec";
-const FB_BASE_URL = "https://friday-club-ticker-default-rtdb.europe-west1.firebasedatabase.app/";
-
-let projectorSessionPin = null;
-let sessionToken = null; 
-
-// 🔥 DELAYED AUDIO SYNC TO PREVENT BOOT FREEZE
-function syncCustomAudio() {
-fetch(FB_BASE_URL + "customAudioData.json")
-.then(res => res.json())
-.then(data => {
-if (data) {
-Object.keys(data).forEach(key => {
-if (!audioMap[key] && data[key].data) {
-audioMap[key] = new Audio(data[key].data);
-}
-});
-}
-}).catch(e => console.log("No custom audio found."));
-}
-
-// 🛡️ THE WRITER: Uses Instant VIP Speed if it has a token, otherwise uses the proxy
-function proxyFirebaseWrite(path, method, payload) {
-if (!projectorSessionPin) return; 
-
-if (!sessionToken) sessionToken = sessionStorage.getItem('sessionToken');
-
-if (sessionToken) {
-let options = { method: method, headers: { 'Content-Type': 'application/json' } };
-if (payload !== undefined) options.body = JSON.stringify(payload);
-fetch(FB_BASE_URL + path + "?auth=" + sessionToken, options);
-return;
-}
-
-let body = { action: 'secureFirebaseWrite', pin: projectorSessionPin, path: path, method: method };
-if (payload !== undefined) body.payload = payload;
-fetch(API_URL, { method: 'POST', body: JSON.stringify(body) });
-}
-
-const google = {
-script: {
-run: {
-withSuccessHandler: function(onSuccess) { this._onSuccess = onSuccess; return this; },
-withFailureHandler: function(onFailure) { this._onFailure = onFailure; return this; },
-_callApi: function(action, params) {
-let url = API_URL + "?action=" + action;
-if (params) { for (let key in params) url += "&" + key + "=" + encodeURIComponent(params[key]); }
-let successCb = this._onSuccess; let failureCb = this._onFailure;
-
-fetch(url).then(res => res.json()).then(data => {
-if (data.error && failureCb) failureCb(data.error);
-else if (successCb) {
-if (data.result !== undefined) successCb(data.result);
-else successCb(data);
-}
-}).catch(err => { if (failureCb) failureCb(err); });
-this._onSuccess = null; this._onFailure = null;
-},
-getFridayNames: function() { this._callApi('getFridayNames'); },
-getNamesFromSheet: function() { this._callApi('getNamesFromSheet'); },
-getTodayActivePlayers: function() { this._callApi('getTodayActive'); },
-getReportData: function() { this._callApi('getReportData'); },
-updateRolloverPot: function(amount) { this._callApi('updatePot', {amount: amount}); },
-getRolloverPot: function() { this._callApi('getPot'); },
-processFridayPrize: function(name, id, type, amount, pin) { this._callApi('processPrize', {name: name, id: (id||''), type: type, amount: amount, pin: (pin||'')}); },
-processAbsentPlayer: function(name, id) { this._callApi('processAbsent', {name: name, id: (id||'')}); },
-webApplyCorrection: function(rowNum, cid, oldCredit, newType, newAmount) { this._callApi('applyCorrection', {rowNum: rowNum, cid: cid, oldCredit: oldCredit, newType: newType, newAmount: newAmount}); },
-webRecoverTickets: function() { this._callApi('recoverTickets'); },
-getTodayWinnersForRemote: function() { this._callApi('requestWinners'); }
-}
-}
-};
-
-let spinMusic = new Audio('https://incompetech.com/music/royalty-free/mp3-royaltyfree/Happy%20Happy%20Game%20Show.mp3?v=2');
-spinMusic.loop = true; spinMusic.volume = 0.3; 
-let players = []; let winningPlayer = null; const ROW_HEIGHT = 90; const COLORS = ['card-blue', 'card-green', 'card-red', 'card-gold']; 
-let audioCtx = null; let tickerInterval = null; let isSpinning = false; let particles = []; let confettiLoop = null; 
-let knownFirebaseKeys = new Set(); let idleSpinFrame = null; let idleTop = -65; let lastWinningScroll = 0; 
-
-const audioMap = {
-'boxIntro': new Audio('INSERT_YOUR_JINGLE_LINK_HERE.mp3'),
-'drumroll': new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_18d09bdeaf.mp3'),
-'sad': new Audio('https://www.myinstants.com/media/sounds/sad-trombone-gaming-sound-effect-hd.mp3'),
-'celebrate': new Audio('https://cdn.pixabay.com/audio/2026/07/29/audio_6b3b29cb40.mp3'),
-'ooh': new Audio('https://www.myinstants.com/media/sounds/sitcom-crowd-ooh_sRDaL7d.mp3'),
-'whistle': new Audio('https://www.myinstants.com/media/sounds/referee-whistle.mp3'),
-'buzzer': new Audio('https://www.myinstants.com/media/sounds/family-feud-wrong-answer-buzzer.mp3'),
-'rewind': new Audio('https://www.myinstants.com/media/sounds/dj-record-rewind-sound-effect.mp3')
-};
-
-function playSoundFX(type) { if (audioMap[type]) { audioMap[type].currentTime = 0; audioMap[type].play().catch(e => console.log("Audio blocked.")); } }
-
-let doorMap = { 1: { t: 53.5, l: 44.5, w: 11, h: 18 }, 2: { t: 43, l: 69, w: 11, h: 15 }, 3: { t: 43, l: 20, w: 11, h: 15 }, 4: { t: 26, l: 69, w: 11, h: 15 }, 5: { t: 77, l: 69, w: 11, h: 15 }, 6: { t: 41, l: 44.5, w: 11, h: 11 }, 7: { t: 41, l: 56, w: 11, h: 11 }, 8: { t: 26, l: 20, w: 11, h: 15 }, 9: { t: 73, l: 56, w: 11, h: 11 }, 10: { t: 73, l: 33, w: 11, h: 11 }, 11: { t: 60, l: 69, w: 11, h: 15 }, 12: { t: 60, l: 20, w: 11, h: 15 }, 13: { t: 73, l: 44.5, w: 11, h: 11 }, 14: { t: 41, l: 33, w: 11, h: 11 }, 15: { t: 77, l: 20, w: 11, h: 15 } };
-let openedBoxes = {}; let prefilledBoxes = {};
-
-function saveToCloud(path, dataObj) { 
-proxyFirebaseWrite("boxes/" + path + ".json", 'PUT', dataObj);
-}
-
-// ==========================================
-// 🔐 TV INTRO GATE VERIFICATION
-// ==========================================
-function verifyGatePin() {
-let pin = document.getElementById('gate-pin-input').value;
-if (!pin) return;
-let btn = document.getElementById('gate-btn');
-btn.innerText = "VERIFYING...";
-
-fetch(API_URL + "?action=verifyPin&pin=" + pin)
-.then(r => r.json())
-.then(res => {
-if (res.success) {
-sessionStorage.setItem('hostPin', pin);
-sessionStorage.setItem('hostName', res.name);
-sessionStorage.setItem('sessionToken', res.token); 
-unlockProjectorGate(pin, res.name);
-} else {
-btn.innerText = "ACCESS DENIED";
-btn.classList.add('denied');
-setTimeout(() => { btn.innerText = "UNLOCK STAGE"; btn.classList.remove('denied'); }, 2000);
-document.getElementById('gate-pin-input').value = "";
-}
-}).catch(err => { btn.innerText = "START SHOW"; });
-}
-
-function unlockProjectorGate(pin, name) {
-projectorSessionPin = pin;
-sessionToken = sessionStorage.getItem('sessionToken'); 
-let gate = document.getElementById('tv-intro-gate');
-if(gate) {
-gate.classList.add('unlocked');
-setTimeout(() => gate.style.display = 'none', 1500);
-}
-showToast("WELCOME, " + (name || "HOST").toUpperCase(), true);
-playSoundFX('celebrate');
-}
-
-// ==========================================
-// 📻 THE RECEIVER: FIREBASE LISTENER LOGIC
-// ==========================================
-let remoteListenerActive = true; 
-let remoteTimer = null; let lastCommandTime = Date.now();
-
-function startRemoteListener() {
-if (remoteTimer) clearInterval(remoteTimer);
-remoteTimer = setInterval(() => {
-fetch(FB_BASE_URL + "remoteCommand.json")
-.then(res => res.json())
-.then(cmd => {
-if (!cmd) return;
-if (cmd.timestamp > lastCommandTime) {
-lastCommandTime = cmd.timestamp;
-
-                    // 🔥 MAGIC FIX: Catch the VIP Token from the remote!
-                    if (cmd.token && sessionToken !== cmd.token) {
-                        sessionToken = cmd.token;
-                        sessionStorage.setItem('sessionToken', sessionToken);
-                    }
-
-let gate = document.getElementById('tv-intro-gate');
-if (gate && gate.style.display !== 'none' && !gate.classList.contains('unlocked')) {
-sessionStorage.setItem('hostPin', cmd.pin);
-unlockProjectorGate(cmd.pin, "HOST");
-}
-
-if (cmd.type === 'sound') playSoundFX(cmd.action);
-else if (cmd.type === 'stage') {
-if (cmd.action === 'navMembers') window.top.location.href = "MembersDraw.html";
-if (cmd.action === 'navFriday') window.top.location.href = "https://cornerstonecoopapps.github.io/FridayClub/";
-
-if (cmd.action === 'spinWheel') triggerSpinAction();
-if (cmd.action === 'triggerVAR') triggerVAR();
-if (cmd.action === 'toggleBox') toggleBoxStage();
-if (cmd.action === 'generateReport') showReport();
-if (cmd.action === 'hydration') document.getElementById('hydration-break-overlay').classList.toggle('active');
-if (cmd.action === 'resetWheel') closeGameReset();
-if (cmd.action === 'refreshAudio') syncCustomAudio(); 
-}
-else if (cmd.type === 'box') {
-if (cmd.action.startsWith('select|')) openPrizeBox(parseInt(cmd.action.split('|')[1]));
-else if (cmd.action === 'autoReveal') attemptReveal();
-else if (cmd.action === 'clearBoard') { 
-openedBoxes = {}; 
-proxyFirebaseWrite("boxes/opened.json", 'DELETE');
-renderBoxGrid(); 
-}
-else if (cmd.action === 'manualAward') executeReveal(cmd.desc, cmd.isCash, cmd.isPint, cmd.pin, null);
-}
-else if (cmd.type === 'wheel') {
-if (cmd.action === 'award') {
-document.getElementById('cashInput').value = cmd.cash || ""; 
-document.getElementById('pintInput').value = cmd.pint || "1"; 
-document.getElementById('customInput').value = cmd.custom || "";
-sendPrize(cmd.prizeType, cmd.pin); 
-}
-}
-}
-}).catch(e => console.log("Remote Link Active"));
-}, 500);
-}
-
-// ==========================================
-// 🛠️ DRAGGABLE BOX EDITOR ('E' and 'S')
-// ==========================================
-let editMode = false;
-let draggedBox = null;
-let offsetX = 0; let offsetY = 0;
-
-document.addEventListener('keydown', function(event) { 
-var target = event.target || event.srcElement; if (target.tagName.toUpperCase() === 'INPUT') return;
-
-if (event.key === 'e' || event.key === 'E') { toggleEditMode(); return; }
-if (event.key === 's' || event.key === 'S') { saveBoxPositions(); return; }
-if (event.key === 'h' || event.key === 'H') { document.getElementById('hydration-break-overlay').classList.toggle('active'); return; }
-if (event.key === 'b' || event.key === 'B') { toggleBoxStage(); return; }
-if (event.key === 'v' || event.key === 'V') { triggerVAR(); return; }
-
-if (event.code === 'Space' || event.code === 'Enter') { 
-let gate = document.getElementById('tv-intro-gate');
-if(!gate || gate.style.display === 'none') {
-event.preventDefault(); triggerSpinAction(); 
-}
-}
-});
-
-function toggleEditMode() {
-if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
-editMode = !editMode;
-const container = document.getElementById('gate-wheel-container');
-if (editMode) {
-container.classList.add('editing');
-document.querySelectorAll('.mapped-door').forEach(box => {
-box.style.cursor = "move";
-box.onmousedown = startDrag;
-});
-} else {
-container.classList.remove('editing');
-document.querySelectorAll('.mapped-door').forEach(box => {
-box.style.cursor = "pointer";
-box.onmousedown = null;
-});
-renderBoxGrid(); 
-}
-}
-
-function startDrag(e) {
-if (!editMode) return;
-draggedBox = this;
-const rect = draggedBox.getBoundingClientRect();
-offsetX = e.clientX - rect.left;
-offsetY = e.clientY - rect.top;
-document.onmousemove = dragBox;
-document.onmouseup = stopDrag;
-}
-
-function dragBox(e) {
-if (!draggedBox) return;
-const container = document.getElementById('gate-wheel-container');
-const rect = container.getBoundingClientRect();
-
-let newLeft = e.clientX - rect.left - offsetX;
-let newTop = e.clientY - rect.top - offsetY;
-
-let leftPct = (newLeft / rect.width) * 100;
-let topPct = (newTop / rect.height) * 100;
-
-draggedBox.style.left = leftPct + "%";
-draggedBox.style.top = topPct + "%";
-}
-
-function stopDrag() {
-draggedBox = null;
-document.onmousemove = null;
-document.onmouseup = null;
-}
-
-function saveBoxPositions() {
-if (!editMode) return;
-let newDoorMap = {};
-document.querySelectorAll('.mapped-door').forEach(box => {
-let id = parseInt(box.id.replace('pbox-', ''));
-newDoorMap[id] = {
-t: parseFloat(box.style.top),
-l: parseFloat(box.style.left),
-w: doorMap[id].w, 
-h: doorMap[id].h
-};
-});
-doorMap = newDoorMap; 
-saveToCloud("doorMap", doorMap);
-
-const container = document.getElementById('gate-wheel-container');
-container.classList.remove('editing');
-editMode = false;
-
-document.querySelectorAll('.mapped-door').forEach(box => {
-box.style.cursor = "pointer";
-box.onmousedown = null;
-});
-}
-
-// ==========================================
-// 🎁 GATE WHEEL LOGIC
-// ==========================================
-let currentOpenBox = null;
-function toggleBoxStage() {
-const boxOverlay = document.getElementById('open-box-overlay');
-const isShowing = boxOverlay.classList.toggle('active');
-if (isShowing) {
-playSoundFX('boxIntro'); currentOpenBox = null;
-document.getElementById('gate-wheel-container').innerHTML = '<h2 style="color:#fff; text-align:center; margin-top:20%;">Syncing with Cloud...</h2>';
-fetch(FB_BASE_URL + "boxes.json").then(res => res.json()).then(cloudData => {
-if (cloudData) { 
-if (cloudData.opened) openedBoxes = cloudData.opened; 
-if (cloudData.prefilled) prefilledBoxes = cloudData.prefilled; 
-if (cloudData.doorMap) doorMap = cloudData.doorMap; 
-}
-renderBoxGrid();
-}).catch(e => renderBoxGrid()); 
-} else { 
-document.getElementById('gate-wheel-container').innerHTML = ''; 
-if(editMode) toggleEditMode(); 
-}
-}
-
-function renderBoxGrid() {
-const container = document.getElementById('gate-wheel-container'); container.innerHTML = ''; 
-let ind = document.createElement('div'); ind.className = 'edit-mode-indicator'; ind.innerText = "EDIT MODE ACTIVE (Press 'S' to Save)";
-container.appendChild(ind);
-
-for (let i = 1; i <= 15; i++) {
-let box = document.createElement('div'); box.className = 'mapped-door'; box.id = 'pbox-' + i;
-box.style.top = doorMap[i].t + '%'; box.style.left = doorMap[i].l + '%'; box.style.width = doorMap[i].w + '%'; box.style.height = doorMap[i].h + '%';
-if (openedBoxes[i]) {
-box.classList.add('opened');
-let isCash = openedBoxes[i].toLowerCase().includes('cash') || openedBoxes[i].includes('£');
-box.innerHTML = `<div class="door-prize-text ${isCash ? 'door-prize-cash' : ''}">${openedBoxes[i].toUpperCase()}</div>`;
-}
-if(!editMode) box.onclick = () => openPrizeBox(i);
-else { box.style.cursor = "move"; box.onmousedown = startDrag; }
-container.appendChild(box);
-}
-}
-
-function openPrizeBox(i) {
-if(editMode) return;
-const box = document.getElementById('pbox-' + i);
-if (box.classList.contains('opened')) return; 
-if (!box.classList.contains('selected')) {
-document.querySelectorAll('.mapped-door').forEach(d => d.classList.remove('selected'));
-box.classList.add('selected'); currentOpenBox = i; playSoundFX('drumroll');
-}
-}
-
-// 🔥 MODIFIED: Now parses the Vault Dropdown Sound!
-function attemptReveal() {
-if (!currentOpenBox) return;
-let vaultData = prefilledBoxes[currentOpenBox];
-if (vaultData) {
-let desc = typeof vaultData === 'object' ? vaultData.text : vaultData;
-let snd = typeof vaultData === 'object' ? vaultData.sound : "DEFAULT";
-executeReveal(desc, desc.toLowerCase().includes('cash') || desc.includes('£'), desc.toLowerCase().includes('pint'), null, snd);
-}
-}
-
-function executeReveal(desc, isCash, isPint, pinOverride, customSound) {
-let activePin = pinOverride;
-if ((isCash || isPint) && !activePin) {
-if (!projectorSessionPin) {
-projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
-if (!projectorSessionPin) return;
-}
-activePin = projectorSessionPin;
-}
-
-if (audioMap['drumroll'] && !audioMap['drumroll'].paused) { audioMap['drumroll'].pause(); audioMap['drumroll'].currentTime = 0; }
-const box = document.getElementById('pbox-' + currentOpenBox); box.classList.remove('selected'); box.classList.add('opened');
-box.innerHTML = `<div class="door-prize-text ${(isCash || isPint) ? 'door-prize-cash' : ''}">${desc.toUpperCase()}</div>`;
-
-openedBoxes[currentOpenBox] = desc; saveToCloud("opened", openedBoxes);
-
-// 🔥 Custom sound hook-in!
-if(customSound && customSound !== "DEFAULT") {
-playSoundFX(customSound);
-} else {
-if (isCash || isPint) playSoundFX('celebrate'); else playSoundFX('sad');
-}
-
-if (typeof winningPlayer !== 'undefined' && winningPlayer && winningPlayer.id) {
-let pType = 'CUSTOM'; let pAmt = desc;
-if (isCash) { pType = 'PHYSICAL_CASH'; pAmt = desc.replace(/[^\d.-]/g, ''); } else if (isPint) { pType = 'PINT'; pAmt = desc.replace(/[^\d.-]/g, '') || "1"; }
-
-google.script.run.withSuccessHandler(res => {
-if (res.includes("UNAUTHORIZED")) { showToast(res, false); projectorSessionPin = null; }
-}).processFridayPrize(winningPlayer.name, winningPlayer.id, pType, pAmt, activePin); 
-}
-currentOpenBox = null;
-}
-
-// ==========================================
-// ⚙️ CORE GAME LOGIC
-// ==========================================
-function startConfetti() { const canvas = document.getElementById('confetti-canvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; const colors = ['#ffd700', '#ff5252', '#ffffff', '#00f2fe']; for(let i=0; i<100; i++) { particles.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20 - 5, color: colors.at(Math.floor(Math.random() * colors.length)), size: Math.random() * 25 + 15, drag: 0.95, gravity: 0.5 }); } if(confettiLoop) cancelAnimationFrame(confettiLoop); function render() { ctx.clearRect(0, 0, canvas.width, canvas.height); let active = false; particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= p.drag; p.vy *= p.drag; if(p.y < canvas.height + p.size) active = true; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); }); if(active) confettiLoop = requestAnimationFrame(render); else ctx.clearRect(0,0, canvas.width, canvas.height); } render(); }
-
-window.onload = function() { 
-document.getElementById('spin-btn').disabled = true; setTimeout(() => { document.body.classList.remove('intro-mode'); }, 1500); 
-initMarqueeLights(); 
-
-startRemoteListener();
-
-let savedPin = sessionStorage.getItem('hostPin');
-let savedName = sessionStorage.getItem('hostName');
-let savedToken = sessionStorage.getItem('sessionToken'); 
-
-if (savedPin) {
-projectorSessionPin = savedPin;
-sessionToken = savedToken;
-let gate = document.getElementById('tv-intro-gate');
-if (gate) gate.style.display = 'none'; 
-}
-
-// 🔥 DELAYED AUDIO FETCH (No Boot Freezes!)
-setTimeout(syncCustomAudio, 2500);
-
-fetch(FB_BASE_URL + "players.json").then(res => res.json()).then(data => {
-if (data) {
-Object.values(data).forEach(p => { if (p.name) players.push({ id: p.id || Date.now(), name: p.name }); });
-renderStaticList(players);
-}
-document.getElementById('spin-btn').disabled = false;
-}).catch(err => console.log("Init fetch error"));
-
-startFirebaseSyncLoop(); 
-};
-
-function advanceTracker(el) { if (el.classList.contains('active-round')) { el.classList.remove('active-round'); el.classList.add('completed'); } else if (el.classList.contains('completed')) { el.classList.remove('completed'); } else { document.querySelectorAll('.tracker-item').forEach(item => item.classList.remove('active-round')); el.classList.add('active-round'); } }
-function autoStepTrackerAfterWin() { const items = Array.from(document.querySelectorAll('.tracker-item')); const currentIdx = items.findIndex(item => item.classList.contains('active-round')); if (currentIdx !== -1) { const currentItem = items.at(currentIdx); currentItem.classList.remove('active-round'); currentItem.classList.add('completed'); const nextItem = items.at(currentIdx + 1); if (nextItem) nextItem.classList.add('active-round'); } }
-
-function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
-function playTick() { if (!audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05); gain.gain.setValueAtTime(0.15, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.06); }
-function playWinSound() { if (!audioCtx) return; const notes = [523.25, 659.25, 783.99, 1046.50]; notes.forEach((freq, i) => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (i*0.1)); gain.gain.setValueAtTime(0.1, audioCtx.currentTime + (i*0.1)); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (i*0.1) + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(audioCtx.currentTime + (i*0.1)); osc.stop(audioCtx.currentTime + (i*0.1) + 0.5); }); }
-
-let isInitialLoad = true;
-function startFirebaseSyncLoop() {
-setInterval(function() {
-if (isSpinning) return; 
-fetch(FB_BASE_URL + "players.json").then(res => res.json()).then(data => {
-if (!data) { isInitialLoad = false; return; }
-let feedUpdated = false;
-Object.keys(data).forEach(key => {
-if (!knownFirebaseKeys.has(key)) {
-knownFirebaseKeys.add(key);
-let newPlayer = null; Object.entries(data).forEach(entry => { if(entry.at(0) === key) newPlayer = entry.at(1); });
-if(newPlayer && newPlayer.name) {
-if (!isInitialLoad) {
-const notif = document.getElementById('live-notification'); notif.innerHTML = `🎟️ TICKET SECURED: ${newPlayer.name.toUpperCase()} 🎟️`; notif.classList.add('show');
-if (audioCtx) { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); osc.frequency.setValueAtTime(1318.51, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
-setTimeout(() => { notif.classList.remove('show'); }, 4000); 
-}
-let matchesExisting = players.some(p => p.name === newPlayer.name);
-if (!matchesExisting) { players.push({ id: newPlayer.id || Date.now(), name: newPlayer.name }); feedUpdated = true; }
-}
-}
-});
-isInitialLoad = false; if (feedUpdated) renderStaticList(players);
-}).catch(err => console.log("Firebase loop active."));
-}, 4000);
-}
-
-function triggerSpinAction() { if(isSpinning) return; if(players.length === 0) return alert("No players entered!"); const btn = document.getElementById('spin-btn'); if(btn && !btn.disabled) { btn.classList.add('simulated-active'); setTimeout(() => btn.classList.remove('simulated-active'), 150); spinWheel(); } }
-function initMarqueeLights() { const frame = document.getElementById('marquee-frame'); const w = 780; const h = 600; const pad = 25; const tl = {x: pad, y: pad}; const tr = {x: w - pad, y: pad}; const br = {x: w - pad, y: h - pad}; const bl = {x: pad, y: h - pad}; const trackW = tr.x - tl.x; const trackH = bl.y - tl.y; const countX = 16; const countY = 12; function createBulb(x, y, i) { let b = document.createElement('div'); b.className = 'bulb ' + (i % 2 === 0 ? 'even' : 'odd'); b.style.left = x + 'px'; b.style.top = y + 'px'; frame.appendChild(b); } let idx = 0; for(let i=1; i < countX - 1; i++) { createBulb(tl.x + (i * (trackW / (countX - 1))), tl.y, idx++); } for(let i=1; i < countY - 1; i++) { createBulb(tr.x, tr.y + (i * (trackH / (countY - 1))), idx++); } for(let i=1; i < countX - 1; i++) { createBulb(br.x - (i * (trackW / (countX - 1))), br.y, idx++); } for(let i=1; i < countY - 1; i++) { createBulb(bl.x, bl.y - (i * (trackH / (countY - 1))), idx++); } }
-
-function renderStaticList(data) { 
-cancelAnimationFrame(idleSpinFrame); const strip = document.getElementById('spinner-strip'); strip.style.transition = "none"; strip.innerHTML = ""; 
-const badge = document.getElementById('ticket-counter-badge'); if (badge) badge.innerText = `🎟️ ${data.length} TICKETS IN PLAY`;
-if(data.length === 0) { strip.innerHTML = "<div class='name-card card-red' style='height:500px'>WAITING FOR ENTRIES...</div>"; strip.style.top = "0px"; return; } 
-let baseList = data.slice().sort(() => 0.5 - Math.random()); let fullPool = []; for(let i = 0; i < 30; i++) fullPool = fullPool.concat(baseList);
-let blankTop = document.createElement('div'); blankTop.className = 'blank-card'; strip.appendChild(blankTop); 
-fullPool.forEach((p, i) => { let div = document.createElement('div'); div.className = `name-card ${COLORS.at(i % COLORS.length)}`; div.innerText = p.name; strip.appendChild(div); }); 
-let blankBottom = document.createElement('div'); blankBottom.className = 'blank-card'; strip.appendChild(blankBottom); 
-idleTop = -65; let singleCycleHeight = baseList.length * ROW_HEIGHT; let lastTime = performance.now();
-function scrollLoop(time) { if(isSpinning) return; let dt = time - lastTime; lastTime = time; if (dt > 100) dt = 16; idleTop -= (45 * (dt / 1000)); if (Math.abs(idleTop + 65) >= singleCycleHeight) idleTop += singleCycleHeight; strip.style.top = idleTop + "px"; idleSpinFrame = requestAnimationFrame(scrollLoop); }
-idleSpinFrame = requestAnimationFrame(scrollLoop);
-}
-
-function spinWheel() { 
-cancelAnimationFrame(idleSpinFrame); if(isSpinning) return; if (players.length === 0) return alert("No players entered yet!"); 
-isSpinning = true; document.body.classList.add('is-spinning'); initAudio(); spinMusic.currentTime = 0; spinMusic.play(); document.body.classList.remove('winner-mode'); 
-document.getElementById('spin-btn').disabled = true; 
-
-let spinList = []; players.forEach(p => spinList.push(p));
-for (let i = spinList.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); let temp = spinList.at(i); spinList.splice(i, 1, spinList.at(j)); spinList.splice(j, 1, temp); } 
-const winnerIndex = Math.floor(Math.random() * spinList.length); winningPlayer = spinList.at(winnerIndex); 
-const strip = document.getElementById('spinner-strip'); strip.innerHTML = ""; let buildList = []; 
-for(let i=0; i<2; i++) buildList.push({type: 'blank'}); for(let i=0; i<40; i++) buildList = buildList.concat(spinList.map(p => ({type: 'name', name: p.name}))); for(let i=0; i<2; i++) buildList.push({type: 'blank'}); 
-const initialBlanks = 2; buildList.forEach((p, index) => { let div = document.createElement('div'); if(p.type === 'blank') { div.className = 'blank-card'; } else { div.className = `name-card ${COLORS.at((index - initialBlanks) % COLORS.length)}`; div.innerText = p.name; } strip.appendChild(div); }); 
-
-const centerOffset = 250; const halfRow = ROW_HEIGHT / 2; const startRound = 35; const startIndex = initialBlanks + (spinList.length * startRound); const startScroll = (startIndex * ROW_HEIGHT) - centerOffset + halfRow; const targetRound = 4; const targetIndex = initialBlanks + (spinList.length * targetRound) + winnerIndex; 
-const targetScroll = (targetIndex * ROW_HEIGHT) - centerOffset + halfRow; lastWinningScroll = targetScroll; 
-
-strip.style.transition = "none"; strip.style.top = `-${startScroll}px`; strip.offsetHeight; 
-setTimeout(() => { strip.style.transition = "top 15s cubic-bezier(0.1, 0, 0.05, 1)"; strip.style.top = `-${targetScroll}px`; if(tickerInterval) clearInterval(tickerInterval); let lastRowIndex = -1; tickerInterval = setInterval(() => { const currentTop = parseFloat(window.getComputedStyle(strip).top); const absTop = Math.abs(currentTop); const currentRow = Math.floor( (absTop + 250) / ROW_HEIGHT ); if (currentRow !== lastRowIndex && lastRowIndex !== -1) { playTick(); } lastRowIndex = currentRow; }, 20); }, 50); 
-setTimeout(() => { clearInterval(tickerInterval); showWinner(winningPlayer); isSpinning = false; }, 15500); 
-}
-
-function triggerVAR() {
-const winnerOverlay = document.getElementById('winner-overlay'); const globalDimmer = document.getElementById('global-dimmer');
-if (winnerOverlay.style.display !== 'flex') return;
-isSpinning = true; winnerOverlay.style.display = 'none'; globalDimmer.style.display = 'none'; 
-playSoundFX('whistle'); playSoundFX('rewind');
-
-const varGraphic = document.createElement("div"); varGraphic.id = "var-overlay"; varGraphic.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; z-index:9000; pointer-events:none; display:flex; flex-direction:column; justify-content:center; align-items:center;";
-varGraphic.innerHTML = `<div style="position:absolute; width:100%; height:100%; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.8) 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px); z-index:1;"></div><div style="position:absolute; top: 10%; width:100%; text-align:center; z-index: 2;"><h1 style="font-family: 'Oswald', sans-serif; font-size: 8vw; color: #fff; text-shadow: 4px 4px 0 #000; margin:0; letter-spacing: 5px; font-style: italic;">⏪ REPLAY</h1></div>`;
-document.body.appendChild(varGraphic);
-
-const strip = document.getElementById('spinner-strip'); strip.style.transition = 'none'; strip.style.top = `-${lastWinningScroll - (ROW_HEIGHT * 8)}px`; 
-
-setTimeout(() => {
-varGraphic.innerHTML = `<div style="background: #000; border-bottom: 8px solid #00ff00; padding: 20px; text-align: center; width:100%; position:absolute; top:0; z-index:10; box-shadow: 0 10px 30px rgba(0,0,0,0.9);"><h1 style="font-size: 4vw; color: #fff; margin:0; font-family: 'Oswald', sans-serif; letter-spacing: 4px; text-transform: uppercase;">VAR <span style="color:#00ff00;">REVIEW</span> IN PROGRESS</h1></div><div id="var-decision" style="position:absolute; bottom:15%; font-family: 'Oswald', sans-serif; font-size: 3.5vw; color: #000; background: #ffeb3b; padding:15px 40px; border-radius: 8px; border: 4px solid #000; font-weight: bold; z-index:10; text-transform: uppercase; box-shadow: 10px 10px 0px rgba(0,0,0,0.8); transition: background 0.3s, color 0.3s;">CHECKING FINAL TOUCH...</div>`;
-strip.style.transition = 'top 5s cubic-bezier(0.1, 0, 0.2, 1)'; strip.style.top = `-${lastWinningScroll}px`;
-setTimeout(() => {
-const decisionBox = document.getElementById("var-decision"); decisionBox.innerHTML = "DECISION: WINNER STANDS"; decisionBox.style.background = "#00ff00"; decisionBox.style.color = "#000000"; 
-playSoundFX('celebrate');
-setTimeout(() => { if(document.getElementById('var-overlay')) document.body.removeChild(document.getElementById('var-overlay')); winnerOverlay.style.display = 'flex'; globalDimmer.style.display = 'block'; isSpinning = false; }, 3000);
-}, 5200); 
-}, 1200); 
-}
-
-function showWinner(player) { 
-spinMusic.pause(); document.body.classList.remove('is-spinning'); document.body.classList.add('winner-mode'); 
-playWinSound(); document.getElementById('global-dimmer').style.display = 'block'; startConfetti(); 
-document.getElementById('winner-overlay').style.display = 'flex'; document.getElementById('winner-name').innerText = player.name; 
-document.getElementById('cashInput').value = ""; document.getElementById('pintInput').value = "1"; document.getElementById('customInput').value = ""; 
-saveToCloud("activeWinner", player.name);
-}
-
-function showToast(msg, isSuccess) {
-var x = document.getElementById("toast-container"); x.innerHTML = `<span class="toast-icon">${isSuccess ? "✅" : "⚠️"}</span> <span>${msg}</span>`; x.className = "show"; x.style.borderColor = isSuccess ? "#00e676" : "#ff1744";
-if(audioCtx && audioCtx.state !== 'suspended') { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(isSuccess ? 880 : 220, audioCtx.currentTime); if(isSuccess) { osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.setValueAtTime(1108, audioCtx.currentTime + 0.1); osc.frequency.setValueAtTime(1318, audioCtx.currentTime + 0.2); } gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.6); }
-setTimeout(function(){ x.className = x.className.replace("show", ""); }, 4000);
-}
-
-function sendPrize(type, pinOverride) { 
-let activePin = pinOverride;
-
-if (!activePin) {
-if (!projectorSessionPin) {
-projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
-if (!projectorSessionPin) return; 
-}
-activePin = projectorSessionPin;
-}
-
-var winnerName = document.getElementById("winner-name").innerText; 
-var amount = 0; 
-var activeBtn = document.getElementById(type === 'CASH' ? 'btnCash' : (type === 'PINT' ? 'btnPint' : 'btnCustom'));
-if (type === 'CASH') { amount = document.getElementById("cashInput").value; if(amount === "" || amount <= 0) { alert("Enter Cash Amount!"); return; } } 
-else if (type === 'PINT') { amount = document.getElementById("pintInput").value; if(amount === "" || amount <= 0) { alert("Enter Number of Pints!"); return; } } 
-else if (type === 'CUSTOM') { amount = document.getElementById("customInput").value; if(amount === "") { alert("Enter Prize Name!"); return; } } 
-
-document.querySelectorAll('.control-btn').forEach(b => { b.disabled = true; });
-var originalText = activeBtn.innerText; activeBtn.innerText = "SENDING...";
-var playerId = winningPlayer ? winningPlayer.id : 0; 
-let displayPrizeText = type === 'CASH' ? `£${amount} Cash` : (type === 'PINT' ? `${amount} Pint(s)` : amount);
-
-google.script.run.withSuccessHandler(function(res) { 
-if (res.includes("UNAUTHORIZED")) {
-showToast(res, false);
-projectorSessionPin = null; 
-document.querySelectorAll('.control-btn').forEach(b => { b.disabled = false; }); 
-activeBtn.innerText = originalText;
-return;
-}
-
-if(res.includes("SUCCESS") || res.includes("Logged")) { 
-let winBox = document.getElementById('session-winners-feed'); if (winBox.firstElementChild && winBox.firstElementChild.style.color) winBox.innerHTML = '';
-let winRow = document.createElement('div'); winRow.className = 'activity-row'; winRow.innerHTML = `🏆 <b>${winnerName}</b><br><span style="color:var(--accent-primary); font-size:0.9em;">${displayPrizeText}</span>`; winBox.insertBefore(winRow, winBox.firstChild);
-autoStepTrackerAfterWin(); setTimeout(() => { closeGameReset(); activeBtn.innerText = originalText; }, 2000); 
-} else { document.querySelectorAll('.control-btn').forEach(b => { b.disabled = false; }); activeBtn.innerText = originalText; }
-}).withFailureHandler(function(err) { showToast("Error: " + err, false); document.querySelectorAll('.control-btn').forEach(b => { b.disabled = false; }); activeBtn.innerText = originalText; })
-.processFridayPrize(winnerName, playerId, type, amount, activePin); 
-}
-
-function closeGameReset() { 
-spinMusic.pause(); document.body.classList.remove('winner-mode'); 
-document.getElementById('global-dimmer').style.display = 'none'; document.getElementById('winner-overlay').style.display = 'none'; 
-const btn = document.getElementById('spin-btn'); btn.disabled = true; const strip = document.getElementById('spinner-strip'); strip.style.transition = "none"; 
-
-proxyFirebaseWrite("boxes/activeWinner.json", 'DELETE');
-
-google.script.run.withSuccessHandler(function(data) { players = data; renderStaticList(players); btn.disabled = false; }).getFridayNames(); 
-document.querySelectorAll('.control-btn').forEach(b => { b.disabled = false; }); 
-}
-
-function showReport() { document.getElementById('global-dimmer').style.display = 'block'; document.getElementById('report-overlay').style.display = 'flex'; const btn = document.getElementById('btn-archive'); btn.innerText = "ARCHIVE TO SHEET"; btn.disabled = false; btn.style.background = "#4caf50"; google.script.run.withSuccessHandler(function(rep) { document.getElementById('rep-entries').innerText = rep.entries || 0; document.getElementById('rep-pot').innerText = "£" + (rep.revenueTonight || 0).toFixed(2); document.getElementById('rep-late').innerText = "£" + (rep.revenueLate || 0).toFixed(2); document.getElementById('rep-payouts').innerText = "£" + (rep.cashWon || 0).toFixed(2); document.getElementById('rep-carry').innerText = "£" + (rep.carryOver || 0).toFixed(2); var listHTML = ""; if(rep.winners && rep.winners.length > 0) { rep.winners.forEach(function(w) { listHTML += `<div class='winner-row'><span>${w.name}</span><span>${w.prize}</span></div>`; }); } document.getElementById('rep-list').innerHTML = listHTML || "NO WINNERS YET."; }).getReportData(); }
-function archiveReport() { const btn = document.getElementById('btn-archive'); btn.innerText = "SAVED (Check Sheet)"; btn.disabled = true; }
-function closeReport() { document.getElementById('report-overlay').style.display='none'; document.getElementById('global-dimmer').style.display='none'; }
-</script>
-</body>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #4a0404; --bg-dot-1: #b8860b; --bg-dot-2: #8a0e0e;
+      --accent-primary: #ffd700; --accent-secondary: #b8860b;
+      --header-grad-1: #d32f2f; --header-grad-2: #b71c1c;
+      --panel-bg-1: rgba(30, 5, 5, 0.88); --panel-bg-2: rgba(50, 10, 10, 0.88);
+      --frame-bg: #3e2723; --glow-color: rgba(255, 215, 0, 0.4);
+    }
+    body { background-color: var(--bg-base); background-image: radial-gradient(var(--bg-dot-1) 2px, transparent 2.2px), radial-gradient(var(--bg-dot-2) 2px, transparent 2.2px); background-size: 30px 30px, 15px 15px; background-position: 0 0, 15px 15px; color: white; font-family: 'Oswald', sans-serif; text-align: center; margin: 0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; transition: background-color 0.4s ease; }
+    
+    /* 🔥 VIBRANT TV INTRO GATE (FRIDAY CLUB THEME) */
+    #tv-intro-gate { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-base); background-image: radial-gradient(var(--bg-dot-1) 2px, transparent 2.2px), radial-gradient(var(--bg-dot-2) 2px, transparent 2.2px); background-size: 30px 30px, 15px 15px; background-position: 0 0, 15px 15px; z-index: 100000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1); }
+    #tv-intro-gate::before { content: ""; position: absolute; top:0; left:0; right:0; bottom:0; background: radial-gradient(circle, rgba(0,0,0,0.4) 20%, rgba(0,0,0,0.95) 100%); z-index: 0; pointer-events: none; }
+    #tv-intro-gate.unlocked { opacity: 0; transform: scale(1.15); pointer-events: none; }
+    .gate-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+    .gate-logo-large { width: 180px; height: 180px; background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1088 816'%3E%3Cpath fill='%23ffd700' d='M735 114c3-1 10-3 10 3l34 196v291h-84v17h87v96H243v-96h92v-17h-90V311h291q7-1 10-7 94-96 189-190m-1 21L564 311h199zM277 334v52h147v-52zm161 0 1 52 27-1q26-25 50-51zm104 1q-9 7-16 16l29 29c7 10 20 4 30 6v-52zm58-1v52h147v-52zm-88 33-18 19h38c-6-6-13-15-20-19m-235 31v55h120l26-26q2-14 1-29zm161 0v14l14-14zm43 0-41 42c-2 4-4 15 3 13h142c0-6 2-14-3-18l-38-36zm92 0 12 12q4-16-12-12m27 0c1 11-5 26 6 33 8 7 15 17 24 22h117v-53q-1-3-5-2zm-323 68v55q27 1 52-1 29-25 55-54zm136 0-55 55h66v-55zm25 0v53q1 3 5 2h142v-55zm162 0v55h67l-51-52q-7-6-16-3m42 0q26 28 54 54 25 2 51 1v-55zm-365 67v40l40-40zm69 1q-26 23-50 49h128v-50zm92-1v48q1 3 5 2h142v-50zm162 0v50h130l-46-47q-3-3-8-3zm109 0 38 38v-38zm-353 71 1 17h316c-1-6 4-19-6-17z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: contain; filter: drop-shadow(0 0 25px rgba(255,215,0,0.8)); margin-bottom: 20px; animation: gateFloat 4s ease-in-out infinite; }
+    @keyframes gateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .gate-title { font-family: 'Oswald', sans-serif; font-size: 7vw; font-weight: 700; color: #fff; margin: 0 0 30px 0; text-transform: uppercase; letter-spacing: 12px; line-height: 1; text-shadow: 0 4px 0 #ccc, 0 8px 15px rgba(0,0,0,0.8), 0 0 40px rgba(255,215,0,0.4); text-align: center; }
+    .gate-input-box { background: rgba(20, 2, 2, 0.9); padding: 40px 60px; border-radius: 25px; border: 4px solid var(--accent-primary); box-shadow: 0 0 50px rgba(255, 215, 0, 0.3), inset 0 0 30px #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px; }
+    .gate-input { width: 280px; text-align: center; font-size: 4em; font-family: 'Oswald', sans-serif; padding: 10px; border-radius: 15px; border: 4px dashed var(--accent-secondary); background: #0a0a0a; color: var(--accent-primary); letter-spacing: 20px; outline: none; margin: 0 auto; text-shadow: 0 0 15px var(--accent-primary); transition: all 0.2s; font-weight: 700;}
+    .gate-input::placeholder { color: #333; text-shadow: none; }
+    .gate-input:focus { border-color: var(--accent-primary); box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); background: #000; }
+    .gate-btn { font-family: 'Oswald', sans-serif; font-size: 2.2em; padding: 15px 40px; background: linear-gradient(135deg, var(--accent-primary), #ffa000); color: #000; border: 4px solid #fff; border-radius: 50px; cursor: pointer; text-transform: uppercase; transition: transform 0.1s; box-shadow: 0 8px #b8860b, 0 15px 20px rgba(0,0,0,0.6); width: 100%; font-weight: bold; margin-top: 10px; }
+    .gate-btn:active { transform: translateY(6px); box-shadow: 0 2px #b8860b, 0 5px 10px rgba(0,0,0,0.6); }
+    .gate-btn.denied { background: #ff0000; border-color: #880000; box-shadow: 0 8px #880000, 0 15px 20px rgba(0,0,0,0.6); color: #fff;}
+
+    #scaler { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; transition: transform 0.3s ease; }
+    #studio-blackout { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, transparent 25%, rgba(0,0,0,0.75) 100%); z-index: 5; pointer-events: none; opacity: 0; transition: opacity 0.8s ease-in-out; }
+    body.is-spinning #studio-blackout { opacity: 1; }
+
+    .game-selector { position: fixed; top: 15px; right: 20px; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); border-radius: 30px; padding: 5px; display: flex; gap: 5px; border: 1px solid rgba(255,255,255,0.2); z-index: 30000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .game-link { text-decoration: none; color: #aaa; font-family: 'Oswald', sans-serif; font-size: 0.9em; letter-spacing: 1px; padding: 8px 20px; border-radius: 25px; transition: all 0.2s; text-transform: uppercase; cursor: pointer;}
+    .game-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .game-link.active { background: var(--accent-primary); color: #000; font-weight: bold; box-shadow: 0 2px 10px var(--glow-color); }
+    .stage-tools { position: fixed; top: 15px; left: 40px; display: flex; gap: 6px; z-index: 3000; align-items: center; flex-wrap: wrap; max-width: 520px; }
+    .tool-pill { background: rgba(0,0,0,0.7); border: 1px solid var(--accent-secondary); color: #ddd; font-family: 'Oswald', sans-serif; font-size: 0.8em; letter-spacing: 1px; padding: 6px 12px; border-radius: 20px; cursor: pointer; text-transform: uppercase; transition: all 0.15s; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+    .tool-pill:hover { color: #fff; border-color: var(--accent-primary); transform: translateY(-1px); }
+    
+    #live-notification { position: fixed; top: -120px; left: 40px; transform: none; background: linear-gradient(135deg, #ffd700, #ff8c00); border: 4px solid #fff; border-radius: 50px; padding: 12px 30px; color: #000; font-size: 1.8em; font-family: 'Oswald', sans-serif; box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.5); z-index: 9999; transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-transform: uppercase; font-weight: bold; white-space: nowrap; text-shadow: 1px 1px 0px rgba(255,255,255,0.6); }
+    #live-notification.show { top: 58px; }
+    
+    .header-box { background: linear-gradient(to bottom, var(--header-grad-1), var(--header-grad-2)); box-shadow: 0 0 0 4px var(--accent-primary), 0 12px 25px rgba(0,0,0,0.7), 0 0 30px var(--glow-color); padding: 12px 50px; border-radius: 14px; position: relative; z-index: 50; transition: all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55); margin-bottom: 10px; display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 12px; }
+    .logo { width: 80px; height: 80px; background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1088 816'%3E%3Cpath fill='%23ffd700' d='M735 114c3-1 10-3 10 3l34 196v291h-84v17h87v96H243v-96h92v-17h-90V311h291q7-1 10-7 94-96 189-190m-1 21L564 311h199zM277 334v52h147v-52zm161 0 1 52 27-1q26-25 50-51zm104 1q-9 7-16 16l29 29c7 10 20 4 30 6v-52zm58-1v52h147v-52zm-88 33-18 19h38c-6-6-13-15-20-19m-235 31v55h120l26-26q2-14 1-29zm161 0v14l14-14zm43 0-41 42c-2 4-4 15 3 13h142c0-6 2-14-3-18l-38-36zm92 0 12 12q4-16-12-12m27 0c1 11-5 26 6 33 8 7 15 17 24 22h117v-53q-1-3-5-2zm-323 68v55q27 1 52-1 29-25 55-54zm136 0-55 55h66v-55zm25 0v53q1 3 5 2h142v-55zm162 0v55h67l-51-52q-7-6-16-3m42 0q26 28 54 54 25 2 51 1v-55zm-365 67v40l40-40zm69 1q-26 23-50 49h128v-50zm92-1v48q1 3 5 2h142v-50zm162 0v50h130l-46-47q-3-3-8-3zm109 0 38 38v-38zm-353 71 1 17h316c-1-6 4-19-6-17z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: contain; filter: drop-shadow(4px 4px 3px rgba(0,0,0,0.5)); }
+    h1 { margin: 0; font-size: 3.4em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 0 #ccc, 0 2px 0 #b9b9b9, 0 3px 0 #aaa, 0 4px 0 rgba(0,0,0,0.6), 0 8px 15px rgba(0,0,0,0.6); line-height: 1; letter-spacing: 3px; white-space: nowrap; }
+    
+    .dashboard-panel { position: fixed; top: 155px; bottom: 40px; width: 310px; background: linear-gradient(135deg, var(--panel-bg-1), var(--panel-bg-2)); border: 3px solid var(--accent-secondary); border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.75), 0 0 20px var(--glow-color); z-index: 40; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; transition: opacity 0.4s ease-in-out, border-color 0.4s ease; overflow-y: auto; overflow-x: hidden; }
+    body.is-spinning .dashboard-panel { opacity: 0.12; pointer-events: none; }
+    .panel-left { left: 40px; } .panel-right { right: 40px; }
+    .panel-header { font-size: 1.4em; color: var(--accent-primary); border-bottom: 2px solid var(--accent-secondary); padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 2px 2px 0 #000; flex-shrink: 0; }
+    .activity-stream { flex: 1; overflow-y: auto; overflow-x: hidden; text-align: left; font-size: 1.1em; line-height: 1.5; padding-right: 5px; }
+    .activity-row { padding: 8px 10px; border-bottom: 1px solid rgba(255,215,0,0.15); border-left: 4px solid var(--accent-primary); background: rgba(0,0,0,0.3); margin-bottom: 6px; border-radius: 0 6px 6px 0; animation: row-slide 0.3s ease-out forwards; }
+    @keyframes row-slide { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
+    .tracker-section { margin-bottom: 6px; background: rgba(0,0,0,0.35); border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); padding: 6px; flex-shrink: 0; }
+    .tracker-title { font-size: 1em; color: var(--accent-primary); text-transform: uppercase; font-weight: bold; margin-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 2px; text-align: left; }
+    .tracker-item { font-size: 0.9em; padding: 4px 8px; margin-bottom: 3px; background: rgba(0,0,0,0.45); border-radius: 4px; cursor: pointer; transition: all 0.2s; border-left: 3px solid #555; text-align: left; display: flex; align-items: center; justify-content: space-between; }
+    .tracker-item.active-round { background: linear-gradient(90deg, rgba(255, 215, 0, 0.28), rgba(255, 215, 0, 0.05)); border-left: 5px solid var(--accent-primary); color: #fff; font-weight: bold; transform: scale(1.02); box-shadow: 0 0 12px var(--glow-color); padding-top: 6px; padding-bottom: 6px; }
+    .tracker-item.completed { background: rgba(76, 175, 80, 0.2); border-left-color: #4caf50; color: #888; text-decoration: line-through; }
+    .tracker-item.box-game { border-left-color: #ff5252; font-weight: bold; color: #ffebee; }
+    
+    .game-elements { opacity: 1; transform: translateY(0); display: flex; flex-direction: column; align-items: center; }
+    #marquee-frame { position: relative; padding: 50px; background: var(--frame-bg); border-radius: 60px; border: 5px solid var(--accent-secondary); box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 35px var(--glow-color); display: inline-block; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s ease !important; }
+    body.is-spinning #marquee-frame { transform: scale(1.35) translateY(-2%) !important; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
+    #ticket-counter-badge { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #111, #2a2a2a); border: 2px solid var(--accent-primary); color: var(--accent-primary); padding: 4px 22px; border-radius: 20px; font-size: 1.05em; letter-spacing: 2px; z-index: 25; box-shadow: 0 4px 12px rgba(0,0,0,0.8); text-transform: uppercase; }
+    .bulb { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #444; border: 2px solid #111; transform: translate(-50%, -50%); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); z-index: 5; }
+    .bulb.odd { animation: slow-blink-1 2s infinite ease-in-out; } .bulb.even { animation: slow-blink-2 2s infinite ease-in-out; }
+    @keyframes slow-blink-1 { 0%, 100% { background: #fffacd; box-shadow: 0 0 10px #fffacd; border-color: #fff; } 50% { background: #b8860b; box-shadow: none; border-color: #b8860b; } }
+    @keyframes slow-blink-2 { 0%, 100% { background: #b8860b; box-shadow: none; border-color: #b8860b; } 50% { background: #fffacd; box-shadow: 0 0 10px #fffacd; border-color: #fff; } }
+    body.winner-mode .bulb { animation: fast-flash 0.2s infinite !important; }
+    body.is-spinning .bulb { animation: fast-flash 0.1s infinite !important; }
+    @keyframes fast-flash { 0%, 100% { background: #fff; box-shadow: 0 0 20px #fff; } 50% { background: #333; box-shadow: none; } }
+    #cabinet { position: relative; width: 680px; height: 500px; background: #000; border-radius: 20px; overflow: hidden; box-shadow: inset 0 0 0 6px var(--accent-primary), 0 0 0 15px var(--accent-secondary); transform: translateZ(0); z-index: 10; }
+    .cylinder-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 10; transition: background 1s; background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 85%, rgba(0,0,0,0.85) 100%); }
+    body.winner-mode .cylinder-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.85) 70%, rgba(0,0,0,0.98) 100%); }
+    .win-line { position: absolute; top: 50%; left: 6px; right: 6px; height: 90px; margin-top: -45px; z-index: 15; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.2) 100%); border-top: 3px solid var(--accent-primary); border-bottom: 3px solid var(--accent-primary); box-shadow: 0 0 20px var(--glow-color); pointer-events: none; }
+    .flipper { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 25px solid var(--accent-primary); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.6)); transform-origin: top center; }
+    body.is-spinning .flipper { animation: flip-bounce 0.1s infinite alternate ease-in-out; }
+    @keyframes flip-bounce { 0% { transform: translateX(-50%) rotate(0deg); } 100% { transform: translateX(-50%) rotate(-15deg); } }
+    #spinner-strip { position: absolute; width: 100%; top: 0; padding: 0 6px; box-sizing: border-box; }
+    .name-card { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 2.8em; text-transform: uppercase; color: #fff; border-top: 2px solid rgba(255,255,255,0.4); border-bottom: 2px solid rgba(0,0,0,0.6); box-sizing: border-box; letter-spacing: 1.5px; text-shadow: 0 2px 0 rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.5); }
+    .blank-card { height: 90px; background: #000; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(0,0,0,0.1); box-sizing: border-box; }
+    .card-blue { background: linear-gradient(180deg, #304ffe, #1a237e); } .card-green { background: linear-gradient(180deg, #2e7d32, #1b5e20); } .card-red { background: linear-gradient(180deg, #d32f2f, #b71c1c); } .card-gold { background: linear-gradient(180deg, #fbc02d, #f57f17); color: #111; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
+    .arcade-button-container { margin-top: 25px; position: relative; width: 120px; height: 120px; z-index: 10; transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s ease !important; }
+    body.is-spinning .arcade-button-container { transform: translateY(250px) scale(0.5) !important; opacity: 0 !important; pointer-events: none !important; }
+    .arcade-btn { position: relative; width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(145deg, #ccc, #888); box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: none; outline: none; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: transform 0.1s; }
+    .arcade-btn::after { content: "SPIN"; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff5252, #b71c1c); box-shadow: inset 0 0 10px rgba(0,0,0,0.3), 0 10px 15px rgba(0,0,0,0.4); border: 2px solid #a30000; display: flex; justify-content: center; align-items: center; font-family: 'Oswald', sans-serif; font-size: 1.8em; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); letter-spacing: 2px; transition: all 0.1s; }
+    .arcade-btn:disabled { filter: grayscale(0.8); cursor: not-allowed; }
+    
+    .winner-box { position: relative; z-index: 110; background: linear-gradient(135deg, var(--header-grad-1), var(--header-grad-2)); border: 8px solid var(--accent-primary); padding: 40px 60px; border-radius: 20px; text-align: center; width: 650px; box-shadow: 0 0 90px var(--glow-color), inset 0 0 30px rgba(0,0,0,0.5); }
+    .winner-label { font-size: 2em; color: var(--accent-primary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 3px; user-select: none; text-shadow: 2px 2px 0 #000; }
+    .winner-name { font-size: 4.5em; color: #fff; margin: 0; line-height: 1; margin-bottom: 25px; text-shadow: 0 1px 0 #ffd700, 0 2px 0 #e6c200, 0 3px 0 #cca300, 0 4px 0 #997a00, 0 6px 0 #000, 0 12px 25px rgba(0,0,0,0.8); }
+    .control-row { display: flex; align-items: center; justify-content: flex-start; gap: 20px; background: rgba(0,0,0,0.35); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); }
+    .control-label { font-size: 1.5em; font-weight: bold; color: var(--accent-primary); width: 120px; text-align: left; }
+    .input-wrapper { position: relative; display: inline-block; }
+    .currency-symbol { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 1.8em; color: #000; font-family: 'Oswald'; font-weight: bold; pointer-events: none; }
+    .control-input, .text-input { font-size: 1.8em; width: 120px; text-align: center; border: 2px solid var(--accent-primary); border-radius: 8px; padding: 5px; font-family: 'Oswald'; background: #fff; color: #000; padding-left: 25px; }
+    .text-input { width: 220px; text-align: left; padding: 10px; font-size: 1.2em; }
+    .control-btn { font-family: 'Oswald'; font-size: 1.4em; padding: 8px 25px; color: white; border: 2px solid #fff; border-radius: 30px; cursor: pointer; letter-spacing: 1px; width: 180px; transition: transform 0.1s; box-shadow: 0 4px rgba(0,0,0,0.3); }
+    .btn-cash { background: linear-gradient(to bottom, #2ecc71, #27ae60); box-shadow: 0 4px #1e8449; }
+    .btn-pint { background: linear-gradient(to bottom, #e67e22, #d35400); box-shadow: 0 4px #a04000; }
+    .btn-custom { background: linear-gradient(to bottom, #9c27b0, #7b1fa2); box-shadow: 0 4px #4a148c; }
+    .btn-close { margin-top: 20px; background: transparent; border: none; color: #fff; text-decoration: underline; cursor: pointer; font-size: 1.2em; }
+
+    #global-dimmer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 100; }
+    #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 110; }
+    .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 120; flex-direction: column; align-items: center; justify-content: center; }
+    
+    .report-box { position: relative; z-index: 110; background: linear-gradient(135deg, #b71c1c, #8a0e0e); border: 4px solid #ffd700; width: 650px; padding: 40px; border-radius: 15px; color: #fff; box-shadow: 0 0 60px #000; text-align: left; }
+    .report-title { margin-top:0; color: #ffd700; text-align:center; text-transform:uppercase; letter-spacing:3px; border-bottom: 2px solid #b8860b; padding-bottom: 15px; margin-bottom: 20px; text-shadow: 2px 2px 0 #000; }
+    .stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.4em; border-bottom: 1px solid rgba(0,0,0,0.3); padding: 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-label { color: #ffccbc; } .stat-val { color: #fff; font-weight: bold; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); }
+    .winner-list-label { margin-top: 25px; color: #ffd700; font-size: 1em; text-transform: uppercase; letter-spacing: 2px; }
+    .winner-list { max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; margin-top: 5px; border: 1px solid rgba(255,215,0,0.3); }
+    .winner-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2em; }
+    .btn-report { position: fixed; bottom: 20px; right: 20px; background: linear-gradient(to bottom, #FFD700, #FFA000); border: 2px solid #fff; color: #3e2723; font-family: 'Oswald', sans-serif; font-size: 0.9em; padding: 10px 20px; cursor: pointer; border-radius: 30px; box-shadow: 0 4px #b71c1c, 0 5px 10px rgba(0,0,0,0.3); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; transition: all 0.1s; z-index: 50; }
+    .report-actions { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
+    .btn-archive { background: #4caf50; border: 2px solid #fff; color: white; padding: 10px 30px; border-radius: 30px; cursor: pointer; font-family: 'Oswald'; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; }
+
+    #toast-container { visibility: hidden; min-width: 280px; margin-left: -140px; background-color: #222; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; font-size: 1.3rem; box-shadow: 0 5px 20px rgba(0,0,0,0.6); border: 2px solid var(--accent-primary); opacity: 0; transition: opacity 0.5s, bottom 0.5s; font-family: 'Oswald', sans-serif; display: flex; align-items: center; justify-content: center; gap: 15px; }
+    #toast-container.show { visibility: visible; opacity: 1; bottom: 50px; }
+
+    #hydration-break-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at 15% 25%, rgba(255,255,255,0.2) 0%, transparent 15%), radial-gradient(circle at 75% 65%, rgba(255,255,255,0.15) 0%, transparent 20%), linear-gradient(135deg, #00d2ff, #0371a3); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in-out; }
+    #hydration-break-overlay.active { opacity: 1; pointer-events: auto; }
+    .hydration-text { font-family: 'Oswald', sans-serif; font-size: 7.5vw; font-weight: 900; font-style: italic; color: #ffffff; text-transform: uppercase; line-height: 1; margin: 0; text-shadow: 6px 6px 15px rgba(0, 0, 0, 0.4); transform: skewX(-6deg) scale(0.8); transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    #hydration-break-overlay.active .hydration-text { transform: skewX(-6deg) scale(1); }
+
+  <div id="open-box-overlay">
+    <h1 style="font-family: 'Oswald', sans-serif; font-size: 4vw; color: #ffd700; margin: 0; text-shadow: 4px 4px 0 #000; letter-spacing: 3px;">OPEN THE BOX!</h1>
+    <div id="gate-wheel-container" class="gate-wheel-container">
+        <div class="edit-mode-indicator">EDIT MODE ACTIVE (Press 'S' to Save)</div>
+    </div>
+    <button style="margin-top: 20px; background: rgba(255,255,255,0.1); color: #fff; padding: 10px 30px; border: 1px solid #555; border-radius: 30px; cursor: pointer; font-family: 'Oswald';" onclick="toggleBoxStage()">CLOSE SCREEN (B)</button>
+  </div>
+
+    <script>
+      if (!Array.prototype.at) { Array.prototype.at = function(n) { n = Math.trunc(n) || 0; if (n < 0) n += this.length; if (n < 0 || n >= this.length) return undefined; return this.slice(n, n + 1).pop(); }; }
+
+      // ==========================================
+      // 🔗 API BRIDGE (NO SECRETS EXPOSED!)
+      // ==========================================
+      const API_URL = "https://script.google.com/a/gateinnwinsford.com/macros/s/AKfycbwX84Y6p9mRo2SUeUOrBaiFjqaI_yQ26K2kE5wO0bofcEYUlOXEnZF7q_RZTYu0Yynb/exec";
+      const FB_BASE_URL = "https://friday-club-ticker-default-rtdb.europe-west1.firebasedatabase.app/";
+
+      let projectorSessionPin = null;
+      let sessionToken = null; 
+
+      // 🔥 DELAYED AUDIO SYNC TO PREVENT BOOT FREEZE
+      function syncCustomAudio() {
+          fetch(FB_BASE_URL + "customAudioData.json")
+          .then(res => res.json())
+          .then(data => {
+              if (data) {
+                  Object.keys(data).forEach(key => {
+                      if (!audioMap[key] && data[key].data) {
+                          audioMap[key] = new Audio(data[key].data);
+                      }
+                  });
+              }
+          }).catch(e => console.log("No custom audio found."));
+      }
+
+      // 🛡️ THE WRITER: Uses Instant VIP Speed if it has a token, otherwise uses the proxy
+      function proxyFirebaseWrite(path, method, payload) {
+          if (!projectorSessionPin) return; 
+          
+          if (!sessionToken) sessionToken = sessionStorage.getItem('sessionToken');
+          
+          if (sessionToken) {
+              let options = { method: method, headers: { 'Content-Type': 'application/json' } };
+              if (payload !== undefined) options.body = JSON.stringify(payload);
+              fetch(FB_BASE_URL + path + "?auth=" + sessionToken, options);
+              return;
+          }
+
+          let body = { action: 'secureFirebaseWrite', pin: projectorSessionPin, path: path, method: method };
+          if (payload !== undefined) body.payload = payload;
+          fetch(API_URL, { method: 'POST', body: JSON.stringify(body) });
+      }
+
+      const google = {
+        script: {
+          run: {
+            withSuccessHandler: function(onSuccess) { this._onSuccess = onSuccess; return this; },
+            withFailureHandler: function(onFailure) { this._onFailure = onFailure; return this; },
+            _callApi: function(action, params) {
+              let url = API_URL + "?action=" + action;
+              if (params) { for (let key in params) url += "&" + key + "=" + encodeURIComponent(params[key]); }
+              let successCb = this._onSuccess; let failureCb = this._onFailure;
+              
+              fetch(url).then(res => res.json()).then(data => {
+                  if (data.error && failureCb) failureCb(data.error);
+                  else if (successCb) {
+                      if (data.result !== undefined) successCb(data.result);
+                      else successCb(data);
+                  }
+              }).catch(err => { if (failureCb) failureCb(err); });
+              this._onSuccess = null; this._onFailure = null;
+            },
+            getFridayNames: function() { this._callApi('getFridayNames'); },
+            getNamesFromSheet: function() { this._callApi('getNamesFromSheet'); },
+            getTodayActivePlayers: function() { this._callApi('getTodayActive'); },
+            getReportData: function() { this._callApi('getReportData'); },
+            updateRolloverPot: function(amount) { this._callApi('updatePot', {amount: amount}); },
+            getRolloverPot: function() { this._callApi('getPot'); },
+            processFridayPrize: function(name, id, type, amount, pin) { this._callApi('processPrize', {name: name, id: (id||''), type: type, amount: amount, pin: (pin||'')}); },
+            processAbsentPlayer: function(name, id) { this._callApi('processAbsent', {name: name, id: (id||'')}); },
+            webApplyCorrection: function(rowNum, cid, oldCredit, newType, newAmount) { this._callApi('applyCorrection', {rowNum: rowNum, cid: cid, oldCredit: oldCredit, newType: newType, newAmount: newAmount}); },
+            webRecoverTickets: function() { this._callApi('recoverTickets'); },
+            getTodayWinnersForRemote: function() { this._callApi('requestWinners'); }
+          }
+        }
+      };
+
+      let spinMusic = new Audio('https://incompetech.com/music/royalty-free/mp3-royaltyfree/Happy%20Happy%20Game%20Show.mp3?v=2');
+      spinMusic.loop = true; spinMusic.volume = 0.3; 
+      let players = []; let winningPlayer = null; const ROW_HEIGHT = 90; const COLORS = ['card-blue', 'card-green', 'card-red', 'card-gold']; 
+      let audioCtx = null; let tickerInterval = null; let isSpinning = false; let particles = []; let confettiLoop = null; 
+      let knownFirebaseKeys = new Set(); let idleSpinFrame = null; let idleTop = -65; let lastWinningScroll = 0; 
+
+      const audioMap = {
+          'boxIntro': new Audio('INSERT_YOUR_JINGLE_LINK_HERE.mp3'),
+          'drumroll': new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_18d09bdeaf.mp3'),
+          'sad': new Audio('https://www.myinstants.com/media/sounds/sad-trombone-gaming-sound-effect-hd.mp3'),
+          'celebrate': new Audio('https://cdn.pixabay.com/audio/2026/07/29/audio_6b3b29cb40.mp3'),
+          'ooh': new Audio('https://www.myinstants.com/media/sounds/sitcom-crowd-ooh_sRDaL7d.mp3'),
+          'whistle': new Audio('https://www.myinstants.com/media/sounds/referee-whistle.mp3'),
+          'buzzer': new Audio('https://www.myinstants.com/media/sounds/family-feud-wrong-answer-buzzer.mp3'),
+          'rewind': new Audio('https://www.myinstants.com/media/sounds/dj-record-rewind-sound-effect.mp3')
+      };
+
+      function playSoundFX(type) { if (audioMap[type]) { audioMap[type].currentTime = 0; audioMap[type].play().catch(e => console.log("Audio blocked.")); } }
+
+      let doorMap = { 1: { t: 53.5, l: 44.5, w: 11, h: 18 }, 2: { t: 43, l: 69, w: 11, h: 15 }, 3: { t: 43, l: 20, w: 11, h: 15 }, 4: { t: 26, l: 69, w: 11, h: 15 }, 5: { t: 77, l: 69, w: 11, h: 15 }, 6: { t: 41, l: 44.5, w: 11, h: 11 }, 7: { t: 41, l: 56, w: 11, h: 11 }, 8: { t: 26, l: 20, w: 11, h: 15 }, 9: { t: 73, l: 56, w: 11, h: 11 }, 10: { t: 73, l: 33, w: 11, h: 11 }, 11: { t: 60, l: 69, w: 11, h: 15 }, 12: { t: 60, l: 20, w: 11, h: 15 }, 13: { t: 73, l: 44.5, w: 11, h: 11 }, 14: { t: 41, l: 33, w: 11, h: 11 }, 15: { t: 77, l: 20, w: 11, h: 15 } };
+      let openedBoxes = {}; let prefilledBoxes = {};
+
+      function saveToCloud(path, dataObj) { 
+          proxyFirebaseWrite("boxes/" + path + ".json", 'PUT', dataObj);
+      }
+
+      // ==========================================
+      // 🔐 TV INTRO GATE VERIFICATION
+      // ==========================================
+      function verifyGatePin() {
+          let pin = document.getElementById('gate-pin-input').value;
+          if (!pin) return;
+          let btn = document.getElementById('gate-btn');
+          btn.innerText = "VERIFYING...";
+          
+          fetch(API_URL + "?action=verifyPin&pin=" + pin)
+          .then(r => r.json())
+          .then(res => {
+              if (res.success) {
+                  sessionStorage.setItem('hostPin', pin);
+                  sessionStorage.setItem('hostName', res.name);
+                  sessionStorage.setItem('sessionToken', res.token); 
+                  unlockProjectorGate(pin, res.name);
+              } else {
+                  btn.innerText = "ACCESS DENIED";
+                  btn.classList.add('denied');
+                  setTimeout(() => { btn.innerText = "UNLOCK STAGE"; btn.classList.remove('denied'); }, 2000);
+                  document.getElementById('gate-pin-input').value = "";
+              }
+          }).catch(err => { btn.innerText = "START SHOW"; });
+      }
+
+      function unlockProjectorGate(pin, name) {
+          projectorSessionPin = pin;
+          sessionToken = sessionStorage.getItem('sessionToken'); 
+          let gate = document.getElementById('tv-intro-gate');
+          if(gate) {
+              gate.classList.add('unlocked');
+              setTimeout(() => gate.style.display = 'none', 1500);
+          }
+          showToast("WELCOME, " + (name || "HOST").toUpperCase(), true);
+          playSoundFX('celebrate');
+      }
+
+      // ==========================================
+      // 📻 THE RECEIVER: FIREBASE LISTENER LOGIC
+      // ==========================================
+      let remoteListenerActive = true; 
+      let remoteTimer = null; let lastCommandTime = Date.now();
+
+      function startRemoteListener() {
+          if (remoteTimer) clearInterval(remoteTimer);
+          remoteTimer = setInterval(() => {
+              fetch(FB_BASE_URL + "remoteCommand.json")
+              .then(res => res.json())
+              .then(cmd => {
+                  if (!cmd) return;
+                  if (cmd.timestamp > lastCommandTime) {
+                      lastCommandTime = cmd.timestamp;
+
+                      // 🔥 MAGIC FIX: Catch the VIP Token from the remote!
+                      if (cmd.token && sessionToken !== cmd.token) {
+                          sessionToken = cmd.token;
+                          sessionStorage.setItem('sessionToken', sessionToken);
+                      }
+
+                      let gate = document.getElementById('tv-intro-gate');
+                      if (gate && gate.style.display !== 'none' && !gate.classList.contains('unlocked')) {
+                          sessionStorage.setItem('hostPin', cmd.pin);
+                          unlockProjectorGate(cmd.pin, "HOST");
+                      }
+                      
+                      if (cmd.type === 'sound') playSoundFX(cmd.action);
+                      else if (cmd.type === 'stage') {
+                          if (cmd.action === 'navMembers') window.top.location.href = "MembersDraw.html";
+                          if (cmd.action === 'navFriday') window.top.location.href = "https://cornerstonecoopapps.github.io/FridayClub/";
+                          
+                          if (cmd.action === 'spinWheel') triggerSpinAction();
+                          if (cmd.action === 'triggerVAR') triggerVAR();
+                          if (cmd.action === 'toggleBox') toggleBoxStage();
+                          if (cmd.action === 'generateReport') showReport();
+                          if (cmd.action === 'hydration') document.getElementById('hydration-break-overlay').classList.toggle('active');
+                          if (cmd.action === 'resetWheel') closeGameReset();
+                          if (cmd.action === 'refreshAudio') syncCustomAudio(); 
+                      }
+                      else if (cmd.type === 'box') {
+                          if (cmd.action.startsWith('select|')) openPrizeBox(parseInt(cmd.action.split('|')[1]));
+                          else if (cmd.action === 'autoReveal') attemptReveal();
+                          else if (cmd.action === 'clearBoard') { 
+                              openedBoxes = {}; 
+                              proxyFirebaseWrite("boxes/opened.json", 'DELETE');
+                              renderBoxGrid(); 
+                          }
+                          else if (cmd.action === 'manualAward') executeReveal(cmd.desc, cmd.isCash, cmd.isPint, cmd.pin, null);
+                      }
+                      else if (cmd.type === 'wheel') {
+                          if (cmd.action === 'award') {
+                               document.getElementById('cashInput').value = cmd.cash || ""; 
+                               document.getElementById('pintInput').value = cmd.pint || "1"; 
+                               document.getElementById('customInput').value = cmd.custom || "";
+                               sendPrize(cmd.prizeType, cmd.pin); 
+                          }
+                      }
+                      // 🔥 ADDED THE MISSING ADMIN HANDLER FOR THE REMOTE UNDO TAB!
+                      else if (cmd.type === 'admin') {
+                          if (cmd.action === 'requestWinners') {
+                              google.script.run.withSuccessHandler(data => {
+                                  proxyFirebaseWrite("admin/winners.json", 'PUT', data);
+                              }).getTodayWinnersForRemote();
+                          }
+                      }
+                  }
+              }).catch(e => console.log("Remote Link Active"));
+          }, 500);
+      }
+
+      // ==========================================
+      // 🛠️ DRAGGABLE BOX EDITOR ('E' and 'S')
+      // ==========================================
+      let editMode = false;
+      let draggedBox = null;
+      let offsetX = 0; let offsetY = 0;
+
+      document.addEventListener('keydown', function(event) { 
+          var target = event.target || event.srcElement; if (target.tagName.toUpperCase() === 'INPUT') return;
+          
+          if (event.key === 'E' || event.key === 'e') { toggleEditMode(); return; }
+          if (event.key === 'S' || event.key === 's') { saveBoxPositions(); return; }
+          if (event.key === 'H' || event.key === 'h') { document.getElementById('hydration-break-overlay').classList.toggle('active'); return; }
+          if (event.key === 'B' || event.key === 'b') { toggleBoxStage(); return; }
+          if (event.key === 'V' || event.key === 'v') { triggerVAR(); return; }
+          
+          if (event.code === 'Space' || event.code === 'Enter') { 
+              let gate = document.getElementById('tv-intro-gate');
+              if(!gate || gate.style.display === 'none') {
+                  event.preventDefault(); triggerSpinAction(); 
+              }
+          }
+      });
+
+      function toggleEditMode() {
+          if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
+          editMode = !editMode;
+          const container = document.getElementById('gate-wheel-container');
+          if (editMode) {
+              container.classList.add('editing');
+              document.querySelectorAll('.mapped-door').forEach(box => {
+                  box.style.cursor = "move";
+                  box.onmousedown = startDrag;
+              });
+          } else {
+              container.classList.remove('editing');
+              document.querySelectorAll('.mapped-door').forEach(box => {
+                  box.style.cursor = "pointer";
+                  box.onmousedown = null;
+              });
+              renderBoxGrid(); 
+          }
+      }
+
+      function startDrag(e) {
+          if (!editMode) return;
+          draggedBox = this;
+          const rect = draggedBox.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+          document.onmousemove = dragBox;
+          document.onmouseup = stopDrag;
+      }
+
+      function dragBox(e) {
+          if (!draggedBox) return;
+          const container = document.getElementById('gate-wheel-container');
+          const rect = container.getBoundingClientRect();
+          
+          let newLeft = e.clientX - rect.left - offsetX;
+          let newTop = e.clientY - rect.top - offsetY;
+
+          let leftPct = (newLeft / rect.width) * 100;
+          let topPct = (newTop / rect.height) * 100;
+
+          draggedBox.style.left = leftPct + "%";
+          draggedBox.style.top = topPct + "%";
+      }
+
+      function stopDrag() {
+          draggedBox = null;
+          document.onmousemove = null;
+          document.onmouseup = null;
+      }
+
+      function saveBoxPositions() {
+          if (!editMode) return;
+          let newDoorMap = {};
+          document.querySelectorAll('.mapped-door').forEach(box => {
+              let id = parseInt(box.id.replace('pbox-', ''));
+              newDoorMap[id] = {
+                  t: parseFloat(box.style.top),
+                  l: parseFloat(box.style.left),
+                  w: doorMap[id].w, 
+                  h: doorMap[id].h
+              };
+          });
+          doorMap = newDoorMap; 
+          saveToCloud("doorMap", doorMap);
+          
+          const container = document.getElementById('gate-wheel-container');
+          container.classList.remove('editing');
+          editMode = false;
+          
+          document.querySelectorAll('.mapped-door').forEach(box => {
+              box.style.cursor = "pointer";
+              box.onmousedown = null;
+          });
+      }
+
+      // ==========================================
+      // 🎁 GATE WHEEL LOGIC
+      // ==========================================
+      let currentOpenBox = null;
+      function toggleBoxStage() {
+          const boxOverlay = document.getElementById('open-box-overlay');
+          const isShowing = boxOverlay.classList.toggle('active');
+          if (isShowing) {
+              playSoundFX('boxIntro'); currentOpenBox = null;
+              document.getElementById('gate-wheel-container').innerHTML = '<h2 style="color:#fff; text-align:center; margin-top:20%;">Syncing with Cloud...</h2>';
+              fetch(FB_BASE_URL + "boxes.json").then(res => res.json()).then(cloudData => {
+                  if (cloudData) { 
+                      if (cloudData.opened) openedBoxes = cloudData.opened; 
+                      if (cloudData.prefilled) prefilledBoxes = cloudData.prefilled; 
+                      if (cloudData.doorMap) doorMap = cloudData.doorMap; 
+                  }
+                  renderBoxGrid();
+              }).catch(e => renderBoxGrid()); 
+          } else { 
+              document.getElementById('gate-wheel-container').innerHTML = ''; 
+              if(editMode) toggleEditMode(); 
+          }
+      }
+
+      function renderBoxGrid() {
+          const container = document.getElementById('gate-wheel-container'); container.innerHTML = ''; 
+          let ind = document.createElement('div'); ind.className = 'edit-mode-indicator'; ind.innerText = "EDIT MODE ACTIVE (Press 'S' to Save)";
+          container.appendChild(ind);
+
+          for (let i = 1; i <= 15; i++) {
+              let box = document.createElement('div'); box.className = 'mapped-door'; box.id = 'pbox-' + i;
+              box.style.top = doorMap[i].t + '%'; box.style.left = doorMap[i].l + '%'; box.style.width = doorMap[i].w + '%'; box.style.height = doorMap[i].h + '%';
+              if (openedBoxes[i]) {
+                  box.classList.add('opened');
+                  let isCash = openedBoxes[i].toLowerCase().includes('cash') || openedBoxes[i].includes('£');
+                  box.innerHTML = `<div class="door-prize-text ${isCash ? 'door-prize-cash' : ''}">${openedBoxes[i].toUpperCase()}</div>`;
+              }
+              if(!editMode) box.onclick = () => openPrizeBox(i);
+              else { box.style.cursor = "move"; box.onmousedown = startDrag; }
+              container.appendChild(box);
+          }
+      }
+
+      function openPrizeBox(i) {
+          if(editMode) return;
+          const box = document.getElementById('pbox-' + i);
+          if (box.classList.contains('opened')) return; 
+          if (!box.classList.contains('selected')) {
+              document.querySelectorAll('.mapped-door').forEach(d => d.classList.remove('selected'));
+              box.classList.add('selected'); currentOpenBox = i; playSoundFX('drumroll');
+          }
+      }
+
+      function attemptReveal() {
+          if (!currentOpenBox) return;
+          let vaultData = prefilledBoxes[currentOpenBox];
+          if (vaultData) {
+              let desc = typeof vaultData === 'object' ? vaultData.text : vaultData;
+              let snd = typeof vaultData === 'object' ? vaultData.sound : "DEFAULT";
+              executeReveal(desc, desc.toLowerCase().includes('cash') || desc.includes('£'), desc.toLowerCase().includes('pint'), null, snd);
+          }
+      }
+
+      function executeReveal(desc, isCash, isPint, pinOverride, customSound) {
+          let activePin = pinOverride;
+          if ((isCash || isPint) && !activePin) {
+              if (!projectorSessionPin) {
+                  projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
+                  if (!projectorSessionPin) return;
+              }
+              activePin = projectorSessionPin;
+          }
+
+          if (audioMap['drumroll'] && !audioMap['drumroll'].paused) { audioMap['drumroll'].pause(); audioMap['drumroll'].currentTime = 0; }
+          const box = document.getElementById('pbox-' + currentOpenBox); box.classList.remove('selected'); box.classList.add('opened');
+          box.innerHTML = `<div class="door-prize-text ${(isCash || isPint) ? 'door-prize-cash' : ''}">${desc.toUpperCase()}</div>`;
+          
+          openedBoxes[currentOpenBox] = desc; saveToCloud("opened", openedBoxes);
+          
+          if(customSound && customSound !== "DEFAULT") {
+              playSoundFX(customSound);
+          } else {
+              if (isCash || isPint) playSoundFX('celebrate'); else playSoundFX('sad');
+          }
+
+          if (typeof winningPlayer !== 'undefined' && winningPlayer && winningPlayer.id) {
+              let pType = 'CUSTOM'; let pAmt = desc;
+              if (isCash) { pType = 'PHYSICAL_CASH'; pAmt = desc.replace(/[^\d.-]/g, ''); } else if (isPint) { pType = 'PINT'; pAmt = desc.replace(/[^\d.-]/g, '') || "1"; }
+              
+              google.script.run.withSuccessHandler(res => {
+                  if (res.includes("UNAUTHORIZED")) { showToast(res, false); projectorSessionPin = null; }
+              }).processFridayPrize(winningPlayer.name, winningPlayer.id, pType, pAmt, activePin); 
+          }
+          currentOpenBox = null;
+      }
+
+      // ==========================================
+      // ⚙️ CORE GAME LOGIC
+      // ==========================================
+      function startConfetti() { const canvas = document.getElementById('confetti-canvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; const colors = ['#ffd700', '#ff5252', '#ffffff', '#00f2fe']; for(let i=0; i<100; i++) { particles.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20 - 5, color: colors.at(Math.floor(Math.random() * colors.length)), size: Math.random() * 25 + 15, drag: 0.95, gravity: 0.5 }); } if(confettiLoop) cancelAnimationFrame(confettiLoop); function render() { ctx.clearRect(0, 0, canvas.width, canvas.height); let active = false; particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= p.drag; p.vy *= p.drag; if(p.y < canvas.height + p.size) active = true; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); }); if(active) confettiLoop = requestAnimationFrame(render); else ctx.clearRect(0,0, canvas.width, canvas.height); } render(); }
+      
+      window.onload = function() { 
+          document.getElementById('spin-btn').disabled = true; setTimeout(() => { document.body.classList.remove('intro-mode'); }, 1500); 
+          initMarqueeLights(); 
+          
+          startRemoteListener();
+          
+          let savedPin = sessionStorage.getItem('hostPin');
+          let savedName = sessionStorage.getItem('hostName');
+          let savedToken = sessionStorage.getItem('sessionToken'); 
+          
+          if (savedPin) {
+              projectorSessionPin = savedPin;
+              sessionToken = savedToken;
+              let gate = document.getElementById('tv-intro-gate');
+              if (gate) gate.style.display = 'none'; 
+          }
+          
+          // 🔥 DELAYED AUDIO FETCH (No Boot Freezes!)
+          setTimeout(syncCustomAudio, 2500);
+
+          fetch(FB_BASE_URL + "players.json").then(res => res.json()).then(data => {
+              if (data) {
+                  Object.values(data).forEach(p => { if (p.name) players.push({ id: p.id || Date.now(), name: p.name }); });
+                  renderStaticList(players);
+              }
+              document.getElementById('spin-btn').disabled = false;
+          }).catch(err => console.log("Init fetch error"));
+          
+          startFirebaseSyncLoop(); 
+      };
+
+      function advanceTracker(el) { if (el.classList.contains('active-round')) { el.classList.remove('active-round'); el.classList.add('completed'); } else if (el.classList.contains('completed')) { el.classList.remove('completed'); } else { document.querySelectorAll('.tracker-item').forEach(item => item.classList.remove('active-round')); el.classList.add('active-round'); } }
+      function autoStepTrackerAfterWin() { const items = Array.from(document.querySelectorAll('.tracker-item')); const currentIdx = items.findIndex(item => item.classList.contains('active-round')); if (currentIdx !== -1) { const currentItem = items.at(currentIdx); currentItem.classList.remove('active-round'); currentItem.classList.add('completed'); const nextItem = items.at(currentIdx + 1); if (nextItem) nextItem.classList.add('active-round'); } }
+      
+      function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+      function playTick() { if (!audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05); gain.gain.setValueAtTime(0.15, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.06); }
+      function playWinSound() { if (!audioCtx) return; const notes = [523.25, 659.25, 783.99, 1046.50]; notes.forEach((freq, i) => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (i*0.1)); gain.gain.setValueAtTime(0.1, audioCtx.currentTime + (i*0.1)); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (i*0.1) + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(audioCtx.currentTime + (i*0.1)); osc.stop(audioCtx.currentTime + (i*0.1) + 0.5); }); }
+
+      let isInitialLoad = true;
+      function startFirebaseSyncLoop() {
+        setInterval(function() {
+          if (isSpinning) return; 
+          fetch(FB_BASE_URL + "players.json").then(res => res.json()).then(data => {
+            if (!data) { isInitialLoad = false; return; }
+            let feedUpdated = false;
+            Object.keys(data).forEach(key => {
+              if (!knownFirebaseKeys.has(key)) {
+                knownFirebaseKeys.add(key);
+                let newPlayer = null; Object.entries(data).forEach(entry => { if(entry.at(0) === key) newPlayer = entry.at(1); });
+                if(newPlayer && newPlayer.name) {
+                  if (!isInitialLoad) {
+                     const notif = document.getElementById('live-notification'); notif.innerHTML = `🎟️ TICKET SECURED: ${newPlayer.name.toUpperCase()} 🎟️`; notif.classList.add('show');
+                     if (audioCtx) { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); osc.frequency.setValueAtTime(1318.51, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+                     setTimeout(() => { notif.classList.remove('show'); }, 4000); 
+                  }
+                  let matchesExisting = players.some(p => p.name === newPlayer.name);
+                  if (!matchesExisting) { players.push({ id: newPlayer.id || Date.now(), name: newPlayer.name }); feedUpdated = true; }
+                }
+              }
+            });
+            isInitialLoad = false; if (feedUpdated) renderStaticList(players);
+          }).catch(err => console.log("Firebase loop active."));
+        }, 4000);
+      }
+
+      function triggerSpinAction() { if(isSpinning) return; if(players.length === 0) return alert("No players entered!"); const btn = document.getElementById('spin-btn'); if(btn && !btn.disabled) { btn.classList.add('simulated-active'); setTimeout(() => btn.classList.remove('simulated-active'), 150); spinWheel(); } }
+      function initMarqueeLights() { const frame = document.getElementById('marquee-frame'); const w = 780; const h = 600; const pad = 25; const tl = {x: pad, y: pad}; const tr = {x: w - pad, y: pad}; const br = {x: w - pad, y: h - pad}; const bl = {x: pad, y: h - pad}; const trackW = tr.x - tl.x; const trackH = bl.y - tl.y; const countX = 16; const countY = 12; function createBulb(x, y, i) { let b = document.createElement('div'); b.className = 'bulb ' + (i % 2 === 0 ? 'even' : 'odd'); b.style.left = x + 'px'; b.style.top = y + 'px'; frame.appendChild(b); } let idx = 0; for(let i=1; i < countX - 1; i++) { createBulb(tl.x + (i * (trackW / (countX - 1))), tl.y, idx++); } for(let i=1; i < countY - 1; i++) { createBulb(tr.x, tr.y + (i * (trackH / (countY - 1))), idx++); } for(let i=1; i < countX - 1; i++) { createBulb(br.x - (i * (trackW / (countX - 1))), br.y, idx++); } for(let i=1; i < countY - 1; i++) { createBulb(bl.x, bl.y - (i * (trackH / (countY - 1))), idx++); } }
+      
+      function renderStaticList(data) { 
+          cancelAnimationFrame(idleSpinFrame); const strip = document.getElementById('spinner-strip'); strip.style.transition = "none"; strip.innerHTML = ""; 
+          const badge = document.getElementById('ticket-counter-badge'); if (badge) badge.innerText = `🎟️ ${data.length} TICKETS IN PLAY`;
+          if(data.length === 0) { strip.innerHTML = "<div class='name-card card-red' style='height:500px'>WAITING FOR ENTRIES...</div>"; strip.style.top = "0px"; return; } 
+          let baseList = data.slice().sort(() => 0.5 - Math.random()); let fullPool = []; for(let i = 0; i < 30; i++) fullPool = fullPool.concat(baseList);
+          let blankTop = document.createElement('div'); blankTop.className = 'blank-card'; strip.appendChild(blankTop); 
+          fullPool.forEach((p, i) => { let div = document.createElement('div'); div.className = `name-card ${COLORS.at(i % COLORS.length)}`; div.innerText = p.name; strip.appendChild(div); }); 
+          let blankBottom = document.createElement('div'); blankBottom.className = 'blank-card'; strip.appendChild(blankBottom); 
+          idleTop = -65; let singleCycleHeight = baseList.length * ROW_HEIGHT; let lastTime = performance.now();
+          function scrollLoop(time) { if(isSpinning) return; let dt = time - lastTime; lastTime = time; if (dt > 100) dt = 16; idleTop -= (45 * (dt / 1000)); if (Math.abs(idleTop + 65) >= singleCycleHeight) idleTop += singleCycleHeight; strip.style.top = idleTop + "px"; idleSpinFrame = requestAnimationFrame(scrollLoop); }
+          idleSpinFrame = requestAnimationFrame(scrollLoop);
+      }
+      
+      function spinWheel() { 
+          cancelAnimationFrame(idleSpinFrame); if(isSpinning) return; if (players.length === 0) return alert("No players entered yet!"); 
+          isSpinning = true; document.body.classList.add('is-spinning'); initAudio(); spinMusic.currentTime = 0; spinMusic.play(); document.body.classList.remove('winner-mode'); 
+          document.getElementById('spin-btn').disabled = true; 
+          
+          let spinList = []; players.forEach(p => spinList.push(p));
+          for (let i = spinList.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); let temp = spinList.at(i); spinList.splice(i, 1, spinList.at(j)); spinList.splice(j, 1, temp); } 
+          const winnerIndex = Math.floor(Math.random() * spinList.length); winningPlayer = spinList.at(winnerIndex); 
+          const strip = document.getElementById('spinner-strip'); strip.innerHTML = ""; let buildList = []; 
+          for(let i=0; i<2; i++) buildList.push({type: 'blank'}); for(let i=0; i<40; i++) buildList = buildList.concat(spinList.map(p => ({type: 'name', name: p.name}))); for(let i=0; i<2; i++) buildList.push({type: 'blank'}); 
+          const initialBlanks = 2; buildList.forEach((p, index) => { let div = document.createElement('div'); if(p.type === 'blank') { div.className = 'blank-card'; } else { div.className = `name-card ${COLORS.at((index - initialBlanks) % COLORS.length)}`; div.innerText = p.name; } strip.appendChild(div); }); 
+          
+          const centerOffset = 250; const halfRow = ROW_HEIGHT / 2; const startRound = 35; const startIndex = initialBlanks + (spinList.length * startRound); const startScroll = (startIndex * ROW_HEIGHT) - centerOffset + halfRow; const targetRound = 4; const targetIndex = initialBlanks + (spinList.length * targetRound) + winnerIndex; 
+          const targetScroll = (targetIndex * ROW_HEIGHT) - centerOffset + halfRow; lastWinningScroll = targetScroll; 
+          
+          strip.style.transition = "none"; strip.style.top = `-${startScroll}px`; strip.offsetHeight; 
+          setTimeout(() => { strip.style.transition = "top 15s cubic-bezier(0.1, 0, 0.05, 1)"; strip.style.top = `-${targetScroll}px`; if(tickerInterval) clearInterval(tickerInterval); let lastRowIndex = -1; tickerInterval = setInterval(() => { const currentTop = parseFloat(window.getComputedStyle(strip).top); const absTop = Math.abs(currentTop); const currentRow = Math.floor( (absTop + 250) / ROW_HEIGHT ); if (currentRow !== lastRowIndex && lastRowIndex !== -1) { playTick(); } lastRowIndex = currentRow; }, 20); }, 50); 
+          setTimeout(() => { clearInterval(tickerInterval); showWinner(winningPlayer); isSpinning = false; }, 15500); 
+      }
+
+      function triggerVAR() {
+          const winnerOverlay = document.getElementById('winner-overlay'); const globalDimmer = document.getElementById('global-dimmer');
+          if (winnerOverlay.style.display !== 'flex') return;
+          isSpinning = true; winnerOverlay.style.display = 'none'; globalDimmer.style.display = 'none'; 
+          playSoundFX('whistle'); playSoundFX('rewind');
+          
+          const varGraphic = document.createElement("div"); varGraphic.id = "var-overlay"; varGraphic.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; z-index:9000; pointer-events:none; display:flex; flex-direction:column; justify-content:center; align-items:center;";
+          varGraphic.innerHTML = `<div style="position:absolute; width:100%; height:100%; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.8) 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px); z-index:1;"></div><div style="position:absolute; top: 10%; width:100%; text-align:center; z-index: 2;"><h1 style="font-family: 'Oswald', sans-serif; font-size: 8vw; color: #fff; text-shadow: 4px 4px 0 #000; margin:0; letter-spacing: 5px; font-style: italic;">⏪ REPLAY</h1></div>`;
+          document.body.appendChild(varGraphic);
+
+          const strip = document.getElementById('spinner-strip'); strip.style.transition = 'none'; strip.style.top = `-${lastWinningScroll - (ROW_HEIGHT * 8)}px`; 
+          
+          setTimeout(() => {
+              varGraphic.innerHTML = `<div style="background: #000; border-bottom: 8px solid #00ff00; padding: 20px; text-align: center; width:100%; position:absolute; top:0; z-index:10; box-shadow: 0 10px 30px rgba(0,0,0,0.9);"><h1 style="font-size: 4vw; color: #fff; margin:0; font-family: 'Oswald', sans-serif; letter-spacing: 4px; text-transform: uppercase;">VAR <span style="color:#00ff00;">REVIEW</span> IN PROGRESS</h1></div><div id="var-decision" style="position:absolute; bottom:15%; font-family: 'Oswald', sans-serif; font-size: 3.5vw; color: #000; background: #ffeb3b; padding:15px 40px; border-radius: 8px; border: 4px solid #000; font-weight: bold; z-index:10; text-transform: uppercase; box-shadow: 10px 10px 0px rgba(0,0,0,0.8); transition: background 0.3s, color 0.3s;">CHECKING FINAL TOUCH...</div>`;
+              strip.style.transition = 'top 5s cubic-bezier(0.1, 0, 0.2, 1)'; strip.style.top = `-${lastWinningScroll}px`;
+              setTimeout(() => {
+                  const decisionBox = document.getElementById("var-decision"); decisionBox.innerHTML = "DECISION: WINNER STANDS"; decisionBox.style.background = "#00ff00"; decisionBox.style.color = "#000000"; 
+                  playSoundFX('celebrate');
+                  setTimeout(() => { if(document.getElementById('var-overlay')) document.body.removeChild(document.getElementById('var-overlay')); winnerOverlay.style.display = 'flex'; globalDimmer.style.display = 'block'; isSpinning = false; }, 3000);
+              }, 5200); 
+          }, 1200); 
+      }
+      
+      function showWinner(player) { 
+          spinMusic.pause(); document.body.classList.remove('is-spinning'); document.body.classList.add('winner-mode'); 
+          playWinSound(); document.getElementById('global-dimmer').style.display = 'block'; startConfetti(); 
+          document.getElementById('winner-overlay').style.display = 'flex'; document.getElementById('winner-name').innerText = player.name; 
+          document.getElementById('cashInput').value = ""; document.getElementById('pintInput').value = "1"; document.getElementById('customInput').value = ""; 
+          saveToCloud("activeWinner", player.name);
+      }
+      
+      function showToast(msg, isSuccess) {
+          var x = document.getElementById("toast-container"); x.innerHTML = `<span class="toast-icon">${isSuccess ? "✅" : "⚠️"}</span> <span>${msg}</span>`; x.className = "show"; x.style.borderColor = isSuccess ? "#00e676" : "#ff1744";
+          if(audioCtx && audioCtx.state !== 'suspended') { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(isSuccess ? 880 : 220, audioCtx.currentTime); if(isSuccess) { osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.setValueAtTime(1108, audioCtx.currentTime + 0.1); osc.frequency.setValueAtTime(1318, audioCtx.currentTime + 0.2); } gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.6); }
+          setTimeout(function(){ x.className = x.className.replace("show", ""); }, 4000);
+      }
+
+      function sendPrize(type, pinOverride) { 
+        let activePin = pinOverride;
+        
+        if (!activePin) {
+            if (!projectorSessionPin) {
+                projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
+                if (!projectorSessionPin) return; 
+            }
+            activePin = projectorSessionPin;
+        }
+        
+        var winnerName = document.getElementById("winner-name-big").innerText; 
+        var amount = 0; 
+        // 🔥 SAFE SELECTOR: This handles whatever the Remote sends without breaking
+        var activeBtn = document.getElementById((type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') ? 'btnCash' : (type === 'PINT' ? 'btnPint' : 'btnCustom'));
+        
+        if (type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') { 
+            amount = document.getElementById("cashInput").value; 
+            if(amount === "" || amount <= 0) { alert("Enter Cash Amount!"); return; } 
+        } 
+        else if (type === 'PINT') { 
+            amount = document.getElementById("pintInput").value; 
+            if(amount === "" || amount <= 0) { alert("Enter Number of Pints!"); return; } 
+        } 
+        else if (type === 'CUSTOM') { 
+            amount = document.getElementById("customInput").value; 
+            if(amount === "") { alert("Enter Prize Name!"); return; } 
+        } 
+        
+        document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.setAttribute('data-txt', b.innerText); b.disabled = true; b.innerText = "..."; });
+        var playerId = 0; 
+        
+        if (allNames && allNames.length > 0) {
+            let winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
+            if (winnerObj && winnerObj.id) playerId = winnerObj.id;
+        }
+        
+        let displayPrizeText = (type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') ? `£${amount} Cash` : (type === 'PINT' ? `${amount} Pint(s)` : amount);
+        
+        google.script.run.withSuccessHandler(function(res) { 
+          if (res.includes("UNAUTHORIZED")) {
+              showToast(res, false);
+              projectorSessionPin = null; 
+              document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); 
+              return;
+          }
+
+          showToast(res, true); 
+          if(res.includes("SUCCESS") || res.includes("Logged")) { 
+              let winBox = document.getElementById('session-winners-feed'); if (winBox && winBox.firstElementChild && winBox.firstElementChild.style.color) winBox.innerHTML = '';
+              if (winBox) {
+                  let winRow = document.createElement('div'); winRow.className = 'activity-row'; winRow.innerHTML = `🏆 <b>${winnerName}</b><br><span style="color:var(--accent-primary); font-size:0.9em;">${displayPrizeText}</span>`; winBox.insertBefore(winRow, winBox.firstChild);
+              }
+              setTimeout(startIdleMode, 2000); 
+          } else { 
+              document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); 
+          }
+        }).withFailureHandler(function(err) { showToast("Error: " + err, false); document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); })
+        .processFridayPrize(winnerName, playerId, type, amount, activePin); 
+      }
+      
+      function showReport() { document.getElementById('global-dimmer').style.display = 'block'; document.getElementById('report-overlay').style.display = 'flex'; const btn = document.getElementById('btn-archive'); btn.innerText = "ARCHIVE TO SHEET"; btn.disabled = false; btn.style.background = "#4caf50"; google.script.run.withSuccessHandler(function(rep) { document.getElementById('rep-entries').innerText = rep.entries || 0; document.getElementById('rep-pot').innerText = "£" + (rep.revenueTonight || 0).toFixed(2); document.getElementById('rep-late').innerText = "£" + (rep.revenueLate || 0).toFixed(2); document.getElementById('rep-payouts').innerText = "£" + (rep.cashWon || 0).toFixed(2); document.getElementById('rep-carry').innerText = "£" + (rep.carryOver || 0).toFixed(2); var listHTML = ""; if(rep.winners && rep.winners.length > 0) rep.winners.forEach(function(w) { listHTML += `<div class='winner-row'><span>${w.name}</span><span>${w.prize}</span></div>`; }); document.getElementById('rep-list').innerHTML = listHTML || "NO WINNERS YET."; }).getReportData(); }
+      function archiveReport() { const btn = document.getElementById('btn-archive'); btn.innerText = "SAVED (Check Sheet)"; btn.disabled = true; }
+      function closeReport() { document.getElementById('report-overlay').style.display='none'; document.getElementById('global-dimmer').style.display='none'; }
+    </script>
+  </body>
 </html>
