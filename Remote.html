@@ -350,6 +350,7 @@ if (navigator.vibrate) navigator.vibrate(50);
 let cmdPayload = { type: category, action: action, pin: validPin, token: sessionToken, timestamp: Date.now() };
 Object.assign(cmdPayload, extraPayload);
 
+// 🔥 THE ANNOYING TOAST IS SILENCED HERE
 instantFirebaseWrite("remoteCommand", 'PUT', cmdPayload)
 .catch(() => showToast("ERROR SENDING COMMAND"));
 }
@@ -585,6 +586,7 @@ function transitionToBoxStage() { document.getElementById('adaptive-winner-overl
 
 function triggerVARFromWinner() {
 fireCommand('stage', 'triggerVAR');
+showToast("⏪ VAR TRIGGERED!");
 
 let btn = document.getElementById('btn-var-overlay');
 btn.innerText = "VAR PLAYING..."; btn.style.color = "#888"; btn.style.borderColor = "#555"; btn.disabled = true;
@@ -628,10 +630,11 @@ function confirmAndSendPrize() {
         if (navigator.vibrate) navigator.vibrate(50);
         
         // 🔥 Re-adding the Toast Notification for peace of mind!
-        showToast("🚀 " + displayStr.toUpperCase() + " LOGGED!");
+        showToast("🚀 " + displayStr.toUpperCase() + " LOGGED!", true);
 
+        // 🔥 THE FIX: Cash maps to PHYSICAL_CASH so it perfectly logs exactly what you typed
         fireCommand('wheel', 'award', { 
-            prizeType: currentPrizeType === 'CASH' ? 'MEMBERS_CASH' : currentPrizeType, 
+            prizeType: currentPrizeType === 'CASH' ? 'PHYSICAL_CASH' : currentPrizeType, 
             cash: currentPrizeType === 'CASH' ? val : "", 
             pint: currentPrizeType === 'PINT' ? val : "", 
             custom: currentPrizeType === 'CUSTOM' ? val : "" 
