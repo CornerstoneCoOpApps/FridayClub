@@ -252,7 +252,9 @@
       <div class="control-row">
         <span class="control-label">CASH</span>
         <div class="input-wrapper"><span class="currency-symbol">£</span><input type="number" id="cashInput" class="control-input" value="" onfocus="this.value=''"></div>
-        <button class="control-btn btn-cash" id="btnCash" onclick="sendPrize('CASH')">LOG CASH</button>
+        
+        <!-- 🔥 FIX: Friday Club natively logs PHYSICAL_CASH directly to bypass the till! -->
+        <button class="control-btn btn-cash" id="btnCash" onclick="sendPrize('PHYSICAL_CASH')">LOG CASH</button>
       </div>
       <div class="control-row">
         <span class="control-label">PINTS</span>
@@ -308,19 +310,6 @@
 
     let projectorSessionPin = null;
     let sessionToken = null; 
-
-    // 🔥 AUDIO SYNC ENGINE FOR CUSTOM SOUNDS
-    const audioMap = {
-        'drumroll': new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_18d09bdeaf.mp3'),
-        'sad': new Audio('https://www.myinstants.com/media/sounds/sad-trombone-gaming-sound-effect-hd.mp3'),
-        'celebrate': new Audio('https://cdn.pixabay.com/audio/2026/07/29/audio_6b3b29cb40.mp3'),
-        'ooh': new Audio('https://www.myinstants.com/media/sounds/sitcom-crowd-ooh_sRDaL7d.mp3'),
-        'whistle': new Audio('https://www.myinstants.com/media/sounds/referee-whistle.mp3'),
-        'buzzer': new Audio('https://www.myinstants.com/media/sounds/family-feud-wrong-answer-buzzer.mp3'),
-        'rewind': new Audio('https://www.myinstants.com/media/sounds/dj-record-rewind-sound-effect.mp3')
-    };
-
-    function playSoundFX(type) { if (audioMap[type]) { audioMap[type].currentTime = 0; audioMap[type].play().catch(e => console.log("Audio blocked.")); } }
 
     // 🔥 DELAYED AUDIO SYNC TO PREVENT BOOT FREEZE
     function syncCustomAudio() {
@@ -395,9 +384,21 @@
     let audioCtx = null; let tickerInterval = null; let isSpinning = false; let particles = []; let confettiLoop = null; 
     let knownFirebaseKeys = new Set(); let idleSpinFrame = null; let idleTop = -65; let lastWinningScroll = 0; 
 
+    const audioMap = {
+        'boxIntro': new Audio('INSERT_YOUR_JINGLE_LINK_HERE.mp3'),
+        'drumroll': new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_18d09bdeaf.mp3'),
+        'sad': new Audio('https://www.myinstants.com/media/sounds/sad-trombone-gaming-sound-effect-hd.mp3'),
+        'celebrate': new Audio('https://cdn.pixabay.com/audio/2026/07/29/audio_6b3b29cb40.mp3'),
+        'ooh': new Audio('https://www.myinstants.com/media/sounds/sitcom-crowd-ooh_sRDaL7d.mp3'),
+        'whistle': new Audio('https://www.myinstants.com/media/sounds/referee-whistle.mp3'),
+        'buzzer': new Audio('https://www.myinstants.com/media/sounds/family-feud-wrong-answer-buzzer.mp3'),
+        'rewind': new Audio('https://www.myinstants.com/media/sounds/dj-record-rewind-sound-effect.mp3')
+    };
+
+    function playSoundFX(type) { if (audioMap[type]) { audioMap[type].currentTime = 0; audioMap[type].play().catch(e => console.log("Audio blocked.")); } }
+
     let doorMap = { 1: { t: 53.5, l: 44.5, w: 11, h: 18 }, 2: { t: 43, l: 69, w: 11, h: 15 }, 3: { t: 43, l: 20, w: 11, h: 15 }, 4: { t: 26, l: 69, w: 11, h: 15 }, 5: { t: 77, l: 69, w: 11, h: 15 }, 6: { t: 41, l: 44.5, w: 11, h: 11 }, 7: { t: 41, l: 56, w: 11, h: 11 }, 8: { t: 26, l: 20, w: 11, h: 15 }, 9: { t: 73, l: 56, w: 11, h: 11 }, 10: { t: 73, l: 33, w: 11, h: 11 }, 11: { t: 60, l: 69, w: 11, h: 15 }, 12: { t: 60, l: 20, w: 11, h: 15 }, 13: { t: 73, l: 44.5, w: 11, h: 11 }, 14: { t: 41, l: 33, w: 11, h: 11 }, 15: { t: 77, l: 20, w: 11, h: 15 } };
     let openedBoxes = {}; let prefilledBoxes = {};
-    let editMode = false; let draggedBox = null; let offsetX = 0; let offsetY = 0;
 
     function saveToCloud(path, dataObj) { 
         proxyFirebaseWrite("boxes/" + path + ".json", 'PUT', dataObj);
@@ -457,7 +458,6 @@
                 if (cmd.timestamp > lastCommandTime) {
                     lastCommandTime = cmd.timestamp;
 
-                    // 🔥 MAGIC FIX: Catch the VIP Token from the remote!
                     if (cmd.token && sessionToken !== cmd.token) {
                         sessionToken = cmd.token;
                         sessionStorage.setItem('sessionToken', sessionToken);
@@ -514,8 +514,12 @@
     }
 
     // ==========================================
-    // 🛠️ DRAGGABLE BOX EDITOR & KEYBINDS
+    // 🛠️ DRAGGABLE BOX EDITOR ('E' and 'S')
     // ==========================================
+    let editMode = false;
+    let draggedBox = null;
+    let offsetX = 0; let offsetY = 0;
+
     document.addEventListener('keydown', function(event) { 
         var target = event.target || event.srcElement; if (target.tagName.toUpperCase() === 'INPUT') return;
         
@@ -533,6 +537,86 @@
         }
     });
 
+    function toggleEditMode() {
+        if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
+        editMode = !editMode;
+        const container = document.getElementById('gate-wheel-container');
+        if (editMode) {
+            container.classList.add('editing');
+            document.querySelectorAll('.mapped-door').forEach(box => {
+                box.style.cursor = "move";
+                box.onmousedown = startDrag;
+            });
+        } else {
+            container.classList.remove('editing');
+            document.querySelectorAll('.mapped-door').forEach(box => {
+                box.style.cursor = "pointer";
+                box.onmousedown = null;
+            });
+            renderBoxGrid(); 
+        }
+    }
+
+    function startDrag(e) {
+        if (!editMode) return;
+        draggedBox = this;
+        const rect = draggedBox.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        document.onmousemove = dragBox;
+        document.onmouseup = stopDrag;
+    }
+
+    function dragBox(e) {
+        if (!draggedBox) return;
+        const container = document.getElementById('gate-wheel-container');
+        const rect = container.getBoundingClientRect();
+        
+        let newLeft = e.clientX - rect.left - offsetX;
+        let newTop = e.clientY - rect.top - offsetY;
+
+        let leftPct = (newLeft / rect.width) * 100;
+        let topPct = (newTop / rect.height) * 100;
+
+        draggedBox.style.left = leftPct + "%";
+        draggedBox.style.top = topPct + "%";
+    }
+
+    function stopDrag() {
+        draggedBox = null;
+        document.onmousemove = null;
+        document.onmouseup = null;
+    }
+
+    function saveBoxPositions() {
+        if (!editMode) return;
+        let newDoorMap = {};
+        document.querySelectorAll('.mapped-door').forEach(box => {
+            let id = parseInt(box.id.replace('pbox-', ''));
+            newDoorMap[id] = {
+                t: parseFloat(box.style.top),
+                l: parseFloat(box.style.left),
+                w: doorMap[id].w, 
+                h: doorMap[id].h
+            };
+        });
+        doorMap = newDoorMap; 
+        saveToCloud("doorMap", doorMap);
+        
+        const container = document.getElementById('gate-wheel-container');
+        container.classList.remove('editing');
+        editMode = false;
+        
+        document.querySelectorAll('.mapped-door').forEach(box => {
+            box.style.cursor = "pointer";
+            box.onmousedown = null;
+        });
+    }
+
+    // ==========================================
+    // 🎁 GATE WHEEL LOGIC
+    // ==========================================
+    let currentOpenBox = null;
     function toggleBoxStage() {
         const boxOverlay = document.getElementById('open-box-overlay');
         const isShowing = boxOverlay.classList.toggle('active');
@@ -557,6 +641,7 @@
         const container = document.getElementById('gate-wheel-container'); container.innerHTML = ''; 
         let ind = document.createElement('div'); ind.className = 'edit-mode-indicator'; ind.innerText = "EDIT MODE ACTIVE (Press 'S' to Save)";
         container.appendChild(ind);
+
         for (let i = 1; i <= 15; i++) {
             let box = document.createElement('div'); box.className = 'mapped-door'; box.id = 'pbox-' + i;
             box.style.top = doorMap[i].t + '%'; box.style.left = doorMap[i].l + '%'; box.style.width = doorMap[i].w + '%'; box.style.height = doorMap[i].h + '%';
@@ -600,9 +685,11 @@
             }
             activePin = projectorSessionPin;
         }
+
         if (audioMap['drumroll'] && !audioMap['drumroll'].paused) { audioMap['drumroll'].pause(); audioMap['drumroll'].currentTime = 0; }
         const box = document.getElementById('pbox-' + currentOpenBox); box.classList.remove('selected'); box.classList.add('opened');
         box.innerHTML = `<div class="door-prize-text ${(isCash || isPint) ? 'door-prize-cash' : ''}">${desc.toUpperCase()}</div>`;
+        
         openedBoxes[currentOpenBox] = desc; saveToCloud("opened", openedBoxes);
         
         if(customSound && customSound !== "DEFAULT") { playSoundFX(customSound); } 
@@ -617,31 +704,6 @@
             }).processFridayPrize(winningPlayer.name, winningPlayer.id, pType, pAmt, activePin); 
         }
         currentOpenBox = null;
-    }
-
-    function toggleEditMode() {
-        if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
-        editMode = !editMode;
-        const container = document.getElementById('gate-wheel-container');
-        if (editMode) {
-            container.classList.add('editing');
-            document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "move"; box.onmousedown = startDrag; });
-        } else {
-            container.classList.remove('editing');
-            document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "pointer"; box.onmousedown = null; });
-            renderBoxGrid(); 
-        }
-    }
-    function startDrag(e) { if (!editMode) return; draggedBox = this; const rect = draggedBox.getBoundingClientRect(); offsetX = e.clientX - rect.left; offsetY = e.clientY - rect.top; document.onmousemove = dragBox; document.onmouseup = stopDrag; }
-    function dragBox(e) { if (!draggedBox) return; const container = document.getElementById('gate-wheel-container'); const rect = container.getBoundingClientRect(); let newLeft = e.clientX - rect.left - offsetX; let newTop = e.clientY - rect.top - offsetY; let leftPct = (newLeft / rect.width) * 100; let topPct = (newTop / rect.height) * 100; draggedBox.style.left = leftPct + "%"; draggedBox.style.top = topPct + "%"; }
-    function stopDrag() { draggedBox = null; document.onmousemove = null; document.onmouseup = null; }
-    function saveBoxPositions() {
-        if (!editMode) return;
-        let newDoorMap = {};
-        document.querySelectorAll('.mapped-door').forEach(box => { let id = parseInt(box.id.replace('pbox-', '')); newDoorMap[id] = { t: parseFloat(box.style.top), l: parseFloat(box.style.left), w: doorMap[id].w, h: doorMap[id].h }; });
-        doorMap = newDoorMap; proxyFirebaseWrite("boxes/doorMap.json", 'PUT', doorMap);
-        const container = document.getElementById('gate-wheel-container'); container.classList.remove('editing'); editMode = false;
-        document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "pointer"; box.onmousedown = null; });
     }
 
     // ==========================================
@@ -787,6 +849,7 @@
         setTimeout(function(){ x.className = x.className.replace("show", ""); }, 4000);
     }
 
+    // 🔥 THE FIX: Now safely accepts PHYSICAL_CASH and bypasses the till logic 
     function sendPrize(type, pinOverride) { 
       let activePin = pinOverride;
       
@@ -815,7 +878,8 @@
           if(amount === "") { alert("Enter Prize Name!"); return; } 
       } 
       
-      document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.setAttribute('data-txt', b.innerText); b.disabled = true; b.innerText = "..."; });
+      document.querySelectorAll('.control-btn').forEach(b => { b.disabled = true; });
+      var originalText = activeBtn.innerText; activeBtn.innerText = "SENDING...";
       var playerId = winningPlayer ? winningPlayer.id : 0; 
       let displayPrizeText = (type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') ? `£${amount} Cash` : (type === 'PINT' ? `${amount} Pint(s)` : amount);
       
@@ -823,19 +887,17 @@
         if (res.includes("UNAUTHORIZED")) {
             showToast(res, false);
             projectorSessionPin = null; 
-            document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); 
+            document.querySelectorAll('.control-btn').forEach(b => { b.disabled = false; }); 
+            activeBtn.innerText = originalText;
             return;
         }
 
-        showToast(res, true); 
         if(res.includes("SUCCESS") || res.includes("Logged")) { 
-            let winBox = document.getElementById('session-winners-feed'); if (winBox && winBox.firstElementChild && winBox.firstElementChild.style.color) winBox.innerHTML = '';
-            if (winBox) {
-                let winRow = document.createElement('div'); winRow.className = 'activity-row'; winRow.innerHTML = `🏆 <b>${winnerName}</b><br><span style="color:var(--accent-primary); font-size:0.9em;">${displayPrizeText}</span>`; winBox.insertBefore(winRow, winBox.firstChild);
-            }
-            autoStepTrackerAfterWin(); setTimeout(() => { closeGameReset(); }, 2000); 
-        } else { document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); }
-      }).withFailureHandler(function(err) { showToast("Error: " + err, false); document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); })
+            let winBox = document.getElementById('session-winners-feed'); if (winBox.firstElementChild && winBox.firstElementChild.style.color) winBox.innerHTML = '';
+            let winRow = document.createElement('div'); winRow.className = 'activity-row'; winRow.innerHTML = `🏆 <b>${winnerName}</b><br><span style="color:var(--accent-primary); font-size:0.9em;">${displayPrizeText}</span>`; winBox.insertBefore(winRow, winBox.firstChild);
+            autoStepTrackerAfterWin(); setTimeout(() => { closeGameReset(); activeBtn.innerText = originalText; }, 2000); 
+        } else { document.querySelectorAll('.control-btn').forEach(b => { b.disabled = false; }); activeBtn.innerText = originalText; }
+      }).withFailureHandler(function(err) { showToast("Error: " + err, false); document.querySelectorAll('.control-btn').forEach(b => { b.disabled = false; }); activeBtn.innerText = originalText; })
       .processFridayPrize(winnerName, playerId, type, amount, activePin); 
     }
     
@@ -847,7 +909,7 @@
         proxyFirebaseWrite("boxes/activeWinner.json", 'DELETE');
         
         google.script.run.withSuccessHandler(function(data) { players = data; renderStaticList(players); btn.disabled = false; }).getFridayNames(); 
-        document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt') || b.innerText; }); 
+        document.querySelectorAll('.control-btn').forEach(b => { b.disabled = false; }); 
     }
     
     function showReport() { document.getElementById('global-dimmer').style.display = 'block'; document.getElementById('report-overlay').style.display = 'flex'; const btn = document.getElementById('btn-archive'); btn.innerText = "ARCHIVE TO SHEET"; btn.disabled = false; btn.style.background = "#4caf50"; google.script.run.withSuccessHandler(function(rep) { document.getElementById('rep-entries').innerText = rep.entries || 0; document.getElementById('rep-pot').innerText = "£" + (rep.revenueTonight || 0).toFixed(2); document.getElementById('rep-late').innerText = "£" + (rep.revenueLate || 0).toFixed(2); document.getElementById('rep-payouts').innerText = "£" + (rep.cashWon || 0).toFixed(2); document.getElementById('rep-carry').innerText = "£" + (rep.carryOver || 0).toFixed(2); var listHTML = ""; if(rep.winners && rep.winners.length > 0) { rep.winners.forEach(function(w) { listHTML += `<div class='winner-row'><span>${w.name}</span><span>${w.prize}</span></div>`; }); } document.getElementById('rep-list').innerHTML = listHTML || "NO WINNERS YET."; }).getReportData(); }
