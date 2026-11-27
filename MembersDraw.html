@@ -72,6 +72,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 #winner-name-container { width: 95%; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; flex-shrink: 0; min-height: 45px; }
 #winner-name-big { font-family: 'Bowlby One SC', cursive; font-size: 4vw; line-height: 1; color: #000; text-transform: uppercase; margin: 0; text-shadow: 2px 2px 0 #fff; white-space: nowrap; }
 
+/* 🔥 RESTORED WINNER ACTIONS (PRIZES) */
 #winner-actions { display: none; flex-direction: column; gap: 6px; width: 95%; z-index: 20; }
 .control-row { display: flex; align-items: center; justify-content: space-between; gap: 5px; background: rgba(0,0,0,0.1); padding: 4px 10px; border-radius: 8px; border: 2px solid rgba(0,0,0,0.1); }
 .control-label { font-size: 1.2em; font-weight: bold; color: #000; width: 70px; text-align: left; font-family: 'Oswald', sans-serif; }
@@ -84,8 +85,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-cash { background: linear-gradient(to bottom, #2ecc71, #27ae60); }
 .btn-pint { background: linear-gradient(to bottom, #e67e22, #d35400); }
 .btn-custom { background: linear-gradient(to bottom, #9c27b0, #7b1fa2); }
-      .btn-absent { background: #333; color: #ccc; border: 2px solid #555; font-size: 1rem; width: 100%; margin-top: 2px; padding: 8px; border-radius: 8px; font-family: 'Oswald', sans-serif; cursor: pointer; font-weight: bold;}
-      .btn-absent:hover { background: #000; color: #fff; }
 .btn-reset { background: transparent; border: none; color: #000; text-decoration: underline; font-size: 0.9rem; box-shadow: none; margin-top: 2px; cursor: pointer; font-weight: bold; }
 
 .grid-box { background: linear-gradient(to bottom, #222, #000); border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-family: 'New Amsterdam', sans-serif; font-size: 1.4rem; letter-spacing: 0.5px; color: #fff; line-height: 1.1; text-shadow: 0 0 5px #fff; padding: 5px; word-wrap: break-word; border: 4px dashed #775500; box-shadow: inset 0 0 10px #000; transition: opacity 0.5s; }
@@ -112,6 +111,22 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 #toast-container { visibility: hidden; min-width: 280px; margin-left: -140px; background-color: #222; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; font-size: 1.3rem; box-shadow: 0 5px 20px rgba(0,0,0,0.6); border: 2px solid #ffd700; opacity: 0; transition: opacity 0.5s, bottom 0.5s; font-family: 'Oswald', sans-serif; display: flex; align-items: center; justify-content: center; gap: 15px; }
 #toast-container.show { visibility: visible; opacity: 1; bottom: 50px; }
+
+#open-box-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1a0b0b 0%, #050202 100%); z-index: 99998; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in-out; }
+#open-box-overlay.active { opacity: 1; pointer-events: auto; }
+
+.gate-wheel-container { position: relative; width: 90vw; max-width: 1100px; aspect-ratio: 1.33 / 1; background-image: url('https://raw.githubusercontent.com/CornerstoneCoOpApps/appassets/refs/heads/main/GateWheel.png'); background-size: contain; background-repeat: no-repeat; background-position: center; margin-top: 20px; transition: border 0.3s; }
+.mapped-door { position: absolute; cursor: pointer; border: 2px solid transparent; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.mapped-door.selected { border-color: #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); background: rgba(255, 215, 0, 0.3); animation: pulse 0.8s infinite alternate; }
+@keyframes pulse { from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); } to { box-shadow: 0 0 35px rgba(255, 215, 0, 1); } }
+.mapped-door.opened { background: #111; border: 2px solid #444; box-shadow: inset 0 0 20px #000; }
+.door-prize-text { font-family: 'Oswald', sans-serif; font-size: 1.5vw; color: #ffd700; font-weight: bold; text-align: center; text-shadow: 2px 2px 0 #000; padding: 4px; line-height: 1.1; }
+.door-prize-cash { color: #4caf50; font-size: 2vw; text-shadow: 0 0 10px #000; }
+
+.edit-mode-indicator { display: none; position: absolute; top: 10px; right: 10px; background: #ff0000; color: #fff; padding: 5px 15px; font-weight: bold; border-radius: 8px; animation: flash 1s infinite alternate; }
+@keyframes flash { from { opacity: 1; } to { opacity: 0.5; } }
+.gate-wheel-container.editing .edit-mode-indicator { display: block; }
+.gate-wheel-container.editing .mapped-door { border: 2px dashed #00ff00 !important; background: rgba(0,255,0,0.2) !important; transition: none !important; }
 
 @media screen and (max-height: 950px) { #scaler { transform: scale(0.85); } }
 @media screen and (max-height: 750px) { #scaler { transform: scale(0.70); } }
@@ -185,8 +200,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 <input type="text" id="customInput" class="text-input" placeholder="e.g. Old Shoe" onfocus="this.value=''">
 <button class="control-btn btn-custom" id="btnCustom" onclick="sendPrize('CUSTOM')">LOG PRIZE</button>
 </div>
-                <button class="action-btn btn-absent" id="btnAbsent" onclick="markAbsent()">❌ PLAYER ABSENT</button>
-                <!-- 🔥 Absent Button removed as requested -->
 <button class="action-btn btn-reset" onclick="startIdleMode()">Cancel / Reset</button>
 </div>
 </div>
@@ -214,6 +227,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 </div>
 <div id="toast-container"></div>
 
+  <div id="open-box-overlay">
+    <h1 style="font-family: 'Oswald', sans-serif; font-size: 4vw; color: #ffd700; margin: 0; text-shadow: 4px 4px 0 #000; letter-spacing: 3px;">OPEN THE BOX!</h1>
+    <div id="gate-wheel-container" class="gate-wheel-container">
+        <div class="edit-mode-indicator">EDIT MODE ACTIVE (Press 'S' to Save)</div>
+    </div>
+    <button style="margin-top: 20px; background: rgba(255,255,255,0.1); color: #fff; padding: 10px 30px; border: 1px solid #555; border-radius: 30px; cursor: pointer; font-family: 'Oswald';" onclick="toggleBoxStage()">CLOSE SCREEN (B)</button>
+  </div>
+
 <script>
 if (!Array.prototype.at) { Array.prototype.at = function(n) { n = Math.trunc(n) || 0; if (n < 0) n += this.length; if (n < 0 || n >= this.length) return undefined; return this.slice(n, n + 1).pop(); }; }
 if (!String.prototype.at) { String.prototype.at = function(n) { n = Math.trunc(n) || 0; if (n < 0) n += this.length; if (n < 0 || n >= this.length) return undefined; return this.substring(n, n + 1); }; }
@@ -225,8 +246,7 @@ const API_URL = "https://script.google.com/a/gateinnwinsford.com/macros/s/AKfycb
 const FB_BASE_URL = "https://friday-club-ticker-default-rtdb.europe-west1.firebasedatabase.app/";
 
 let projectorSessionPin = null;
-      let sessionToken = null; // 🔥 ADDED: VIP Speed Token
-      let sessionToken = null; 
+let sessionToken = null; 
 
 // 🔥 AUDIO SYNC ENGINE FOR MEMBERS DRAW
 const audioMap = {
@@ -398,6 +418,92 @@ var gameState = "LOADING"; let masterMembersList = [];
 // 🔥 FIREBASE REMOTE ENGINE
 let remoteListenerActive = true; let remoteTimer = null; let lastCommandTime = Date.now();
 
+// ==========================================
+// 🛠️ DRAGGABLE BOX EDITOR & BACKGROUND ('E' and 'S')
+// ==========================================
+let editMode = false;
+let draggedBox = null;
+let offsetX = 0; let offsetY = 0;
+
+document.addEventListener('keydown', function(event) { 
+var target = event.target || event.srcElement; if (target.tagName.toUpperCase() === 'INPUT') return;
+
+if (event.key === 'E' || event.key === 'e') { toggleEditMode(); return; }
+if (event.key === 'S' || event.key === 's') { saveBoxPositions(); return; }
+
+if (event.key === 'H' || event.key === 'h') { document.getElementById('hydration-break-overlay').classList.toggle('active'); return; }
+if (event.key === 'B' || event.key === 'b') { toggleBoxStage(); return; }
+if (event.key === 'V' || event.key === 'v') { triggerVAR(); return; }
+
+if (event.code === 'Space' || event.code === 'Enter') { 
+let gate = document.getElementById('tv-intro-gate');
+if(!gate || gate.style.display === 'none') {
+event.preventDefault(); 
+if (gameState === "IDLE") startSpin(); else if (gameState === "SPINNING") stopSpin(); 
+}
+}
+});
+
+function toggleEditMode() {
+if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
+editMode = !editMode;
+const container = document.getElementById('gate-wheel-container');
+if (editMode) {
+container.classList.add('editing');
+document.querySelectorAll('.mapped-door').forEach(box => {
+box.style.cursor = "move";
+box.onmousedown = startDrag;
+});
+} else {
+container.classList.remove('editing');
+document.querySelectorAll('.mapped-door').forEach(box => {
+box.style.cursor = "pointer";
+box.onmousedown = null;
+});
+renderBoxGrid(); 
+}
+}
+
+function startDrag(e) {
+if (!editMode) return;
+draggedBox = this;
+const rect = draggedBox.getBoundingClientRect();
+offsetX = e.clientX - rect.left;
+offsetY = e.clientY - rect.top;
+document.onmousemove = dragBox;
+document.onmouseup = stopDrag;
+}
+
+function dragBox(e) {
+if (!draggedBox) return;
+const container = document.getElementById('gate-wheel-container');
+const rect = container.getBoundingClientRect();
+let newLeft = e.clientX - rect.left - offsetX;
+let newTop = e.clientY - rect.top - offsetY;
+let leftPct = (newLeft / rect.width) * 100;
+let topPct = (newTop / rect.height) * 100;
+draggedBox.style.left = leftPct + "%";
+draggedBox.style.top = topPct + "%";
+}
+
+function stopDrag() { draggedBox = null; document.onmousemove = null; document.onmouseup = null; }
+
+function saveBoxPositions() {
+if (!editMode) return;
+let newDoorMap = {};
+document.querySelectorAll('.mapped-door').forEach(box => {
+let id = parseInt(box.id.replace('pbox-', ''));
+newDoorMap[id] = { t: parseFloat(box.style.top), l: parseFloat(box.style.left), w: doorMap[id].w, h: doorMap[id].h };
+});
+doorMap = newDoorMap; 
+saveToCloud("doorMap", doorMap);
+
+const container = document.getElementById('gate-wheel-container');
+container.classList.remove('editing'); editMode = false;
+
+document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "pointer"; box.onmousedown = null; });
+}
+
 window.onload = function() {
 loadPot(); 
 initBoardStructure(); 
@@ -408,12 +514,11 @@ let savedPin = sessionStorage.getItem('hostPin');
 let savedName = sessionStorage.getItem('hostName');
 let savedToken = sessionStorage.getItem('sessionToken'); 
 
-if (savedPin) {
+if (savedPin && savedToken) {
 projectorSessionPin = savedPin;
 sessionToken = savedToken; 
 let gate = document.getElementById('tv-intro-gate');
 if (gate) gate.style.display = 'none'; 
-             showToast("WELCOME BACK, " + (savedName || "HOST").toUpperCase(), true);
 }
 
 // 🔥 DELAYED AUDIO FETCH (No Boot Freezes!)
@@ -429,17 +534,6 @@ startIdleMode(true);
 startRemoteListener();
 };
 
-document.addEventListener('keydown', function(event) {
-var target = event.target || event.srcElement; if (target.tagName.toUpperCase() === 'INPUT') return;
-if (event.code === 'Space' || event.code === 'Enter') { 
-let gate = document.getElementById('tv-intro-gate');
-if(!gate || gate.style.display === 'none') {
-event.preventDefault(); 
-if (gameState === "IDLE") startSpin(); else if (gameState === "SPINNING") stopSpin(); 
-}
-}
-});
-
 function startRemoteListener() {
 if (remoteTimer) clearInterval(remoteTimer);
 remoteTimer = setInterval(() => {
@@ -450,11 +544,11 @@ if (!cmd) return;
 if (cmd.timestamp > lastCommandTime) {
 lastCommandTime = cmd.timestamp;
 
-                      // 🔥 MAGIC FIX: Catch the VIP Token from the remote!
-                      if (cmd.token && sessionToken !== cmd.token) {
-                          sessionToken = cmd.token;
-                          sessionStorage.setItem('sessionToken', sessionToken);
-                      }
+// 🔥 MAGIC FIX: Catch the VIP Token from the remote!
+if (cmd.token && sessionToken !== cmd.token) {
+sessionToken = cmd.token;
+sessionStorage.setItem('sessionToken', sessionToken);
+}
 
 let gate = document.getElementById('tv-intro-gate');
 if (gate && gate.style.display !== 'none' && !gate.classList.contains('unlocked')) {
@@ -475,10 +569,6 @@ if (cmd.action === 'award') {
 document.getElementById('winner-stage').classList.remove('pop-up-active');
 startIdleMode(); 
 }
-                          else if (cmd.action === 'absent') {
-                              document.getElementById('winner-stage').classList.remove('pop-up-active');
-                              startIdleMode(); 
-                          }
 }
 }
 }).catch(e => console.log("Remote Link Active"));
@@ -561,14 +651,256 @@ proxyFirebaseWrite("boxes/activeWinner.json", 'PUT', winnerName);
 setTimeout(function() { fitTextToContainer('winner-name-big', 5); }, 50);
 }
 
+let doorMap = { 1: { t: 53.5, l: 44.5, w: 11, h: 18 }, 2: { t: 43, l: 69, w: 11, h: 15 }, 3: { t: 43, l: 20, w: 11, h: 15 }, 4: { t: 26, l: 69, w: 11, h: 15 }, 5: { t: 77, l: 69, w: 11, h: 15 }, 6: { t: 41, l: 44.5, w: 11, h: 11 }, 7: { t: 41, l: 56, w: 11, h: 11 }, 8: { t: 26, l: 20, w: 11, h: 15 }, 9: { t: 73, l: 56, w: 11, h: 11 }, 10: { t: 73, l: 33, w: 11, h: 11 }, 11: { t: 60, l: 69, w: 11, h: 15 }, 12: { t: 60, l: 20, w: 11, h: 15 }, 13: { t: 73, l: 44.5, w: 11, h: 11 }, 14: { t: 41, l: 33, w: 11, h: 11 }, 15: { t: 77, l: 20, w: 11, h: 15 } };
+let openedBoxes = {}; let prefilledBoxes = {};
+
+function toggleBoxStage() {
+const boxOverlay = document.getElementById('open-box-overlay');
+const isShowing = boxOverlay.classList.toggle('active');
+if (isShowing) {
+playSoundFX('boxIntro'); currentOpenBox = null;
+document.getElementById('gate-wheel-container').innerHTML = '<h2 style="color:#fff; text-align:center; margin-top:20%;">Syncing with Cloud...</h2>';
+fetch(FB_BASE_URL + "boxes.json").then(res => res.json()).then(cloudData => {
+if (cloudData) { 
+if (cloudData.opened) openedBoxes = cloudData.opened; 
+if (cloudData.prefilled) prefilledBoxes = cloudData.prefilled; 
+if (cloudData.doorMap) doorMap = cloudData.doorMap; 
+}
+renderBoxGrid();
+}).catch(e => renderBoxGrid()); 
+} else { 
+if(editMode) toggleEditMode(); 
+}
+}
+
+function renderBoxGrid() {
+const container = document.getElementById('gate-wheel-container'); container.innerHTML = ''; 
+// Re-add edit indicator
+let ind = document.createElement('div'); ind.className = 'edit-mode-indicator'; ind.innerText = "EDIT MODE ACTIVE (Press 'S' to Save)";
+container.appendChild(ind);
+
+for (let i = 1; i <= 15; i++) {
+let box = document.createElement('div'); box.className = 'mapped-door'; box.id = 'pbox-' + i;
+box.style.top = doorMap[i].t + '%'; box.style.left = doorMap[i].l + '%'; box.style.width = doorMap[i].w + '%'; box.style.height = doorMap[i].h + '%';
+if (openedBoxes[i]) {
+box.classList.add('opened');
+let isCash = openedBoxes[i].toLowerCase().includes('cash') || openedBoxes[i].includes('£');
+box.innerHTML = `<div class="door-prize-text ${isCash ? 'door-prize-cash' : ''}">${openedBoxes[i].toUpperCase()}</div>`;
+}
+if(!editMode) box.onclick = () => openPrizeBox(i);
+else { box.style.cursor = "move"; box.onmousedown = startDrag; }
+container.appendChild(box);
+}
+}
+
+function openPrizeBox(i) {
+if(editMode) return;
+const box = document.getElementById('pbox-' + i);
+if (box.classList.contains('opened')) return; 
+if (!box.classList.contains('selected')) {
+document.querySelectorAll('.mapped-door').forEach(d => d.classList.remove('selected'));
+box.classList.add('selected'); currentOpenBox = i; playSoundFX('drumroll');
+}
+}
+
+// 🔥 MODIFIED: Now parses the Vault Dropdown Sound!
+function attemptReveal() {
+if (!currentOpenBox) return;
+let vaultData = prefilledBoxes[currentOpenBox];
+if (vaultData) {
+let desc = typeof vaultData === 'object' ? vaultData.text : vaultData;
+let snd = typeof vaultData === 'object' ? vaultData.sound : "DEFAULT";
+executeReveal(desc, desc.toLowerCase().includes('cash') || desc.includes('£'), desc.toLowerCase().includes('pint'), null, snd);
+}
+}
+
+function executeReveal(desc, isCash, isPint, pinOverride, customSound) {
+let activePin = pinOverride;
+if ((isCash || isPint) && !activePin) {
+if (!projectorSessionPin) {
+projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
+if (!projectorSessionPin) return;
+}
+activePin = projectorSessionPin;
+}
+
+if (audioMap['drumroll'] && !audioMap['drumroll'].paused) { audioMap['drumroll'].pause(); audioMap['drumroll'].currentTime = 0; }
+const box = document.getElementById('pbox-' + currentOpenBox); box.classList.remove('selected'); box.classList.add('opened');
+box.innerHTML = `<div class="door-prize-text ${(isCash || isPint) ? 'door-prize-cash' : ''}">${desc.toUpperCase()}</div>`;
+
+openedBoxes[currentOpenBox] = desc; saveToCloud("opened", openedBoxes);
+
+// 🔥 Custom sound hook-in!
+if(customSound && customSound !== "DEFAULT") {
+playSoundFX(customSound);
+} else {
+if (isCash || isPint) playSoundFX('celebrate'); else playSoundFX('sad');
+}
+
+let playerId = 0; 
+let winnerName = document.getElementById('winner-name-big').innerText;
+if (allNames && allNames.length > 0) {
+let winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
+if (winnerObj && winnerObj.id) playerId = winnerObj.id;
+}
+
+let pType = 'CUSTOM'; let pAmt = desc;
+if (isCash) { pType = 'PHYSICAL_CASH'; pAmt = desc.replace(/[^\d.-]/g, ''); } else if (isPint) { pType = 'PINT'; pAmt = desc.replace(/[^\d.-]/g, '') || "1"; }
+
+google.script.run.withSuccessHandler(res => {
+if (res.includes("UNAUTHORIZED")) { showToast(res, false); projectorSessionPin = null; }
+}).processFridayPrize(winnerName, playerId, pType, pAmt, activePin); 
+
+currentOpenBox = null;
+}
+
+// ==========================================
+// ⚙️ CORE GAME LOGIC
+// ==========================================
+function startConfetti() { const canvas = document.getElementById('confetti-canvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight; particles = []; const colors = ['#ffd700', '#ff5252', '#ffffff', '#00f2fe']; for(let i=0; i<100; i++) { particles.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20 - 5, color: colors.at(Math.floor(Math.random() * colors.length)), size: Math.random() * 25 + 15, drag: 0.95, gravity: 0.5 }); } if(confettiLoop) cancelAnimationFrame(confettiLoop); function render() { ctx.clearRect(0, 0, canvas.width, canvas.height); let active = false; particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= p.drag; p.vy *= p.drag; if(p.y < canvas.height + p.size) active = true; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); }); if(active) confettiLoop = requestAnimationFrame(render); else ctx.clearRect(0,0, canvas.width, canvas.height); } render(); }
+
+window.onload = function() { 
+document.getElementById('spin-btn').disabled = true; setTimeout(() => { document.body.classList.remove('intro-mode'); }, 1500); 
+initMarqueeLights(); 
+
+startRemoteListener();
+
+let savedPin = sessionStorage.getItem('hostPin');
+let savedName = sessionStorage.getItem('hostName');
+let savedToken = sessionStorage.getItem('sessionToken'); 
+
+if (savedPin) {
+projectorSessionPin = savedPin;
+sessionToken = savedToken;
+let gate = document.getElementById('tv-intro-gate');
+if (gate) gate.style.display = 'none'; 
+}
+
+// 🔥 DELAYED AUDIO FETCH (No Boot Freezes!)
+setTimeout(syncCustomAudio, 2500);
+
+fetch(FB_BASE_URL + "players.json").then(res => res.json()).then(data => {
+if (data) {
+Object.values(data).forEach(p => { if (p.name) players.push({ id: p.id || Date.now(), name: p.name }); });
+renderStaticList(players);
+}
+document.getElementById('spin-btn').disabled = false;
+}).catch(err => console.log("Init fetch error"));
+
+startFirebaseSyncLoop(); 
+};
+
+function advanceTracker(el) { if (el.classList.contains('active-round')) { el.classList.remove('active-round'); el.classList.add('completed'); } else if (el.classList.contains('completed')) { el.classList.remove('completed'); } else { document.querySelectorAll('.tracker-item').forEach(item => item.classList.remove('active-round')); el.classList.add('active-round'); } }
+function autoStepTrackerAfterWin() { const items = Array.from(document.querySelectorAll('.tracker-item')); const currentIdx = items.findIndex(item => item.classList.contains('active-round')); if (currentIdx !== -1) { const currentItem = items.at(currentIdx); currentItem.classList.remove('active-round'); currentItem.classList.add('completed'); const nextItem = items.at(currentIdx + 1); if (nextItem) nextItem.classList.add('active-round'); } }
+
+function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+function playTick() { if (!audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05); gain.gain.setValueAtTime(0.15, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.06); }
+function playWinSound() { if (!audioCtx) return; const notes = [523.25, 659.25, 783.99, 1046.50]; notes.forEach((freq, i) => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (i*0.1)); gain.gain.setValueAtTime(0.1, audioCtx.currentTime + (i*0.1)); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (i*0.1) + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(audioCtx.currentTime + (i*0.1)); osc.stop(audioCtx.currentTime + (i*0.1) + 0.5); }); }
+
+let isInitialLoad = true;
+function startFirebaseSyncLoop() {
+setInterval(function() {
+if (isSpinning) return; 
+fetch(FB_BASE_URL + "players.json").then(res => res.json()).then(data => {
+if (!data) { isInitialLoad = false; return; }
+let feedUpdated = false;
+Object.keys(data).forEach(key => {
+if (!knownFirebaseKeys.has(key)) {
+knownFirebaseKeys.add(key);
+let newPlayer = null; Object.entries(data).forEach(entry => { if(entry.at(0) === key) newPlayer = entry.at(1); });
+if(newPlayer && newPlayer.name) {
+if (!isInitialLoad) {
+const notif = document.getElementById('live-notification'); notif.innerHTML = `🎟️ TICKET SECURED: ${newPlayer.name.toUpperCase()} 🎟️`; notif.classList.add('show');
+if (audioCtx) { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); osc.frequency.setValueAtTime(1318.51, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+setTimeout(() => { notif.classList.remove('show'); }, 4000); 
+}
+let matchesExisting = players.some(p => p.name === newPlayer.name);
+if (!matchesExisting) { players.push({ id: newPlayer.id || Date.now(), name: newPlayer.name }); feedUpdated = true; }
+}
+}
+});
+isInitialLoad = false; if (feedUpdated) renderStaticList(players);
+}).catch(err => console.log("Firebase loop active."));
+}, 4000);
+}
+
+function triggerSpinAction() { if(isSpinning) return; if(players.length === 0) return alert("No players entered!"); const btn = document.getElementById('spin-btn'); if(btn && !btn.disabled) { btn.classList.add('simulated-active'); setTimeout(() => btn.classList.remove('simulated-active'), 150); spinWheel(); } }
+function initMarqueeLights() { const frame = document.getElementById('marquee-frame'); const w = 780; const h = 600; const pad = 25; const tl = {x: pad, y: pad}; const tr = {x: w - pad, y: pad}; const br = {x: w - pad, y: h - pad}; const bl = {x: pad, y: h - pad}; const trackW = tr.x - tl.x; const trackH = bl.y - tl.y; const countX = 16; const countY = 12; function createBulb(x, y, i) { let b = document.createElement('div'); b.className = 'bulb ' + (i % 2 === 0 ? 'even' : 'odd'); b.style.left = x + 'px'; b.style.top = y + 'px'; frame.appendChild(b); } let idx = 0; for(let i=1; i < countX - 1; i++) { createBulb(tl.x + (i * (trackW / (countX - 1))), tl.y, idx++); } for(let i=1; i < countY - 1; i++) { createBulb(tr.x, tr.y + (i * (trackH / (countY - 1))), idx++); } for(let i=1; i < countX - 1; i++) { createBulb(br.x - (i * (trackW / (countX - 1))), br.y, idx++); } for(let i=1; i < countY - 1; i++) { createBulb(bl.x, bl.y - (i * (trackH / (countY - 1))), idx++); } }
+
+function renderStaticList(data) { 
+cancelAnimationFrame(idleSpinFrame); const strip = document.getElementById('spinner-strip'); strip.style.transition = "none"; strip.innerHTML = ""; 
+const badge = document.getElementById('ticket-counter-badge'); if (badge) badge.innerText = `🎟️ ${data.length} TICKETS IN PLAY`;
+if(data.length === 0) { strip.innerHTML = "<div class='name-card card-red' style='height:500px'>WAITING FOR ENTRIES...</div>"; strip.style.top = "0px"; return; } 
+let baseList = data.slice().sort(() => 0.5 - Math.random()); let fullPool = []; for(let i = 0; i < 30; i++) fullPool = fullPool.concat(baseList);
+let blankTop = document.createElement('div'); blankTop.className = 'blank-card'; strip.appendChild(blankTop); 
+fullPool.forEach((p, i) => { let div = document.createElement('div'); div.className = `name-card ${COLORS.at(i % COLORS.length)}`; div.innerText = p.name; strip.appendChild(div); }); 
+let blankBottom = document.createElement('div'); blankBottom.className = 'blank-card'; strip.appendChild(blankBottom); 
+idleTop = -65; let singleCycleHeight = baseList.length * ROW_HEIGHT; let lastTime = performance.now();
+function scrollLoop(time) { if(isSpinning) return; let dt = time - lastTime; lastTime = time; if (dt > 100) dt = 16; idleTop -= (45 * (dt / 1000)); if (Math.abs(idleTop + 65) >= singleCycleHeight) idleTop += singleCycleHeight; strip.style.top = idleTop + "px"; idleSpinFrame = requestAnimationFrame(scrollLoop); }
+idleSpinFrame = requestAnimationFrame(scrollLoop);
+}
+
+function spinWheel() { 
+cancelAnimationFrame(idleSpinFrame); if(isSpinning) return; if (players.length === 0) return alert("No players entered yet!"); 
+isSpinning = true; document.body.classList.add('is-spinning'); initAudio(); spinMusic.currentTime = 0; spinMusic.play(); document.body.classList.remove('winner-mode'); 
+document.getElementById('spin-btn').disabled = true; 
+
+let spinList = []; players.forEach(p => spinList.push(p));
+for (let i = spinList.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); let temp = spinList.at(i); spinList.splice(i, 1, spinList.at(j)); spinList.splice(j, 1, temp); } 
+const winnerIndex = Math.floor(Math.random() * spinList.length); winningPlayer = spinList.at(winnerIndex); 
+const strip = document.getElementById('spinner-strip'); strip.innerHTML = ""; let buildList = []; 
+for(let i=0; i<2; i++) buildList.push({type: 'blank'}); for(let i=0; i<40; i++) buildList = buildList.concat(spinList.map(p => ({type: 'name', name: p.name}))); for(let i=0; i<2; i++) buildList.push({type: 'blank'}); 
+const initialBlanks = 2; buildList.forEach((p, index) => { let div = document.createElement('div'); if(p.type === 'blank') { div.className = 'blank-card'; } else { div.className = `name-card ${COLORS.at((index - initialBlanks) % COLORS.length)}`; div.innerText = p.name; } strip.appendChild(div); }); 
+
+const centerOffset = 250; const halfRow = ROW_HEIGHT / 2; const startRound = 35; const startIndex = initialBlanks + (spinList.length * startRound); const startScroll = (startIndex * ROW_HEIGHT) - centerOffset + halfRow; const targetRound = 4; const targetIndex = initialBlanks + (spinList.length * targetRound) + winnerIndex; 
+const targetScroll = (targetIndex * ROW_HEIGHT) - centerOffset + halfRow; lastWinningScroll = targetScroll; 
+
+strip.style.transition = "none"; strip.style.top = `-${startScroll}px`; strip.offsetHeight; 
+setTimeout(() => { strip.style.transition = "top 15s cubic-bezier(0.1, 0, 0.05, 1)"; strip.style.top = `-${targetScroll}px`; if(tickerInterval) clearInterval(tickerInterval); let lastRowIndex = -1; tickerInterval = setInterval(() => { const currentTop = parseFloat(window.getComputedStyle(strip).top); const absTop = Math.abs(currentTop); const currentRow = Math.floor( (absTop + 250) / ROW_HEIGHT ); if (currentRow !== lastRowIndex && lastRowIndex !== -1) { playTick(); } lastRowIndex = currentRow; }, 20); }, 50); 
+setTimeout(() => { clearInterval(tickerInterval); showWinner(winningPlayer); isSpinning = false; }, 15500); 
+}
+
+function triggerVAR() {
+const winnerOverlay = document.getElementById('winner-overlay'); const globalDimmer = document.getElementById('global-dimmer');
+if (winnerOverlay.style.display !== 'flex') return;
+isSpinning = true; winnerOverlay.style.display = 'none'; globalDimmer.style.display = 'none'; 
+playSoundFX('whistle'); playSoundFX('rewind');
+
+const varGraphic = document.createElement("div"); varGraphic.id = "var-overlay"; varGraphic.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; z-index:9000; pointer-events:none; display:flex; flex-direction:column; justify-content:center; align-items:center;";
+varGraphic.innerHTML = `<div style="position:absolute; width:100%; height:100%; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.8), rgba(0,0,0,0.8) 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px); z-index:1;"></div><div style="position:absolute; top: 10%; width:100%; text-align:center; z-index: 2;"><h1 style="font-family: 'Oswald', sans-serif; font-size: 8vw; color: #fff; text-shadow: 4px 4px 0 #000; margin:0; letter-spacing: 5px; font-style: italic;">⏪ REPLAY</h1></div>`;
+document.body.appendChild(varGraphic);
+
+const strip = document.getElementById('spinner-strip'); strip.style.transition = 'none'; strip.style.top = `-${lastWinningScroll - (ROW_HEIGHT * 8)}px`; 
+
+setTimeout(() => {
+varGraphic.innerHTML = `<div style="background: #000; border-bottom: 8px solid #00ff00; padding: 20px; text-align: center; width:100%; position:absolute; top:0; z-index:10; box-shadow: 0 10px 30px rgba(0,0,0,0.9);"><h1 style="font-size: 4vw; color: #fff; margin:0; font-family: 'Oswald', sans-serif; letter-spacing: 4px; text-transform: uppercase;">VAR <span style="color:#00ff00;">REVIEW</span> IN PROGRESS</h1></div><div id="var-decision" style="position:absolute; bottom:15%; font-family: 'Oswald', sans-serif; font-size: 3.5vw; color: #000; background: #ffeb3b; padding:15px 40px; border-radius: 8px; border: 4px solid #000; font-weight: bold; z-index:10; text-transform: uppercase; box-shadow: 10px 10px 0px rgba(0,0,0,0.8); transition: background 0.3s, color 0.3s;">CHECKING FINAL TOUCH...</div>`;
+strip.style.transition = 'top 5s cubic-bezier(0.1, 0, 0.2, 1)'; strip.style.top = `-${lastWinningScroll}px`;
+setTimeout(() => {
+const decisionBox = document.getElementById("var-decision"); decisionBox.innerHTML = "DECISION: WINNER STANDS"; decisionBox.style.background = "#00ff00"; decisionBox.style.color = "#000000"; 
+playSoundFX('celebrate');
+setTimeout(() => { if(document.getElementById('var-overlay')) document.body.removeChild(document.getElementById('var-overlay')); winnerOverlay.style.display = 'flex'; globalDimmer.style.display = 'block'; isSpinning = false; }, 3000);
+}, 5200); 
+}, 1200); 
+}
+
+function showWinner(player) { 
+spinMusic.pause(); document.body.classList.remove('is-spinning'); document.body.classList.add('winner-mode'); 
+playWinSound(); document.getElementById('global-dimmer').style.display = 'block'; startConfetti(); 
+document.getElementById('winner-overlay').style.display = 'flex'; document.getElementById('winner-name').innerText = player.name; 
+document.getElementById('cashInput').value = ""; document.getElementById('pintInput').value = "1"; document.getElementById('customInput').value = ""; 
+saveToCloud("activeWinner", player.name);
+}
+
 function showToast(msg, isSuccess) {
 var x = document.getElementById("toast-container"); x.innerHTML = `<span class="toast-icon">${isSuccess ? "✅" : "⚠️"}</span> <span>${msg}</span>`; x.className = "show"; x.style.borderColor = isSuccess ? "#00e676" : "#ff1744";
 if(audioCtx && audioCtx.state !== 'suspended') { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(isSuccess ? 880 : 220, audioCtx.currentTime); if(isSuccess) { osc.frequency.setValueAtTime(880, audioCtx.currentTime); osc.frequency.setValueAtTime(1108, audioCtx.currentTime + 0.1); osc.frequency.setValueAtTime(1318, audioCtx.currentTime + 0.2); } gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.6); }
 setTimeout(function(){ x.className = x.className.replace("show", ""); }, 4000);
 }
 
-function sendPrize(amount, pinOverride) {
+// 🔥 THE FIX: Now perfectly accepts PHYSICAL_CASH and pulls the number correctly!
+function sendPrize(type, pinOverride) { 
 let activePin = pinOverride;
+
 if (!activePin) {
 if (!projectorSessionPin) {
 projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
@@ -577,46 +909,50 @@ if (!projectorSessionPin) return;
 activePin = projectorSessionPin;
 }
 
-var winnerName = document.getElementById('winner-name-big').innerText;
-var winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
-if (!winnerObj || !winnerObj.id) { showToast("Could not find ID for " + winnerName, false); return; }
+var winnerName = document.getElementById("winner-name").innerText; 
+var amount = 0; 
+var activeBtn = document.getElementById((type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') ? 'btnCash' : (type === 'PINT' ? 'btnPint' : 'btnCustom'));
 
-Array.prototype.slice.call(document.querySelectorAll('.control-btn, .action-btn')).forEach(function(b) { b.setAttribute('data-txt', b.innerText); b.disabled = true; b.innerText = "..."; });
+if (type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') { 
+amount = document.getElementById("cashInput").value; 
+if(amount === "" || amount <= 0) { alert("Enter Cash Amount!"); return; } 
+} 
+else if (type === 'PINT') { 
+amount = document.getElementById("pintInput").value; 
+if(amount === "" || amount <= 0) { alert("Enter Number of Pints!"); return; } 
+} 
+else if (type === 'CUSTOM') { 
+amount = document.getElementById("customInput").value; 
+if(amount === "") { alert("Enter Prize Name!"); return; } 
+} 
 
-var finalAmount = 0;
-if (amount === 'MEMBERS_CASH' || amount === 'CASH') {
-finalAmount = document.getElementById('cashInput').value; if(!finalAmount || finalAmount <= 0) { showToast("Enter Cash Amount", false); resetButtons(); return; }
-currentPot = 25; document.getElementById('rollover-amount').innerText = '£' + currentPot; 
-google.script.run.updateRolloverPot(currentPot);
-} else if (amount === 'PINT') { finalAmount = document.getElementById('pintInput').value; if(!finalAmount || finalAmount <= 0) { showToast("Enter Pints", false); resetButtons(); return; }
-} else if (amount === 'CUSTOM') { finalAmount = document.getElementById('customInput').value; if(!finalAmount) { showToast("Enter Prize Name", false); resetButtons(); return; }
-} else finalAmount = amount;
+document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.setAttribute('data-txt', b.innerText); b.disabled = true; b.innerText = "..."; });
+var playerId = 0; 
 
-google.script.run.withSuccessHandler(function(response) {
-if (response.includes("UNAUTHORIZED")) {
-showToast(response, false); 
+if (allNames && allNames.length > 0) {
+let winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
+if (winnerObj && winnerObj.id) playerId = winnerObj.id;
+}
+
+let displayPrizeText = (type === 'CASH' || type === 'MEMBERS_CASH' || type === 'PHYSICAL_CASH') ? `£${amount} Cash` : (type === 'PINT' ? `${amount} Pint(s)` : amount);
+
+google.script.run.withSuccessHandler(function(res) { 
+if (res.includes("UNAUTHORIZED")) {
+showToast(res, false);
 projectorSessionPin = null; 
-resetButtons();
+document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); 
 return;
 }
-showToast(response, true); 
-if(response.includes("SUCCESS") || response.includes("Logged")) setTimeout(startIdleMode, 2000); else resetButtons();
-}).withFailureHandler(function(err) { showToast("Error: " + err, false); resetButtons(); })
-.processFridayPrize(winnerName, winnerObj.id, (amount === 'CUSTOM' ? 'CUSTOM' : (amount === 'PINT' ? 'PINT' : (amount === 'MEMBERS_CASH' ? 'MEMBERS_CASH' : 'CASH'))), finalAmount, activePin); 
+
+showToast(res, true); 
+if(res.includes("SUCCESS") || res.includes("Logged")) { 
+setTimeout(startIdleMode, 2000); 
+} else { 
+document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); 
 }
-
-function resetButtons() { Array.prototype.slice.call(document.querySelectorAll('.control-btn, .action-btn')).forEach(function(b) { b.disabled = false; b.innerText = b.getAttribute('data-txt') || b.innerText; }); }
-
-      function markAbsent() {
-          var winnerName = document.getElementById('winner-name-big').innerText;
-          var winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
-          var btn = document.getElementById('btnAbsent'); btn.disabled = true; btn.innerText = "DRAFTING..."; 
-          google.script.run.withSuccessHandler(function(draftRes) {
-              showToast("Draft Created! Logging...", false);
-              google.script.run.withSuccessHandler(function(res){ showToast("Marked Absent & Drafted", true); startIdleMode(); })
-              .processFridayPrize(winnerName, (winnerObj ? winnerObj.id : 0), "ABSENT", "0");
-          }).processAbsentPlayer(winnerName, (winnerObj ? winnerObj.id : ""));
-      }
+}).withFailureHandler(function(err) { showToast("Error: " + err, false); document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt'); }); })
+.processFridayPrize(winnerName, playerId, type, amount, activePin); 
+}
 
 function showReport() { document.getElementById('global-dimmer').style.display = 'block'; document.getElementById('report-overlay').style.display = 'flex'; const btn = document.getElementById('btn-archive'); btn.innerText = "ARCHIVE TO SHEET"; btn.disabled = false; btn.style.background = "#4caf50"; google.script.run.withSuccessHandler(function(rep) { document.getElementById('rep-entries').innerText = rep.entries || 0; document.getElementById('rep-pot').innerText = "£" + (rep.revenueTonight || 0).toFixed(2); document.getElementById('rep-late').innerText = "£" + (rep.revenueLate || 0).toFixed(2); document.getElementById('rep-payouts').innerText = "£" + (rep.cashWon || 0).toFixed(2); document.getElementById('rep-carry').innerText = "£" + (rep.carryOver || 0).toFixed(2); var listHTML = ""; if(rep.winners && rep.winners.length > 0) rep.winners.forEach(function(w) { listHTML += `<div class='winner-row'><span>${w.name}</span><span>${w.prize}</span></div>`; }); document.getElementById('rep-list').innerHTML = listHTML || "NO WINNERS YET."; }).getReportData(); }
 function archiveReport() { const btn = document.getElementById('btn-archive'); btn.innerText = "SAVED (Check Sheet)"; btn.disabled = true; }
