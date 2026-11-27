@@ -151,6 +151,7 @@ body, html { margin: 0; padding: 0; background: linear-gradient(135deg, var(--bg
 <h2 style="color:var(--accent-gold); margin:0 0 5px 0; font-size:1.5em; letter-spacing:2px; text-shadow: 2px 2px 0px #000;">WHEEL WINNER</h2>
 <h1 id="aw-name" style="color:#fff; font-size:2.8em; margin:0 0 20px 0; line-height:1.1; text-shadow:3px 3px 0 #000;">JOHN DOE</h1>
 
+<!-- 🔥 NEW: Simplified Single Input -->
 <div style="background:#111; padding:15px; border-radius:8px; border:2px solid #333; margin-bottom:15px;">
     <div style="display:flex; gap:5px; margin-bottom:15px;">
         <button id="type-btn-cash" class="adaptive-btn" style="flex:1; padding:10px 0; background:var(--success); color:#000;" onclick="selectPrizeType('CASH')">CASH</button>
@@ -229,7 +230,7 @@ let currentPin = "";
 let validPin = ""; 
 let hostName = ""; 
 let sessionToken = null; 
-let activeGameContext = 'fc';
+let activeGameContext = 'fc'; // 🔥 Tracks which tab the remote is currently on
 
 let gridHtml = '';
 for(let i=1; i<=15; i++) {
@@ -260,6 +261,7 @@ if (response.success && response.payload) {
     hostName = response.name;
     sessionToken = response.token;
     
+    // Store token and pin in session storage for instant auto-login
     sessionStorage.setItem('sessionToken', sessionToken);
     sessionStorage.setItem('hostPin', validPin);
     
@@ -330,7 +332,7 @@ if (navigator.vibrate) navigator.vibrate(30);
 
 function setGameContext(game) {
 if(navigator.vibrate) navigator.vibrate(20);
-activeGameContext = game;
+activeGameContext = game; // 🔥 Update the context tracker
 
 if (game === 'fc') {
 document.getElementById('toggle-fc').style.background = 'var(--accent-gold)'; document.getElementById('toggle-fc').style.color = '#000';
@@ -392,7 +394,7 @@ document.getElementById('r-box-peek').innerText = peekText;
 document.getElementById('r-box-peek').style.color = prefilledCache[boxNum] ? '#ffd700' : '#888';
 
 document.getElementById('remote-prize-panel').style.display = 'block';
-document.getElementById('master-prize-input').value = ""; 
+document.getElementById('master-prize-input').value = ""; // Clear main input just in case
 fireCommand('box', 'select|' + boxNum); 
 }
 
@@ -478,6 +480,7 @@ let lastSeenWinner = null;
 function startRemoteSync() {
     if (!sessionToken) sessionToken = sessionStorage.getItem('sessionToken');
     
+    // 🔥 INCREASED SPEED: Polling every 500ms for zero-lag name grabs!
     setInterval(() => {
         Promise.all([
             fetch(FB_BASE_URL + "boxes.json").then(r => r.json()).catch(() => null),
@@ -491,6 +494,7 @@ function startRemoteSync() {
                 for(let i=1; i<=15; i++) {
                     let textEl = document.getElementById(`admin-v-${i}`);
                     let soundEl = document.getElementById(`admin-s-${i}`);
+                    // Only update inputs if you aren't currently typing in them
                     if (textEl && document.activeElement !== textEl && document.activeElement !== soundEl) {
                         let val = prefilledCache[i];
                         if (typeof val === 'object') {
@@ -522,6 +526,7 @@ function startRemoteSync() {
             let soundGrid = document.getElementById('custom-sounds-grid');
             let miniBar = document.getElementById('mini-sound-bar');
             
+            // Build the Mini Soundbar with presets
             let miniSoundHtml = `
                 <button class="remote-btn" onclick="fireCommand('sound', 'drumroll')" style="background:#222; color:#fff; border:1px solid #555; padding:8px 15px; border-radius:20px; font-family:'Oswald'; font-size: 1rem; flex-direction: row; flex: 0 0 auto;">🥁 Drum</button>
                 <button class="remote-btn" onclick="fireCommand('sound', 'celebrate')" style="background:#222; color:#fff; border:1px solid #555; padding:8px 15px; border-radius:20px; font-family:'Oswald'; font-size: 1rem; flex-direction: row; flex: 0 0 auto;">🎉 Win</button>
@@ -534,6 +539,7 @@ function startRemoteSync() {
                 Object.keys(cloud.customAudio).forEach(key => {
                     let sound = cloud.customAudio[key];
                     if (sound && sound.name) {
+                        // Main Sounds Tab UI
                         customHtml += `
                         <div style="display:flex; gap:8px; margin-bottom:12px;">
                             <button class="remote-btn btn-sound" onclick="fireCommand('sound', '${key}')" style="flex:1; border-color:#00f2fe; color:#00f2fe; padding:15px;">
@@ -543,8 +549,10 @@ function startRemoteSync() {
                             <button onclick="deleteCustomSound('${key}')" style="background:var(--danger); color:#fff; border:2px solid #8a0e0e; border-radius:12px; padding:0 20px; font-size:1.5em; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">🗑️</button>
                         </div>`;
                         
+                        // Add to Mini Soundbar on Box Screen
                         miniSoundHtml += `<button class="remote-btn" onclick="fireCommand('sound', '${key}')" style="background:#00f2fe; color:#000; border:1px solid #00f2fe; padding:8px 15px; border-radius:20px; font-family:'Oswald'; font-size: 1rem; flex-direction: row; font-weight:bold; flex: 0 0 auto;">${sound.icon || '🎵'} ${sound.name}</button>`;
                         
+                        // Populate Dropdowns in Vault Setup dynamically
                         for(let i=1; i<=15; i++) {
                             let sel = document.getElementById(`admin-s-${i}`);
                             if(sel && !sel.querySelector(`option[value="${key}"]`)) {
@@ -566,6 +574,7 @@ function startRemoteSync() {
                 lastSeenWinner = currentWinner;
                 document.getElementById('aw-name').innerText = currentWinner;
                 
+                // 🔥 NEW UI SETUP
                 document.getElementById('master-prize-input').value = "";
                 selectPrizeType('CASH');
 
@@ -577,7 +586,7 @@ function startRemoteSync() {
                 document.getElementById('adaptive-winner-overlay').style.display = 'none';
             }
         }).catch(e => console.log("Sync error...", e));
-    }, 500); 
+    }, 500); // ⚡ 500ms POLLING 
 }
 
 function dismissWheelWinner() { document.getElementById('adaptive-winner-overlay').style.display = 'none'; fireCommand('stage', 'resetWheel'); }
@@ -596,6 +605,7 @@ btn.innerText = "⏪ VAR REPLAY"; btn.style.color = "var(--danger)"; btn.style.b
 }, 8500);
 }
 
+// 🔥 NEW: Logic for the Simplified Single Input UI
 let currentPrizeType = 'CASH';
 
 function selectPrizeType(type) {
@@ -627,15 +637,17 @@ function confirmAndSendPrize() {
 
     if(confirm(`Send ${displayStr} to ${name}?`)) {
         if (navigator.vibrate) navigator.vibrate(50);
+        
+        // 🔥 Re-adding the Toast Notification for peace of mind!
         showToast("🚀 " + displayStr.toUpperCase() + " LOGGED!", true);
 
-        // 🔥 THE FIX: Context-Aware Cash Logging!
+        // 🔥 THE FIX: Cash maps EXACTLY to the Projector's native buttons
         let finalPrizeType = currentPrizeType;
         if (currentPrizeType === 'CASH') {
              if (activeGameContext === 'md') {
                   finalPrizeType = 'MEMBERS_CASH';
              } else {
-                  finalPrizeType = 'CASH'; // Matches exactly what the manual button sends
+                  finalPrizeType = 'CASH'; // Matches exactly what the manual button expects
              }
         }
 
@@ -697,6 +709,7 @@ function deleteCustomSound(key) {
     }
 }
 
+// 🔥 INVISIBLE AUTO-LOGIN: Prevents the double PIN pop-up on page refresh!
 window.addEventListener('DOMContentLoaded', (event) => {
     let savedPin = sessionStorage.getItem('hostPin');
     let savedToken = sessionStorage.getItem('sessionToken');
