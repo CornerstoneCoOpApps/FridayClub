@@ -230,6 +230,7 @@ let currentPin = "";
 let validPin = ""; 
 let hostName = ""; 
 let sessionToken = null; 
+let activeGameContext = 'fc'; // 🔥 Tracks which tab the remote is currently on
 
 let gridHtml = '';
 for(let i=1; i<=15; i++) {
@@ -244,6 +245,7 @@ document.getElementById('pin-dots').innerText = '*'.repeat(currentPin.length);
 
 function checkPin() {
 if (currentPin.length === 0) return;
+document.getElementById('pin-dots').innerText = "VERIFYING";
 document.getElementById('pin-dots').style.letterSpacing = "2px";
 
 let script = document.createElement('script');
@@ -330,6 +332,8 @@ if (navigator.vibrate) navigator.vibrate(30);
 
 function setGameContext(game) {
 if(navigator.vibrate) navigator.vibrate(20);
+activeGameContext = game; // 🔥 Update the context tracker
+
 if (game === 'fc') {
 document.getElementById('toggle-fc').style.background = 'var(--accent-gold)'; document.getElementById('toggle-fc').style.color = '#000';
 document.getElementById('toggle-md').style.background = 'transparent'; document.getElementById('toggle-md').style.color = '#888';
@@ -350,7 +354,6 @@ if (navigator.vibrate) navigator.vibrate(50);
 let cmdPayload = { type: category, action: action, pin: validPin, token: sessionToken, timestamp: Date.now() };
 Object.assign(cmdPayload, extraPayload);
 
-// 🔥 THE ANNOYING TOAST IS SILENCED HERE
 instantFirebaseWrite("remoteCommand", 'PUT', cmdPayload)
 .catch(() => showToast("ERROR SENDING COMMAND"));
 }
@@ -391,7 +394,7 @@ document.getElementById('r-box-peek').innerText = peekText;
 document.getElementById('r-box-peek').style.color = prefilledCache[boxNum] ? '#ffd700' : '#888';
 
 document.getElementById('remote-prize-panel').style.display = 'block';
-document.getElementById('master-prize-input').value = ""; // Clear main input just in case
+document.getElementById('master-prize-input').value = ""; 
 fireCommand('box', 'select|' + boxNum); 
 }
 
@@ -565,7 +568,6 @@ function startRemoteSync() {
                 lastSeenWinner = currentWinner;
                 document.getElementById('aw-name').innerText = currentWinner;
                 
-                // 🔥 NEW UI SETUP
                 document.getElementById('master-prize-input').value = "";
                 selectPrizeType('CASH');
 
@@ -596,7 +598,6 @@ btn.innerText = "⏪ VAR REPLAY"; btn.style.color = "var(--danger)"; btn.style.b
 }, 8500);
 }
 
-// 🔥 NEW: Logic for the Simplified Single Input UI
 let currentPrizeType = 'CASH';
 
 function selectPrizeType(type) {
@@ -628,13 +629,21 @@ function confirmAndSendPrize() {
 
     if(confirm(`Send ${displayStr} to ${name}?`)) {
         if (navigator.vibrate) navigator.vibrate(50);
-        
-        // 🔥 Re-adding the Toast Notification for peace of mind!
         showToast("🚀 " + displayStr.toUpperCase() + " LOGGED!", true);
 
-        // 🔥 THE FIX: Cash maps to PHYSICAL_CASH so it perfectly logs exactly what you typed
+        // 🔥 THE FIX: Context-Aware Cash Logging!
+        let finalPrizeType = currentPrizeType;
+        if (currentPrizeType === 'CASH') {
+             // If we are on the Members Draw tab, it MUST send MEMBERS_CASH
+             if (activeGameContext === 'md') {
+                  finalPrizeType = 'MEMBERS_CASH';
+             } else {
+                  finalPrizeType = 'PHYSICAL_CASH';
+             }
+        }
+
         fireCommand('wheel', 'award', { 
-            prizeType: currentPrizeType === 'CASH' ? 'PHYSICAL_CASH' : currentPrizeType, 
+            prizeType: finalPrizeType, 
             cash: currentPrizeType === 'CASH' ? val : "", 
             pint: currentPrizeType === 'PINT' ? val : "", 
             custom: currentPrizeType === 'CUSTOM' ? val : "" 
