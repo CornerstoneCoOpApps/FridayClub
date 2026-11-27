@@ -151,18 +151,21 @@ body, html { margin: 0; padding: 0; background: linear-gradient(135deg, var(--bg
 <h2 style="color:var(--accent-gold); margin:0 0 5px 0; font-size:1.5em; letter-spacing:2px; text-shadow: 2px 2px 0px #000;">WHEEL WINNER</h2>
 <h1 id="aw-name" style="color:#fff; font-size:2.8em; margin:0 0 20px 0; line-height:1.1; text-shadow:3px 3px 0 #000;">JOHN DOE</h1>
 
-<input type="number" id="aw-cash" class="game-theme-input" placeholder="£ CASH" onfocus="this.value=''">
-<input type="number" id="aw-pint" class="game-theme-input" placeholder="# OF PINTS" onfocus="this.value=''">
-<input type="text" id="aw-custom" class="game-theme-input" placeholder="CUSTOM PRIZE" onfocus="this.value=''">
+<!-- 🔥 NEW: Simplified Single Input -->
+<div style="background:#111; padding:15px; border-radius:8px; border:2px solid #333; margin-bottom:15px;">
+    <div style="display:flex; gap:5px; margin-bottom:15px;">
+        <button id="type-btn-cash" class="adaptive-btn" style="flex:1; padding:10px 0; background:var(--success); color:#000;" onclick="selectPrizeType('CASH')">CASH</button>
+        <button id="type-btn-pint" class="adaptive-btn" style="flex:1; padding:10px 0; background:#333; color:#aaa;" onclick="selectPrizeType('PINT')">PINT</button>
+        <button id="type-btn-custom" class="adaptive-btn" style="flex:1; padding:10px 0; background:#333; color:#aaa;" onclick="selectPrizeType('CUSTOM')">CUSTOM</button>
+    </div>
+    <div style="display:flex; align-items:center; background:#fff; border:3px solid #000; border-radius:8px; padding:0 15px;">
+        <span id="prize-prefix" style="color:#000; font-size:1.4em; font-weight:bold; font-family:'Oswald';">£</span>
+        <input type="number" id="master-prize-input" style="flex:1; border:none; background:transparent; color:#000; font-size:1.6em; font-weight:bold; font-family:'Oswald'; text-align:center; padding:15px 0; outline:none;" placeholder="Amount">
+        <span id="prize-postfix" style="color:#000; font-size:1.4em; font-weight:bold; font-family:'Oswald'; display:none;"> Pints</span>
+    </div>
+</div>
 
-<div class="adaptive-btn-grid">
-<button class="adaptive-btn" style="background:var(--success); color:#000;" onclick="sendWheelPrize('MEMBERS_CASH')">CASH</button>
-<button class="adaptive-btn" style="background:#e67e22; color:#000;" onclick="sendWheelPrize('PINT')">PINT</button>
-</div>
-<!-- 🔥 ABSENT BUTTON REMOVED, CUSTOM TAKES FULL WIDTH -->
-<div class="adaptive-btn-grid" style="margin-top:10px; grid-template-columns: 1fr;">
-<button class="adaptive-btn" style="background:var(--accent-gold); color:#000;" onclick="sendWheelPrize('CUSTOM')">CUSTOM</button>
-</div>
+<button class="adaptive-btn" style="width:100%; background:var(--accent-gold); color:#000; font-size:1.4em; padding:15px;" onclick="confirmAndSendPrize()">🚀 CONFIRM & SEND</button>
 
 <div id="fc-quick-actions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; border-top:2px dashed var(--accent-gold); padding-top:15px;">
 <button id="btn-var-overlay" onclick="triggerVARFromWinner()" style="background:#fff; border:2px solid var(--danger); color:var(--danger); padding:10px; border-radius:6px; font-family:'Oswald'; font-weight:bold; cursor:pointer;">⏪ VAR REPLAY</button>
@@ -297,7 +300,6 @@ if (response.success && response.payload) {
 }
 }
 
-// ⚡ THE INSTANT WRITER: Direct to Firebase using RAM token
 function instantFirebaseWrite(path, method, payload) {
     if (!sessionToken) sessionToken = sessionStorage.getItem('sessionToken');
     
@@ -307,7 +309,6 @@ function instantFirebaseWrite(path, method, payload) {
         return Promise.reject("No Token");
     }
     
-    // Ensure .json is appended correctly
     let url = FB_BASE_URL + path + (path.includes(".json") ? "" : ".json") + "?auth=" + sessionToken;
     let options = { 
         method: method,
@@ -346,12 +347,9 @@ fireCommand('stage', 'navMembers');
 
 function fireCommand(category, action, extraPayload = {}) {
 if (navigator.vibrate) navigator.vibrate(50);
-
-// 🔥 MAGIC FIX: Pass the VIP Token into the payload so the Projector NEVER lags!
 let cmdPayload = { type: category, action: action, pin: validPin, token: sessionToken, timestamp: Date.now() };
 Object.assign(cmdPayload, extraPayload);
 
-// 🔥 The annoying UI toasts have been completely silenced here.
 instantFirebaseWrite("remoteCommand", 'PUT', cmdPayload)
 .catch(() => showToast("ERROR SENDING COMMAND"));
 }
@@ -392,7 +390,7 @@ document.getElementById('r-box-peek').innerText = peekText;
 document.getElementById('r-box-peek').style.color = prefilledCache[boxNum] ? '#ffd700' : '#888';
 
 document.getElementById('remote-prize-panel').style.display = 'block';
-document.getElementById('r-prize-input').value = "";
+document.getElementById('master-prize-input').value = ""; // Clear main input just in case
 fireCommand('box', 'select|' + boxNum); 
 }
 
@@ -478,7 +476,6 @@ let lastSeenWinner = null;
 function startRemoteSync() {
     if (!sessionToken) sessionToken = sessionStorage.getItem('sessionToken');
     
-    // 🔥 INCREASED SPEED: Polling every 500ms for zero-lag name grabs!
     setInterval(() => {
         Promise.all([
             fetch(FB_BASE_URL + "boxes.json").then(r => r.json()).catch(() => null),
@@ -492,7 +489,6 @@ function startRemoteSync() {
                 for(let i=1; i<=15; i++) {
                     let textEl = document.getElementById(`admin-v-${i}`);
                     let soundEl = document.getElementById(`admin-s-${i}`);
-                    // Only update inputs if you aren't currently typing in them
                     if (textEl && document.activeElement !== textEl && document.activeElement !== soundEl) {
                         let val = prefilledCache[i];
                         if (typeof val === 'object') {
@@ -524,7 +520,6 @@ function startRemoteSync() {
             let soundGrid = document.getElementById('custom-sounds-grid');
             let miniBar = document.getElementById('mini-sound-bar');
             
-            // Build the Mini Soundbar with presets
             let miniSoundHtml = `
                 <button class="remote-btn" onclick="fireCommand('sound', 'drumroll')" style="background:#222; color:#fff; border:1px solid #555; padding:8px 15px; border-radius:20px; font-family:'Oswald'; font-size: 1rem; flex-direction: row; flex: 0 0 auto;">🥁 Drum</button>
                 <button class="remote-btn" onclick="fireCommand('sound', 'celebrate')" style="background:#222; color:#fff; border:1px solid #555; padding:8px 15px; border-radius:20px; font-family:'Oswald'; font-size: 1rem; flex-direction: row; flex: 0 0 auto;">🎉 Win</button>
@@ -537,7 +532,6 @@ function startRemoteSync() {
                 Object.keys(cloud.customAudio).forEach(key => {
                     let sound = cloud.customAudio[key];
                     if (sound && sound.name) {
-                        // Main Sounds Tab UI
                         customHtml += `
                         <div style="display:flex; gap:8px; margin-bottom:12px;">
                             <button class="remote-btn btn-sound" onclick="fireCommand('sound', '${key}')" style="flex:1; border-color:#00f2fe; color:#00f2fe; padding:15px;">
@@ -547,10 +541,8 @@ function startRemoteSync() {
                             <button onclick="deleteCustomSound('${key}')" style="background:var(--danger); color:#fff; border:2px solid #8a0e0e; border-radius:12px; padding:0 20px; font-size:1.5em; cursor:pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">🗑️</button>
                         </div>`;
                         
-                        // Add to Mini Soundbar on Box Screen
                         miniSoundHtml += `<button class="remote-btn" onclick="fireCommand('sound', '${key}')" style="background:#00f2fe; color:#000; border:1px solid #00f2fe; padding:8px 15px; border-radius:20px; font-family:'Oswald'; font-size: 1rem; flex-direction: row; font-weight:bold; flex: 0 0 auto;">${sound.icon || '🎵'} ${sound.name}</button>`;
                         
-                        // Populate Dropdowns in Vault Setup dynamically
                         for(let i=1; i<=15; i++) {
                             let sel = document.getElementById(`admin-s-${i}`);
                             if(sel && !sel.querySelector(`option[value="${key}"]`)) {
@@ -571,7 +563,11 @@ function startRemoteSync() {
             if (currentWinner && currentWinner !== lastSeenWinner) {
                 lastSeenWinner = currentWinner;
                 document.getElementById('aw-name').innerText = currentWinner;
-                document.getElementById('aw-cash').value = ""; document.getElementById('aw-pint').value = ""; document.getElementById('aw-custom').value = "";
+                
+                // 🔥 NEW UI SETUP
+                document.getElementById('master-prize-input').value = "";
+                selectPrizeType('CASH');
+
                 document.getElementById('adaptive-winner-overlay').style.display = 'flex';
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
             } 
@@ -580,7 +576,7 @@ function startRemoteSync() {
                 document.getElementById('adaptive-winner-overlay').style.display = 'none';
             }
         }).catch(e => console.log("Sync error...", e));
-    }, 500); // ⚡ 500ms POLLING 
+    }, 500); 
 }
 
 function dismissWheelWinner() { document.getElementById('adaptive-winner-overlay').style.display = 'none'; fireCommand('stage', 'resetWheel'); }
@@ -598,16 +594,50 @@ btn.innerText = "⏪ VAR REPLAY"; btn.style.color = "var(--danger)"; btn.style.b
 }, 8500);
 }
 
-function sendWheelPrize(type) {
-let cash = document.getElementById('aw-cash').value; let pint = document.getElementById('aw-pint').value; let custom = document.getElementById('aw-custom').value;
+// 🔥 NEW: Logic for the Simplified Single Input UI
+let currentPrizeType = 'CASH';
 
-if (type === 'MEMBERS_CASH' && !cash) { alert("Enter cash amount!"); return; }
-if (type === 'PINT' && !pint) { alert("Enter pint amount!"); return; }
-if (type === 'CUSTOM' && !custom) { alert("Enter custom prize!"); return; }
-if (navigator.vibrate) navigator.vibrate(50);
+function selectPrizeType(type) {
+    currentPrizeType = type;
+    document.getElementById('type-btn-cash').style.background = type === 'CASH' ? 'var(--success)' : '#333';
+    document.getElementById('type-btn-cash').style.color = type === 'CASH' ? '#000' : '#aaa';
+    document.getElementById('type-btn-pint').style.background = type === 'PINT' ? '#e67e22' : '#333';
+    document.getElementById('type-btn-pint').style.color = type === 'PINT' ? '#000' : '#aaa';
+    document.getElementById('type-btn-custom').style.background = type === 'CUSTOM' ? 'var(--accent-gold)' : '#333';
+    document.getElementById('type-btn-custom').style.color = type === 'CUSTOM' ? '#000' : '#aaa';
 
-fireCommand('wheel', 'award', { prizeType: type, cash: cash, pint: pint, custom: custom });
-document.getElementById('adaptive-winner-overlay').style.display = 'none';
+    document.getElementById('prize-prefix').style.display = type === 'CASH' ? 'inline' : 'none';
+    document.getElementById('prize-postfix').style.display = type === 'PINT' ? 'inline' : 'none';
+    document.getElementById('master-prize-input').type = type === 'CUSTOM' ? 'text' : 'number';
+    document.getElementById('master-prize-input').placeholder = type === 'CUSTOM' ? 'e.g. Free Meal' : 'Amount';
+    
+    if(navigator.vibrate) navigator.vibrate(20);
+}
+
+function confirmAndSendPrize() {
+    let val = document.getElementById('master-prize-input').value.trim();
+    if (!val) { alert("Please enter a prize amount or description!"); return; }
+    
+    let name = document.getElementById('aw-name').innerText;
+    let displayStr = "";
+    if (currentPrizeType === 'CASH') displayStr = `£${val} Cash`;
+    else if (currentPrizeType === 'PINT') displayStr = `${val} Pint(s)`;
+    else displayStr = `${val}`;
+
+    if(confirm(`Send ${displayStr} to ${name}?`)) {
+        if (navigator.vibrate) navigator.vibrate(50);
+        
+        // 🔥 Re-adding the Toast Notification for peace of mind!
+        showToast("🚀 " + displayStr.toUpperCase() + " LOGGED!");
+
+        fireCommand('wheel', 'award', { 
+            prizeType: currentPrizeType === 'CASH' ? 'MEMBERS_CASH' : currentPrizeType, 
+            cash: currentPrizeType === 'CASH' ? val : "", 
+            pint: currentPrizeType === 'PINT' ? val : "", 
+            custom: currentPrizeType === 'CUSTOM' ? val : "" 
+        });
+        document.getElementById('adaptive-winner-overlay').style.display = 'none';
+    }
 }
 
 function submitAudioUpload() {
