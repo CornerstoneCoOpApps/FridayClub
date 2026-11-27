@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>HostOS</title>
+<title>Friday Club Remote</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -151,6 +151,7 @@ body, html { margin: 0; padding: 0; background: linear-gradient(135deg, var(--bg
 <h2 style="color:var(--accent-gold); margin:0 0 5px 0; font-size:1.5em; letter-spacing:2px; text-shadow: 2px 2px 0px #000;">WHEEL WINNER</h2>
 <h1 id="aw-name" style="color:#fff; font-size:2.8em; margin:0 0 20px 0; line-height:1.1; text-shadow:3px 3px 0 #000;">JOHN DOE</h1>
 
+<!-- 🔥 NEW: Simplified Single Input -->
 <div style="background:#111; padding:15px; border-radius:8px; border:2px solid #333; margin-bottom:15px;">
     <div style="display:flex; gap:5px; margin-bottom:15px;">
         <button id="type-btn-cash" class="adaptive-btn" style="flex:1; padding:10px 0; background:var(--success); color:#000;" onclick="selectPrizeType('CASH')">CASH</button>
@@ -260,6 +261,7 @@ if (response.success && response.payload) {
     hostName = response.name;
     sessionToken = response.token;
     
+    // Store token and pin in session storage for instant auto-login
     sessionStorage.setItem('sessionToken', sessionToken);
     sessionStorage.setItem('hostPin', validPin);
     
@@ -400,7 +402,15 @@ function sendRemoteBoxPrize(type) {
 const desc = document.getElementById('r-prize-input').value.trim();
 if (!desc) { alert("Type a prize first!"); return; }
 if (navigator.vibrate) navigator.vibrate(50);
-const payload = { desc: desc, isCash: (type === 'CASH'), isPint: (type === 'PINT') };
+
+// 🔥 Fix Box Prize Context!
+let finalType = type;
+if (type === 'CASH') {
+    if (activeGameContext === 'md') finalType = 'MEMBERS_CASH';
+    else finalType = 'PHYSICAL_CASH';
+}
+
+const payload = { desc: desc, isCash: (finalType === 'MEMBERS_CASH' || finalType === 'PHYSICAL_CASH' || finalType === 'CASH'), isPint: (type === 'PINT') };
 fireCommand('box', 'manualAward', payload);
 
 document.getElementById('remote-prize-panel').style.display = 'none';
@@ -637,13 +647,13 @@ function confirmAndSendPrize() {
         if (navigator.vibrate) navigator.vibrate(50);
         showToast("🚀 " + displayStr.toUpperCase() + " LOGGED!", true);
 
-        // 🔥 THE FIX: Cash maps EXACTLY to the Projector's native buttons based on the game
+        // 🔥 THE FIX: Cash maps EXACTLY to the Projector's native buttons depending on game context!
         let finalPrizeType = currentPrizeType;
         if (currentPrizeType === 'CASH') {
              if (activeGameContext === 'md') {
                   finalPrizeType = 'MEMBERS_CASH';
              } else {
-                  finalPrizeType = 'PHYSICAL_CASH'; // Matches what Friday Club expects to skip the till
+                  finalPrizeType = 'CASH'; // Matches exactly what Friday Club native expects to skip the till
              }
         }
 
