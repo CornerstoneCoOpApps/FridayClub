@@ -110,18 +110,10 @@
       #toast-container { visibility: hidden; min-width: 280px; margin-left: -140px; background-color: #222; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; font-size: 1.3rem; box-shadow: 0 5px 20px rgba(0,0,0,0.6); border: 2px solid #ffd700; opacity: 0; transition: opacity 0.5s, bottom 0.5s; font-family: 'Oswald', sans-serif; display: flex; align-items: center; justify-content: center; gap: 15px; }
       #toast-container.show { visibility: visible; opacity: 1; bottom: 50px; }
 
-      .gate-wheel-container { position: relative; width: 90vw; max-width: 1100px; aspect-ratio: 1.33 / 1; background-image: url('https://raw.githubusercontent.com/CornerstoneCoOpApps/appassets/refs/heads/main/GateWheel.png'); background-size: contain; background-repeat: no-repeat; background-position: center; margin-top: 20px; transition: border 0.3s; }
-      .mapped-door { position: absolute; cursor: pointer; border: 2px solid transparent; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-      .mapped-door.selected { border-color: #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); background: rgba(255, 215, 0, 0.3); animation: pulse 0.8s infinite alternate; }
-      @keyframes pulse { from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); } to { box-shadow: 0 0 35px rgba(255, 215, 0, 1); } }
-      .mapped-door.opened { background: #111; border: 2px solid #444; box-shadow: inset 0 0 20px #000; }
-      .door-prize-text { font-family: 'Oswald', sans-serif; font-size: 1.5vw; color: #ffd700; font-weight: bold; text-align: center; text-shadow: 2px 2px 0 #000; padding: 4px; line-height: 1.1; }
-      .door-prize-cash { color: #4caf50; font-size: 2vw; text-shadow: 0 0 10px #000; }
-      
-      .edit-mode-indicator { display: none; position: absolute; top: 10px; right: 10px; background: #ff0000; color: #fff; padding: 5px 15px; font-weight: bold; border-radius: 8px; animation: flash 1s infinite alternate; }
-      @keyframes flash { from { opacity: 1; } to { opacity: 0.5; } }
-      .gate-wheel-container.editing .edit-mode-indicator { display: block; }
-      .gate-wheel-container.editing .mapped-door { border: 2px dashed #00ff00 !important; background: rgba(0,255,0,0.2) !important; transition: none !important; }
+      #hydration-break-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at 15% 25%, rgba(255,255,255,0.2) 0%, transparent 15%), radial-gradient(circle at 75% 65%, rgba(255,255,255,0.15) 0%, transparent 20%), linear-gradient(135deg, #00d2ff, #0371a3); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in-out; }
+      #hydration-break-overlay.active { opacity: 1; pointer-events: auto; }
+      .hydration-text { font-family: 'Oswald', sans-serif; font-size: 7.5vw; font-weight: 900; font-style: italic; color: #ffffff; text-transform: uppercase; line-height: 1; margin: 0; text-shadow: 6px 6px 15px rgba(0, 0, 0, 0.4); transform: skewX(-6deg) scale(0.8); transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+      #hydration-break-overlay.active .hydration-text { transform: skewX(-6deg) scale(1); }
 
       @media screen and (max-height: 950px) { #scaler { transform: scale(0.85); } }
       @media screen and (max-height: 750px) { #scaler { transform: scale(0.70); } }
@@ -194,7 +186,6 @@
                   <input type="text" id="customInput" class="text-input" placeholder="e.g. Old Shoe" onfocus="this.value=''">
                   <button class="control-btn btn-custom" id="btnCustom" onclick="sendPrize('CUSTOM')">LOG PRIZE</button>
                 </div>
-                <!-- 🔥 Absent Button removed as requested -->
                 <button class="action-btn btn-reset" onclick="startIdleMode()">Cancel / Reset</button>
               </div>
             </div>
@@ -221,14 +212,6 @@
       </div>
     </div>
     <div id="toast-container"></div>
-
-  <div id="open-box-overlay">
-    <h1 style="font-family: 'Oswald', sans-serif; font-size: 4vw; color: #ffd700; margin: 0; text-shadow: 4px 4px 0 #000; letter-spacing: 3px;">OPEN THE BOX!</h1>
-    <div id="gate-wheel-container" class="gate-wheel-container">
-        <div class="edit-mode-indicator">EDIT MODE ACTIVE (Press 'S' to Save)</div>
-    </div>
-    <button style="margin-top: 20px; background: rgba(255,255,255,0.1); color: #fff; padding: 10px 30px; border: 1px solid #555; border-radius: 30px; cursor: pointer; font-family: 'Oswald';" onclick="toggleBoxStage()">CLOSE SCREEN (B)</button>
-  </div>
 
     <script>
       if (!Array.prototype.at) { Array.prototype.at = function(n) { n = Math.trunc(n) || 0; if (n < 0) n += this.length; if (n < 0 || n >= this.length) return undefined; return this.slice(n, n + 1).pop(); }; }
@@ -413,22 +396,10 @@
       // 🔥 FIREBASE REMOTE ENGINE
       let remoteListenerActive = true; let remoteTimer = null; let lastCommandTime = Date.now();
 
-      // ==========================================
-      // 🛠️ DRAGGABLE BOX EDITOR ('E' and 'S')
-      // ==========================================
-      let editMode = false;
-      let draggedBox = null;
-      let offsetX = 0; let offsetY = 0;
-      
       document.addEventListener('keydown', function(event) { 
           var target = event.target || event.srcElement; if (target.tagName.toUpperCase() === 'INPUT') return;
           
-          if (event.key === 'E' || event.key === 'e') { toggleEditMode(); return; }
-          if (event.key === 'S' || event.key === 's') { saveBoxPositions(); return; }
-          
           if (event.key === 'H' || event.key === 'h') { document.getElementById('hydration-break-overlay').classList.toggle('active'); return; }
-          if (event.key === 'B' || event.key === 'b') { toggleBoxStage(); return; }
-          if (event.key === 'V' || event.key === 'v') { triggerVAR(); return; }
           
           if (event.code === 'Space' || event.code === 'Enter') { 
               let gate = document.getElementById('tv-intro-gate');
@@ -438,66 +409,6 @@
               }
           }
       });
-
-      function toggleEditMode() {
-          if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
-          editMode = !editMode;
-          const container = document.getElementById('gate-wheel-container');
-          if (editMode) {
-              container.classList.add('editing');
-              document.querySelectorAll('.mapped-door').forEach(box => {
-                  box.style.cursor = "move";
-                  box.onmousedown = startDrag;
-              });
-          } else {
-              container.classList.remove('editing');
-              document.querySelectorAll('.mapped-door').forEach(box => {
-                  box.style.cursor = "pointer";
-                  box.onmousedown = null;
-              });
-              renderBoxGrid(); 
-          }
-      }
-
-      function startDrag(e) {
-          if (!editMode) return;
-          draggedBox = this;
-          const rect = draggedBox.getBoundingClientRect();
-          offsetX = e.clientX - rect.left;
-          offsetY = e.clientY - rect.top;
-          document.onmousemove = dragBox;
-          document.onmouseup = stopDrag;
-      }
-
-      function dragBox(e) {
-          if (!draggedBox) return;
-          const container = document.getElementById('gate-wheel-container');
-          const rect = container.getBoundingClientRect();
-          let newLeft = e.clientX - rect.left - offsetX;
-          let newTop = e.clientY - rect.top - offsetY;
-          let leftPct = (newLeft / rect.width) * 100;
-          let topPct = (newTop / rect.height) * 100;
-          draggedBox.style.left = leftPct + "%";
-          draggedBox.style.top = topPct + "%";
-      }
-
-      function stopDrag() { draggedBox = null; document.onmousemove = null; document.onmouseup = null; }
-
-      function saveBoxPositions() {
-          if (!editMode) return;
-          let newDoorMap = {};
-          document.querySelectorAll('.mapped-door').forEach(box => {
-              let id = parseInt(box.id.replace('pbox-', ''));
-              newDoorMap[id] = { t: parseFloat(box.style.top), l: parseFloat(box.style.left), w: doorMap[id].w, h: doorMap[id].h };
-          });
-          doorMap = newDoorMap; 
-          saveToCloud("doorMap", doorMap);
-          
-          const container = document.getElementById('gate-wheel-container');
-          container.classList.remove('editing'); editMode = false;
-          
-          document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "pointer"; box.onmousedown = null; });
-      }
 
       window.onload = function() {
          loadPot(); 
@@ -514,7 +425,6 @@
              sessionToken = savedToken; 
              let gate = document.getElementById('tv-intro-gate');
              if (gate) gate.style.display = 'none'; 
-             showToast("WELCOME BACK, " + (savedName || "HOST").toUpperCase(), true);
          }
 
          // 🔥 DELAYED AUDIO FETCH (No Boot Freezes!)
@@ -645,103 +555,6 @@
         proxyFirebaseWrite("boxes/activeWinner.json", 'PUT', winnerName);
         
         setTimeout(function() { fitTextToContainer('winner-name-big', 5); }, 50);
-      }
-
-      let doorMap = { 1: { t: 53.5, l: 44.5, w: 11, h: 18 }, 2: { t: 43, l: 69, w: 11, h: 15 }, 3: { t: 43, l: 20, w: 11, h: 15 }, 4: { t: 26, l: 69, w: 11, h: 15 }, 5: { t: 77, l: 69, w: 11, h: 15 }, 6: { t: 41, l: 44.5, w: 11, h: 11 }, 7: { t: 41, l: 56, w: 11, h: 11 }, 8: { t: 26, l: 20, w: 11, h: 15 }, 9: { t: 73, l: 56, w: 11, h: 11 }, 10: { t: 73, l: 33, w: 11, h: 11 }, 11: { t: 60, l: 69, w: 11, h: 15 }, 12: { t: 60, l: 20, w: 11, h: 15 }, 13: { t: 73, l: 44.5, w: 11, h: 11 }, 14: { t: 41, l: 33, w: 11, h: 11 }, 15: { t: 77, l: 20, w: 11, h: 15 } };
-      let openedBoxes = {}; let prefilledBoxes = {};
-
-      function toggleBoxStage() {
-          const boxOverlay = document.getElementById('open-box-overlay');
-          const isShowing = boxOverlay.classList.toggle('active');
-          if (isShowing) {
-              playSoundFX('boxIntro'); currentOpenBox = null;
-              document.getElementById('gate-wheel-container').innerHTML = '<h2 style="color:#fff; text-align:center; margin-top:20%;">Syncing with Cloud...</h2>';
-              fetch(FB_BASE_URL + "boxes.json").then(res => res.json()).then(cloudData => {
-                  if (cloudData) { 
-                      if (cloudData.opened) openedBoxes = cloudData.opened; 
-                      if (cloudData.prefilled) prefilledBoxes = cloudData.prefilled; 
-                      if (cloudData.doorMap) doorMap = cloudData.doorMap; 
-                  }
-                  renderBoxGrid();
-              }).catch(e => renderBoxGrid()); 
-          } else { 
-              if(editMode) toggleEditMode(); 
-          }
-      }
-
-      function renderBoxGrid() {
-          const container = document.getElementById('gate-wheel-container'); container.innerHTML = ''; 
-          let ind = document.createElement('div'); ind.className = 'edit-mode-indicator'; ind.innerText = "EDIT MODE ACTIVE (Press 'S' to Save)";
-          container.appendChild(ind);
-
-          for (let i = 1; i <= 15; i++) {
-              let box = document.createElement('div'); box.className = 'mapped-door'; box.id = 'pbox-' + i;
-              box.style.top = doorMap[i].t + '%'; box.style.left = doorMap[i].l + '%'; box.style.width = doorMap[i].w + '%'; box.style.height = doorMap[i].h + '%';
-              if (openedBoxes[i]) {
-                  box.classList.add('opened');
-                  let isCash = openedBoxes[i].toLowerCase().includes('cash') || openedBoxes[i].includes('£');
-                  box.innerHTML = `<div class="door-prize-text ${isCash ? 'door-prize-cash' : ''}">${openedBoxes[i].toUpperCase()}</div>`;
-              }
-              if(!editMode) box.onclick = () => openPrizeBox(i);
-              else { box.style.cursor = "move"; box.onmousedown = startDrag; }
-              container.appendChild(box);
-          }
-      }
-
-      function openPrizeBox(i) {
-          if(editMode) return;
-          const box = document.getElementById('pbox-' + i);
-          if (box.classList.contains('opened')) return; 
-          if (!box.classList.contains('selected')) {
-              document.querySelectorAll('.mapped-door').forEach(d => d.classList.remove('selected'));
-              box.classList.add('selected'); currentOpenBox = i; playSoundFX('drumroll');
-          }
-      }
-
-      function attemptReveal() {
-          if (!currentOpenBox) return;
-          let vaultData = prefilledBoxes[currentOpenBox];
-          if (vaultData) {
-              let desc = typeof vaultData === 'object' ? vaultData.text : vaultData;
-              let snd = typeof vaultData === 'object' ? vaultData.sound : "DEFAULT";
-              executeReveal(desc, desc.toLowerCase().includes('cash') || desc.includes('£'), desc.toLowerCase().includes('pint'), null, snd);
-          }
-      }
-
-      function executeReveal(desc, isCash, isPint, pinOverride, customSound) {
-          let activePin = pinOverride;
-          if ((isCash || isPint) && !activePin) {
-              if (!projectorSessionPin) {
-                  projectorSessionPin = prompt("🔒 SECURE SESSION: Enter Staff PIN once to unlock the till for this game:");
-                  if (!projectorSessionPin) return;
-              }
-              activePin = projectorSessionPin;
-          }
-
-          if (audioMap['drumroll'] && !audioMap['drumroll'].paused) { audioMap['drumroll'].pause(); audioMap['drumroll'].currentTime = 0; }
-          const box = document.getElementById('pbox-' + currentOpenBox); box.classList.remove('selected'); box.classList.add('opened');
-          box.innerHTML = `<div class="door-prize-text ${(isCash || isPint) ? 'door-prize-cash' : ''}">${desc.toUpperCase()}</div>`;
-          
-          openedBoxes[currentOpenBox] = desc; saveToCloud("opened", openedBoxes);
-          
-          if(customSound && customSound !== "DEFAULT") { playSoundFX(customSound); } 
-          else { if (isCash || isPint) playSoundFX('celebrate'); else playSoundFX('sad'); }
-
-          let playerId = 0; 
-          let winnerName = document.getElementById('winner-name-big').innerText;
-          if (allNames && allNames.length > 0) {
-              let winnerObj = allNames.find(function(p) { return p.name.toUpperCase().replace(/\s/g,'') === winnerName.replace(/\s/g,''); });
-              if (winnerObj && winnerObj.id) playerId = winnerObj.id;
-          }
-          
-          let pType = 'CUSTOM'; let pAmt = desc;
-          if (isCash) { pType = 'PHYSICAL_CASH'; pAmt = desc.replace(/[^\d.-]/g, ''); } else if (isPint) { pType = 'PINT'; pAmt = desc.replace(/[^\d.-]/g, '') || "1"; }
-          
-          google.script.run.withSuccessHandler(res => {
-              if (res.includes("UNAUTHORIZED")) { showToast(res, false); projectorSessionPin = null; }
-          }).processFridayPrize(winnerName, playerId, pType, pAmt, activePin); 
-          
-          currentOpenBox = null;
       }
 
       function showToast(msg, isSuccess) {
