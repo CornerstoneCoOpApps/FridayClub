@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Friday Club</title>
+  <title>Friday Club/title>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -136,6 +136,7 @@
       /* background: url('YOUR_IMAGE_URL_HERE.jpg') center/cover no-repeat; */
       z-index: 99998; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease-in-out; 
     }
+    #open-box-overlay.active { opacity: 1; pointer-events: auto; }
     
     /* 🔥 THE BOX CONTAINER SIZING (Shrunk for Chromebooks) */
     .gate-wheel-container { 
@@ -286,6 +287,7 @@
   </div>
   
   <div id="toast-container"></div>
+  <div id="hydration-break-overlay"><h1 class="hydration-text">HYDRATION BREAK</h1></div>
   
   <div id="open-box-overlay">
     <h1 style="font-family: 'Oswald', sans-serif; font-size: 4vw; color: #ffd700; margin: 0; text-shadow: 4px 4px 0 #000; letter-spacing: 3px;">OPEN THE BOX!</h1>
@@ -306,6 +308,19 @@
 
     let projectorSessionPin = null;
     let sessionToken = null; 
+
+    // 🔥 AUDIO SYNC ENGINE FOR CUSTOM SOUNDS
+    const audioMap = {
+        'drumroll': new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_18d09bdeaf.mp3'),
+        'sad': new Audio('https://www.myinstants.com/media/sounds/sad-trombone-gaming-sound-effect-hd.mp3'),
+        'celebrate': new Audio('https://cdn.pixabay.com/audio/2026/07/29/audio_6b3b29cb40.mp3'),
+        'ooh': new Audio('https://www.myinstants.com/media/sounds/sitcom-crowd-ooh_sRDaL7d.mp3'),
+        'whistle': new Audio('https://www.myinstants.com/media/sounds/referee-whistle.mp3'),
+        'buzzer': new Audio('https://www.myinstants.com/media/sounds/family-feud-wrong-answer-buzzer.mp3'),
+        'rewind': new Audio('https://www.myinstants.com/media/sounds/dj-record-rewind-sound-effect.mp3')
+    };
+
+    function playSoundFX(type) { if (audioMap[type]) { audioMap[type].currentTime = 0; audioMap[type].play().catch(e => console.log("Audio blocked.")); } }
 
     // 🔥 DELAYED AUDIO SYNC TO PREVENT BOOT FREEZE
     function syncCustomAudio() {
@@ -380,21 +395,9 @@
     let audioCtx = null; let tickerInterval = null; let isSpinning = false; let particles = []; let confettiLoop = null; 
     let knownFirebaseKeys = new Set(); let idleSpinFrame = null; let idleTop = -65; let lastWinningScroll = 0; 
 
-    const audioMap = {
-        'boxIntro': new Audio('INSERT_YOUR_JINGLE_LINK_HERE.mp3'),
-        'drumroll': new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_18d09bdeaf.mp3'),
-        'sad': new Audio('https://www.myinstants.com/media/sounds/sad-trombone-gaming-sound-effect-hd.mp3'),
-        'celebrate': new Audio('https://cdn.pixabay.com/audio/2026/07/29/audio_6b3b29cb40.mp3'),
-        'ooh': new Audio('https://www.myinstants.com/media/sounds/sitcom-crowd-ooh_sRDaL7d.mp3'),
-        'whistle': new Audio('https://www.myinstants.com/media/sounds/referee-whistle.mp3'),
-        'buzzer': new Audio('https://www.myinstants.com/media/sounds/family-feud-wrong-answer-buzzer.mp3'),
-        'rewind': new Audio('https://www.myinstants.com/media/sounds/dj-record-rewind-sound-effect.mp3')
-    };
-
-    function playSoundFX(type) { if (audioMap[type]) { audioMap[type].currentTime = 0; audioMap[type].play().catch(e => console.log("Audio blocked.")); } }
-
     let doorMap = { 1: { t: 53.5, l: 44.5, w: 11, h: 18 }, 2: { t: 43, l: 69, w: 11, h: 15 }, 3: { t: 43, l: 20, w: 11, h: 15 }, 4: { t: 26, l: 69, w: 11, h: 15 }, 5: { t: 77, l: 69, w: 11, h: 15 }, 6: { t: 41, l: 44.5, w: 11, h: 11 }, 7: { t: 41, l: 56, w: 11, h: 11 }, 8: { t: 26, l: 20, w: 11, h: 15 }, 9: { t: 73, l: 56, w: 11, h: 11 }, 10: { t: 73, l: 33, w: 11, h: 11 }, 11: { t: 60, l: 69, w: 11, h: 15 }, 12: { t: 60, l: 20, w: 11, h: 15 }, 13: { t: 73, l: 44.5, w: 11, h: 11 }, 14: { t: 41, l: 33, w: 11, h: 11 }, 15: { t: 77, l: 20, w: 11, h: 15 } };
     let openedBoxes = {}; let prefilledBoxes = {};
+    let editMode = false; let draggedBox = null; let offsetX = 0; let offsetY = 0;
 
     function saveToCloud(path, dataObj) { 
         proxyFirebaseWrite("boxes/" + path + ".json", 'PUT', dataObj);
@@ -530,72 +533,6 @@
         }
     });
 
-    let editMode = false;
-    let draggedBox = null;
-    let offsetX = 0; let offsetY = 0;
-
-    function toggleEditMode() {
-        if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
-        editMode = !editMode;
-        const container = document.getElementById('gate-wheel-container');
-        if (editMode) {
-            container.classList.add('editing');
-            document.querySelectorAll('.mapped-door').forEach(box => {
-                box.style.cursor = "move";
-                box.onmousedown = startDrag;
-            });
-        } else {
-            container.classList.remove('editing');
-            document.querySelectorAll('.mapped-door').forEach(box => {
-                box.style.cursor = "pointer";
-                box.onmousedown = null;
-            });
-            renderBoxGrid(); 
-        }
-    }
-
-    function startDrag(e) {
-        if (!editMode) return;
-        draggedBox = this;
-        const rect = draggedBox.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-        document.onmousemove = dragBox;
-        document.onmouseup = stopDrag;
-    }
-
-    function dragBox(e) {
-        if (!draggedBox) return;
-        const container = document.getElementById('gate-wheel-container');
-        const rect = container.getBoundingClientRect();
-        let newLeft = e.clientX - rect.left - offsetX;
-        let newTop = e.clientY - rect.top - offsetY;
-        let leftPct = (newLeft / rect.width) * 100;
-        let topPct = (newTop / rect.height) * 100;
-        draggedBox.style.left = leftPct + "%";
-        draggedBox.style.top = topPct + "%";
-    }
-
-    function stopDrag() { draggedBox = null; document.onmousemove = null; document.onmouseup = null; }
-
-    function saveBoxPositions() {
-        if (!editMode) return;
-        let newDoorMap = {};
-        document.querySelectorAll('.mapped-door').forEach(box => {
-            let id = parseInt(box.id.replace('pbox-', ''));
-            newDoorMap[id] = { t: parseFloat(box.style.top), l: parseFloat(box.style.left), w: doorMap[id].w, h: doorMap[id].h };
-        });
-        doorMap = newDoorMap; 
-        saveToCloud("doorMap", doorMap);
-        const container = document.getElementById('gate-wheel-container');
-        container.classList.remove('editing'); editMode = false;
-        document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "pointer"; box.onmousedown = null; });
-    }
-
-    // ==========================================
-    // 🎁 GATE WHEEL LOGIC
-    // ==========================================
-    let currentOpenBox = null;
     function toggleBoxStage() {
         const boxOverlay = document.getElementById('open-box-overlay');
         const isShowing = boxOverlay.classList.toggle('active');
@@ -680,6 +617,31 @@
             }).processFridayPrize(winningPlayer.name, winningPlayer.id, pType, pAmt, activePin); 
         }
         currentOpenBox = null;
+    }
+
+    function toggleEditMode() {
+        if(document.getElementById('open-box-overlay').style.opacity === '0' || !document.getElementById('open-box-overlay').classList.contains('active')) return;
+        editMode = !editMode;
+        const container = document.getElementById('gate-wheel-container');
+        if (editMode) {
+            container.classList.add('editing');
+            document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "move"; box.onmousedown = startDrag; });
+        } else {
+            container.classList.remove('editing');
+            document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "pointer"; box.onmousedown = null; });
+            renderBoxGrid(); 
+        }
+    }
+    function startDrag(e) { if (!editMode) return; draggedBox = this; const rect = draggedBox.getBoundingClientRect(); offsetX = e.clientX - rect.left; offsetY = e.clientY - rect.top; document.onmousemove = dragBox; document.onmouseup = stopDrag; }
+    function dragBox(e) { if (!draggedBox) return; const container = document.getElementById('gate-wheel-container'); const rect = container.getBoundingClientRect(); let newLeft = e.clientX - rect.left - offsetX; let newTop = e.clientY - rect.top - offsetY; let leftPct = (newLeft / rect.width) * 100; let topPct = (newTop / rect.height) * 100; draggedBox.style.left = leftPct + "%"; draggedBox.style.top = topPct + "%"; }
+    function stopDrag() { draggedBox = null; document.onmousemove = null; document.onmouseup = null; }
+    function saveBoxPositions() {
+        if (!editMode) return;
+        let newDoorMap = {};
+        document.querySelectorAll('.mapped-door').forEach(box => { let id = parseInt(box.id.replace('pbox-', '')); newDoorMap[id] = { t: parseFloat(box.style.top), l: parseFloat(box.style.left), w: doorMap[id].w, h: doorMap[id].h }; });
+        doorMap = newDoorMap; proxyFirebaseWrite("boxes/doorMap.json", 'PUT', doorMap);
+        const container = document.getElementById('gate-wheel-container'); container.classList.remove('editing'); editMode = false;
+        document.querySelectorAll('.mapped-door').forEach(box => { box.style.cursor = "pointer"; box.onmousedown = null; });
     }
 
     // ==========================================
@@ -825,7 +787,6 @@
         setTimeout(function(){ x.className = x.className.replace("show", ""); }, 4000);
     }
 
-    // 🔥 THE FIX: Now safely accepts PHYSICAL_CASH and bypasses the till logic 
     function sendPrize(type, pinOverride) { 
       let activePin = pinOverride;
       
@@ -889,7 +850,7 @@
         document.querySelectorAll('.control-btn, .action-btn').forEach(b => { b.disabled = false; b.innerText = b.getAttribute('data-txt') || b.innerText; }); 
     }
     
-    function showReport() { document.getElementById('global-dimmer').style.display = 'block'; document.getElementById('report-overlay').style.display = 'flex'; const btn = document.getElementById('btn-archive'); btn.innerText = "ARCHIVE TO SHEET"; btn.disabled = false; btn.style.background = "#4caf50"; google.script.run.withSuccessHandler(function(rep) { document.getElementById('rep-entries').innerText = rep.entries || 0; document.getElementById('rep-pot').innerText = "£" + (rep.revenueTonight || 0).toFixed(2); document.getElementById('rep-late').innerText = "£" + (rep.revenueLate || 0).toFixed(2); document.getElementById('rep-payouts').innerText = "£" + (rep.cashWon || 0).toFixed(2); document.getElementById('rep-carry').innerText = "£" + (rep.carryOver || 0).toFixed(2); var listHTML = ""; if(rep.winners && rep.winners.length > 0) rep.winners.forEach(function(w) { listHTML += `<div class='winner-row'><span>${w.name}</span><span>${w.prize}</span></div>`; }); document.getElementById('rep-list').innerHTML = listHTML || "NO WINNERS YET."; }).getReportData(); }
+    function showReport() { document.getElementById('global-dimmer').style.display = 'block'; document.getElementById('report-overlay').style.display = 'flex'; const btn = document.getElementById('btn-archive'); btn.innerText = "ARCHIVE TO SHEET"; btn.disabled = false; btn.style.background = "#4caf50"; google.script.run.withSuccessHandler(function(rep) { document.getElementById('rep-entries').innerText = rep.entries || 0; document.getElementById('rep-pot').innerText = "£" + (rep.revenueTonight || 0).toFixed(2); document.getElementById('rep-late').innerText = "£" + (rep.revenueLate || 0).toFixed(2); document.getElementById('rep-payouts').innerText = "£" + (rep.cashWon || 0).toFixed(2); document.getElementById('rep-carry').innerText = "£" + (rep.carryOver || 0).toFixed(2); var listHTML = ""; if(rep.winners && rep.winners.length > 0) { rep.winners.forEach(function(w) { listHTML += `<div class='winner-row'><span>${w.name}</span><span>${w.prize}</span></div>`; }); } document.getElementById('rep-list').innerHTML = listHTML || "NO WINNERS YET."; }).getReportData(); }
     function archiveReport() { const btn = document.getElementById('btn-archive'); btn.innerText = "SAVED (Check Sheet)"; btn.disabled = true; }
     function closeReport() { document.getElementById('report-overlay').style.display='none'; document.getElementById('global-dimmer').style.display='none'; }
   </script>
